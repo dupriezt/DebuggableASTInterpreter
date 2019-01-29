@@ -46,6 +46,17 @@ DASTInterpreterTests >> testAssignAndEvaluateTemporaryVariable [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testAssignTemporaryVariableUsingItsOwnValue [
+
+	| interpreter |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 1 . x := x + 2 . x').
+	
+	
+	self assert: interpreter evaluate equals: 3
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testAssignmentTemporaryVariable [
 
 	| interpreter |
