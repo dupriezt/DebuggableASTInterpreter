@@ -64,6 +64,15 @@ DASTInterpreterTests >> testEvaluateFullExpression [
 	| interpreter |
 	"evaluates the whole expression"
 	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 - 3 abs').
+	self assert: interpreter evaluate equals: -2.
+]
+
+{ #category : #tests }
+DASTInterpreterTests >> testEvaluateFullUnaryExpression [
+	| interpreter |
+	"evaluates the whole expression"
+	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: '1').
 	self assert: interpreter evaluate equals: 1.
 ]
