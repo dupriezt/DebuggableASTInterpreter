@@ -66,7 +66,6 @@ DASTInterpreter >> nextNode: aNode [
 
 { #category : #'stack-management' }
 DASTInterpreter >> pop [
-	
 	^ stack pop
 ]
 
@@ -115,13 +114,16 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
-	"When visiting a block node, I put it in the stack. The block will be evaluated only when it is the receiver of a message."
-	self push: aRBBlockNode.
+	"A new context must be created, and its parent must be the current context"
+	
+	| blockContext |
+	blockContext := DASTContext new initializeInContext: currentContext.
+	currentContext := blockContext 
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
-	
+
 	self push: aRBLiteralValueNode value
 ]
 
@@ -132,6 +134,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	| arguments receiver |
 	arguments := self pop: aRBMessageNode arguments size.
+	
 	receiver := self pop.
 	
 	self push: (receiver perform: aRBMessageNode selector withArguments: arguments asArray)
@@ -143,10 +146,11 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 ]
 
 { #category : #visiting }
-DASTInterpreter >> visitVariableNode: aRBVariableNode [ 
-	| valueInContext |
-	valueInContext := self currentContext find: aRBVariableNode name.
-	self push: (valueInContext 
-						ifNil: [aRBVariableNode name]
-						ifNotNil: [:val | val ])
+DASTInterpreter >> visitVariableNode: aRBVariableNode [
+	| varName |
+	varName := aRBVariableNode name.
+	self push:
+		((self nextNode: aRBVariableNode) isAssignment 
+			ifTrue: [ varName ]
+			ifFalse: [ currentContext find: varName  ])
 ]

@@ -57,6 +57,17 @@ DASTInterpreterTests >> testAssignmentTemporaryVariable [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testAssignmentTemporaryVariableTwice [
+
+	| interpreter |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 1 . x := 2 . x').
+	
+	
+	self assert: interpreter evaluate equals: 2
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testBinaryMessageSendPushesReceiverAndArguments [
 
 	| interpreter |
