@@ -17,6 +17,14 @@ DASTInterpreter >> deepestLeftChildOf: aNode [
 	^ deepestLeftChild
 ]
 
+{ #category : #evaluation }
+DASTInterpreter >> evaluate [
+	[ self nextNode: currentNode ] whileNotNil: [  
+		self step
+	].
+	^ self pop
+]
+
 { #category : #stepping }
 DASTInterpreter >> evaluateNode: aNode [
 
@@ -40,6 +48,8 @@ DASTInterpreter >> nextNode: aNode [
 	
 	"If it is the last, we evaluate the parent"
 	| sibling |
+	aNode parent ifNil: [ ^nil ] .
+
 	aNode parent children last = aNode
 		ifTrue: [ ^ aNode parent ].
 	
@@ -103,4 +113,9 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	receiver := self pop.
 	
 	self push: (receiver perform: aRBMessageNode selector withArguments: arguments asArray)
+]
+
+{ #category : #visiting }
+DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
+	aRBSequenceNode value
 ]

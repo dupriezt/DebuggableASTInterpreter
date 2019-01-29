@@ -60,6 +60,15 @@ DASTInterpreterTests >> testEvaluateConstant [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testEvaluateFullExpression [
+	| interpreter |
+	"evaluates the whole expression"
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1').
+	self assert: interpreter evaluate equals: 1.
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testParenthesisForOperationAndUnaryMessage [
 
 	| interpreter |
