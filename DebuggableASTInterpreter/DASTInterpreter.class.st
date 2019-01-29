@@ -3,10 +3,16 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'currentNode',
-		'stack'
+		'stack',
+		'currentContext'
 	],
 	#category : #DebuggableASTInterpreter
 }
+
+{ #category : #contexts }
+DASTInterpreter >> currentContext [
+	^ currentContext.
+]
 
 { #category : #traversing }
 DASTInterpreter >> deepestLeftChildOf: aNode [
@@ -39,7 +45,7 @@ DASTInterpreter >> initialize [
 
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [ 
-	
+	currentContext := Dictionary new.
 	currentNode := (self deepestLeftChildOf: aRBNode)
 ]
 
@@ -98,6 +104,23 @@ DASTInterpreter >> step [
 ]
 
 { #category : #visiting }
+DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
+	| name value |
+	"The evaluation is eager, therefore the stack will contain the variable value already evaluated"
+	name := stack pop.
+	value := stack top.
+	self currentContext at: name put: value.
+	
+]
+
+{ #category : #visiting }
+DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
+	"When visiting a block node, I put it in the stack. The block will be evaluated only when it is the receiver of a message."
+	self halt.
+	self push: aRBBlockNode.
+]
+
+{ #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
 	
 	self push: aRBLiteralValueNode value
@@ -118,4 +141,9 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
 	^self
+]
+
+{ #category : #visting }
+DASTInterpreter >> visitVariableNode: aRBVariableNode [ 
+	self push: aRBVariableNode name
 ]
