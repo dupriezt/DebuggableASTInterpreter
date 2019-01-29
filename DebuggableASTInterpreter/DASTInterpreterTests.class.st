@@ -58,3 +58,31 @@ DASTInterpreterTests >> testEvaluateConstant [
 	interpreter step.
 	self assert: interpreter stackTop equals: 1
 ]
+
+{ #category : #tests }
+DASTInterpreterTests >> testParenthesisForOperationAndUnaryMessage [
+
+	| interpreter |
+	"The unary message must be evaluated before the Add"
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '(1 - 3) abs').
+	interpreter step.
+	interpreter step.
+	interpreter step.
+	interpreter step.
+	self assert: interpreter pop equals: 2.
+]
+
+{ #category : #tests }
+DASTInterpreterTests >> testPrecedenceForOperationAndUnaryMessage [
+
+	| interpreter |
+	"The unary message must be evaluated before the Add"
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 - 3 abs').
+	interpreter step.
+	interpreter step.
+	interpreter step.
+	interpreter step.
+	self assert: interpreter pop equals: -2.
+]
