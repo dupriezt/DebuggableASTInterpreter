@@ -8,7 +8,7 @@ Class {
 	#category : #DebuggableASTInterpreter
 }
 
-{ #category : #recorrido }
+{ #category : #traversing }
 DASTInterpreter >> deepestLeftChildOf: aNode [
 	| deepestLeftChild |
 	deepestLeftChild := aNode.
@@ -43,7 +43,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	currentNode := (self deepestLeftChildOf: aRBNode)
 ]
 
-{ #category : #recorrido }
+{ #category : #traversing }
 DASTInterpreter >> nextNode: aNode [
 	
 	"If it is the last, we evaluate the parent"
