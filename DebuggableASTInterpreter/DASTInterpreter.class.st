@@ -106,7 +106,7 @@ DASTInterpreter >> step [
 { #category : #visiting }
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
-	"The evaluation is eager, therefore the stack will contain the variable value already evaluated"
+	"The evaluation is eager, therefore the stack will contain the value already evaluated"
 	name := stack pop.
 	value := stack top.
 	self currentContext at: name put: value.
