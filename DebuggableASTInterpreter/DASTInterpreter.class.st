@@ -117,5 +117,5 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
-	aRBSequenceNode value
+	^self
 ]
