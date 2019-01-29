@@ -74,6 +74,22 @@ DASTInterpreterTests >> testParenthesisForOperationAndUnaryMessage [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testPrecedenceForOperationAndMessageWithArgument [
+
+	| interpreter |
+	"The unary message must be evaluated before the Add"
+	interpreter := DASTInterpreter new.
+
+	interpreter initializeWithProgram: (RBParser parseExpression: '#abc at: 3 - 1').
+	interpreter step.
+	interpreter step.
+	interpreter step.
+	interpreter step.
+	interpreter step.
+	self assert: interpreter pop equals: $b.
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testPrecedenceForOperationAndUnaryMessage [
 
 	| interpreter |
