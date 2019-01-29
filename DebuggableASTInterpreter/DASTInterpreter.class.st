@@ -116,7 +116,6 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	"When visiting a block node, I put it in the stack. The block will be evaluated only when it is the receiver of a message."
-	self halt.
 	self push: aRBBlockNode.
 ]
 
@@ -143,7 +142,11 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 	^self
 ]
 
-{ #category : #visting }
+{ #category : #visiting }
 DASTInterpreter >> visitVariableNode: aRBVariableNode [ 
-	self push: aRBVariableNode name
+	| valueInContext |
+	valueInContext := self currentContext find: aRBVariableNode name.
+	self push: (valueInContext 
+						ifNil: [aRBVariableNode name]
+						ifNotNil: [:val | val ])
 ]

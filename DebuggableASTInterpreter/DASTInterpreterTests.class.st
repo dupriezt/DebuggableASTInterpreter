@@ -35,6 +35,17 @@ DASTInterpreterTests >> testAddTwoNumbersPushesResultInStack [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testAssignAndEvaluateTemporaryVariable [
+
+	| interpreter |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 1 . x + 2').
+	
+	
+	self assert: interpreter evaluate equals: 3
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testAssignmentTemporaryVariable [
 
 	| interpreter |
