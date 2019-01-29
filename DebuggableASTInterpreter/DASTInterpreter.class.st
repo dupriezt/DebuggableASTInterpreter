@@ -40,12 +40,12 @@ DASTInterpreter >> evaluateNode: aNode [
 { #category : #initialization }
 DASTInterpreter >> initialize [
 	super initialize.
+	currentContext := DASTContext new.	
 	stack := Stack new.
 ]
 
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [ 
-	currentContext := Dictionary new.
 	currentNode := (self deepestLeftChildOf: aRBNode)
 ]
 
