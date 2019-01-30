@@ -4,5 +4,8 @@ I determine that the interpreter does not follow recursion and method calls. I h
 Class {
 	#name : #DASTDebuggerModeStepOver,
 	#superclass : #DASTDebuggerMode,
+	#instVars : [
+		'context'
+	],
 	#category : #DebuggableASTInterpreter
 }

@@ -17,21 +17,9 @@ DASTInterpreter >> currentContext [
 	^ currentContext.
 ]
 
-{ #category : #traversing }
-DASTInterpreter >> deepestLeftChildOf: aNode [
-	| deepestLeftChild |
-	deepestLeftChild := aNode.
-	[ deepestLeftChild children isEmpty ]
-		whileFalse: [ deepestLeftChild := deepestLeftChild children first ].
-	^ deepestLeftChild
-]
-
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
-	[ self nextNode: currentNode ] whileNotNil: [  
-		self step
-	].
-	^ self pop
+	^ currentNode acceptVisitor: self
 ]
 
 { #category : #stepping }
@@ -44,74 +32,22 @@ DASTInterpreter >> evaluateNode: aNode [
 DASTInterpreter >> initialize [
 	super initialize.
 	currentContext := DASTContext new.	
-	stack := Stack new.
 ]
 
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [ 
-	currentNode := (self deepestLeftChildOf: aRBNode)
-]
-
-{ #category : #traversing }
-DASTInterpreter >> nextNode: aNode [
-	
-	"If it is the last, we evaluate the parent"
-	| sibling |
-	aNode parent ifNil: [ ^nil ] .
-
-	aNode parent children last = aNode
-		ifTrue: [ ^ aNode parent ].
-	
-	"Then, we get the next child and we get it's deepest first child"
-	sibling := aNode parent children after: aNode.
-	^ self deepestLeftChildOf: sibling
-]
-
-{ #category : #'stack-management' }
-DASTInterpreter >> pop [
-	^ stack pop
-]
-
-{ #category : #'stack-management' }
-DASTInterpreter >> pop: anInteger [ 
-	
-	| poppedElements |
-	poppedElements := OrderedCollection new.
-	anInteger timesRepeat: [ poppedElements addFirst: stack pop ].
-	^ poppedElements
-]
-
-{ #category : #'stack-management' }
-DASTInterpreter >> push: anObject [
-
-	stack push: anObject
-]
-
-{ #category : #'stack-management' }
-DASTInterpreter >> stack [
-	^ stack
-]
-
-{ #category : #'stack-management' }
-DASTInterpreter >> stackTop [
-	
-	^ stack top
-]
-
-{ #category : #stepping }
-DASTInterpreter >> step [
-	
-	self evaluateNode: currentNode.
-	currentNode := self nextNode: currentNode.
+	currentNode := aRBNode
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
 	"The evaluation is eager, therefore the stack will contain the value already evaluated"
-	name := stack pop.
-	value := stack top.
+	self assert: (aRBAssignmentNode children size = 2).
+	name := aRBAssignmentNode children last acceptVisitor: self.
+	value := aRBAssignmentNode children first acceptVisitor: self.
 	self currentContext at: name put: value.
+	^ value
 	
 ]
 
@@ -127,33 +63,34 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
 
-	self push: aRBLiteralValueNode value
+	^ aRBLiteralValueNode value
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	"When visiting a message node, its arguments are already in the stack.
-	This is because our interpreter iterates the tree in deep first post order"	
+	| arguments receiver receiverNode argumentsNodes |
 	
-	| arguments receiver |
-	arguments := self pop: aRBMessageNode arguments size.
+	receiverNode := aRBMessageNode children first.
+	receiver := receiverNode acceptVisitor: self.
 	
-	receiver := self pop.
+	argumentsNodes := aRBMessageNode children allButFirst.
+	arguments := argumentsNodes collect: [:node | node acceptVisitor: self].
 	
-	self push: (receiver perform: aRBMessageNode selector withArguments: arguments asArray)
+	^ receiver perform: aRBMessageNode selector withArguments: arguments asArray
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
-	^self
+	| results |
+	results := aRBSequenceNode children collect: [:node | node acceptVisitor: self].
+	^ results last
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	| varName |
 	varName := aRBVariableNode name.
-	self push:
-		((self nextNode: aRBVariableNode) isAssignment 
+	^ (aRBVariableNode parent isAssignment 
 			ifTrue: [ varName ]
 			ifFalse: [ currentContext find: varName  ])
 ]
