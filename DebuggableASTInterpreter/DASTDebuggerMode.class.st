@@ -10,3 +10,13 @@ Class {
 	],
 	#category : #DebuggableASTInterpreter
 }
+
+{ #category : #running }
+DASTDebuggerMode >> debuggerService: aDASTDebuggerService [
+	debuggerService := aDASTDebuggerService
+]
+
+{ #category : #running }
+DASTDebuggerMode >> onTracePoint: aRBNode [
+	debuggerService tracepointReachedFor: aRBNode
+]

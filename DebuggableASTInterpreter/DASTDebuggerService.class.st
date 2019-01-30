@@ -26,12 +26,34 @@ DASTDebuggerService >> initializeWithProgram: aString [
 	aRBNode := RBParser parseExpression: aString.
 	
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: aRBNode.
-	mode := DASTDebuggerModeContinue new.
+	interpreter initializeWithProgram: aRBNode debuggerService: self.
+	mode := DASTDebuggerModeContinue new debuggerService: self.
 	self addBreakPointAt: interpreter currentNode.
+]
+
+{ #category : #initialization }
+DASTDebuggerService >> initializeWithProgramString: aString [ 
+	| aRBNode |
+	aRBNode := RBParser parseExpression: aString.
+	
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: aRBNode debuggerService: self.
+	mode := DASTDebuggerModeContinue new debuggerService: self.
+	self addBreakPointAt: interpreter currentNode.
+]
+
+{ #category : #running }
+DASTDebuggerService >> onTracePoint: aRBNode [
+	mode onTracePoint: aRBNode
 ]
 
 { #category : #running }
 DASTDebuggerService >> runInterpreter [
 	^ interpreter evaluate
+]
+
+{ #category : #running }
+DASTDebuggerService >> tracepointReachedFor: aRBNode [
+	"interpreter process suspend".
+	Transcript show: 'asd';cr
 ]

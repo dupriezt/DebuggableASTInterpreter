@@ -28,9 +28,9 @@ DASTInterpreter >> evaluate [
 	| value semaphore |
 	semaphore := Semaphore new: 0.
 	currentContext := DASTContext new.
-	process := ([value := ([self visit: currentNode] 
+	process := ([value := [[self visit: currentNode] 
 						on: Exception 
-						do: [ :e | Transcript show: e asString; cr . semaphore signal]) 
+						do: [ :e | Transcript show: e asString; cr . semaphore signal]]
 					ensure: [semaphore signal]] newProcess) resume.
 	semaphore wait.
 	^ value
@@ -50,6 +50,11 @@ DASTInterpreter >> initializeWithProgram: aRBNode debuggerService: aDebuggerServ
 { #category : #execution }
 DASTInterpreter >> onTracePoint: aRBNode [
 	debuggerService onTracePoint: aRBNode
+]
+
+{ #category : #execution }
+DASTInterpreter >> process [ 
+	^process
 ]
 
 { #category : #evaluation }
