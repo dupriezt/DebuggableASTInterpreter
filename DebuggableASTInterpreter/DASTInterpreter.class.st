@@ -6,8 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'currentNode',
-		'stack',
-		'currentContext'
+		'currentContext',
+		'process'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -24,19 +24,12 @@ DASTInterpreter >> currentNode [
 
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
-	^ currentNode acceptVisitor: self
-]
-
-{ #category : #stepping }
-DASTInterpreter >> evaluateNode: aNode [
-
-	^ aNode acceptVisitor: self
-]
-
-{ #category : #initialization }
-DASTInterpreter >> initialize [
-	super initialize.
-	currentContext := DASTContext new.	
+	| value semaphore |
+	semaphore := Semaphore new: 0.
+	currentContext := DASTContext new.
+	process := ([[value := self visit: currentNode] ensure: [semaphore signal]] newProcess) resume.
+	semaphore wait.
+	^ value
 ]
 
 { #category : #initialization }
@@ -49,6 +42,16 @@ DASTInterpreter >> initializeWithProgramString: aString [
 	| aRBNode |
 	aRBNode := RBParser parseExpression: aString.
 	self initializeWithProgram: aRBNode 
+]
+
+{ #category : #evaluation }
+DASTInterpreter >> visit: aRBNode [
+	| value previousNode |
+	previousNode := currentNode.
+	currentNode := aRBNode.
+	value := aRBNode acceptVisitor: self.
+	currentNode := previousNode.
+	^ value
 ]
 
 { #category : #visiting }
