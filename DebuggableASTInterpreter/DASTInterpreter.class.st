@@ -8,7 +8,8 @@ Class {
 		'currentNode',
 		'currentContext',
 		'process',
-		'debuggerService'
+		'debuggerService',
+		'stackTop'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -33,7 +34,7 @@ DASTInterpreter >> evaluate [
 						do: [ :e | Transcript show: e asString; cr . semaphore signal]]
 					ensure: [semaphore signal]] newProcess) resume.
 	semaphore wait.
-	^ value
+	^ stackTop := value
 ]
 
 { #category : #initialization }
@@ -49,12 +50,26 @@ DASTInterpreter >> initializeWithProgram: aRBNode debuggerService: aDebuggerServ
 
 { #category : #execution }
 DASTInterpreter >> onTracePoint: aRBNode [
+	"if debuggerService is not set, then it's not necessary to implement stepping 
+	and this message does nothing"
+	debuggerService ifNil: [ ^ self ].
 	debuggerService onTracePoint: aRBNode
 ]
 
 { #category : #execution }
 DASTInterpreter >> process [ 
 	^process
+]
+
+{ #category : #execution }
+DASTInterpreter >> run [
+	process ifNil: [ ^ self evaluate ].
+	process resume
+]
+
+{ #category : #evaluation }
+DASTInterpreter >> stackTop [
+	^stackTop
 ]
 
 { #category : #evaluation }

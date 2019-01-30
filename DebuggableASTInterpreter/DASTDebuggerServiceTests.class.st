@@ -17,7 +17,7 @@ DASTDebuggerServiceTests >> testInterpretAllWithoutBreakPoints [
 DASTDebuggerServiceTests >> testInterpretComplexMessageAllWithoutBreakPoint [
 	| ds |
 	ds := DASTDebuggerService new.
-	ds initializeWithProgram: 'x:=1 . x:= x+2. x'.
+	ds initializeWithProgram: 'x:=1 . x:= x+2 . x'.
 	self assert: ds runInterpreter equals: 3.
 	
 ]
