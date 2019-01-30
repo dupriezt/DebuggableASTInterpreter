@@ -29,10 +29,10 @@ DASTInterpreter >> evaluate [
 	| value semaphore |
 	semaphore := Semaphore new: 0.
 	currentContext := DASTContext new.
-	process := ([value := [[self visit: currentNode] 
-						on: Exception 
-						do: [ :e | Transcript show: e asString; cr . semaphore signal]]
-					ensure: [semaphore signal]] newProcess) resume.
+	process := [value := [[self visit: currentNode] 
+									on: Exception 
+									do: [ :e | Transcript show: e asString; cr . semaphore signal]]
+					ensure: [semaphore signal]] fork.
 	semaphore wait.
 	^ stackTop := value
 ]
@@ -63,8 +63,10 @@ DASTInterpreter >> process [
 
 { #category : #execution }
 DASTInterpreter >> run [
-	process ifNil: [ ^ self evaluate ].
-	process resume
+	process 
+		ifNil: [ ^ self evaluate ]
+		ifNotNil: [ process resume ].
+	
 ]
 
 { #category : #evaluation }
@@ -77,6 +79,7 @@ DASTInterpreter >> visit: aRBNode [
 	| value previousNode |
 	previousNode := currentNode.
 	currentNode := aRBNode.
+	"Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr ."
 	value := aRBNode acceptVisitor: self.
 	currentNode := previousNode.
 	^ value
@@ -87,8 +90,9 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	| name value |
 	"The evaluation is eager, therefore the stack will contain the value already evaluated"
 	self assert: (aRBAssignmentNode children size = 2).
-	name := aRBAssignmentNode children last acceptVisitor: self.
-	value := aRBAssignmentNode children first acceptVisitor: self.
+	name := self visit: aRBAssignmentNode children last.
+	value := self visit: aRBAssignmentNode children first.
+	self onTracePoint: aRBAssignmentNode.
 	self currentContext at: name put: value.
 	^ value
 	
@@ -105,7 +109,6 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
-
 	^ aRBLiteralValueNode value
 ]
 
@@ -114,20 +117,21 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	| arguments receiver receiverNode argumentsNodes |
 	
 	receiverNode := aRBMessageNode children first.
-	receiver := receiverNode acceptVisitor: self.
+	receiver := self visit: receiverNode.
 	
 	argumentsNodes := aRBMessageNode children allButFirst.
-	arguments := argumentsNodes collect: [:node | node acceptVisitor: self].
+	arguments := argumentsNodes collect: [:node | self visit: node].
 	"the next call if for controlling the execution of the interpreter 
 	depending on the debuggerService mode"
 	self onTracePoint: aRBMessageNode .
+	
 	^ receiver perform: aRBMessageNode selector withArguments: arguments asArray
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
 	| results |
-	results := aRBSequenceNode children collect: [:node | node acceptVisitor: self].
+	results := aRBSequenceNode children collect: [:node | self visit: node ].
 	^ results last
 ]
 

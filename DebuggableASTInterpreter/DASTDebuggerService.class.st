@@ -20,6 +20,11 @@ DASTDebuggerService >> addBreakPointAt: aRBNode [
 	breakpoints add: aRBNode.
 ]
 
+{ #category : #accessing }
+DASTDebuggerService >> currentNode [
+	^interpreter currentNode
+]
+
 { #category : #initialization }
 DASTDebuggerService >> initializeWithProgram: aString [ 
 	| aRBNode |
@@ -43,6 +48,6 @@ DASTDebuggerService >> runInterpreter [
 
 { #category : #running }
 DASTDebuggerService >> tracepointReachedFor: aRBNode [
-	Transcript show: 'suspend interpreter evaluation'.
 	
+	[interpreter process suspend] fork
 ]
