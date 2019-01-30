@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'currentNode',
 		'currentContext',
-		'process'
+		'process',
+		'debuggerService'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -27,21 +28,28 @@ DASTInterpreter >> evaluate [
 	| value semaphore |
 	semaphore := Semaphore new: 0.
 	currentContext := DASTContext new.
-	process := ([[value := self visit: currentNode] ensure: [semaphore signal]] newProcess) resume.
+	process := ([value := ([self visit: currentNode] 
+						on: Exception 
+						do: [ :e | Transcript show: e asString; cr . semaphore signal]) 
+					ensure: [semaphore signal]] newProcess) resume.
 	semaphore wait.
 	^ value
 ]
 
 { #category : #initialization }
-DASTInterpreter >> initializeWithProgram: aRBNode [ 
-	currentNode := aRBNode
+DASTInterpreter >> initializeWithProgram: aRBNode [
+	currentNode := aRBNode.
 ]
 
 { #category : #initialization }
-DASTInterpreter >> initializeWithProgramString: aString [
-	| aRBNode |
-	aRBNode := RBParser parseExpression: aString.
-	self initializeWithProgram: aRBNode 
+DASTInterpreter >> initializeWithProgram: aRBNode debuggerService: aDebuggerService [
+	currentNode := aRBNode.
+	debuggerService := aDebuggerService.
+]
+
+{ #category : #execution }
+DASTInterpreter >> onTracePoint: aRBNode [
+	debuggerService onTracePoint: aRBNode
 ]
 
 { #category : #evaluation }
@@ -90,7 +98,9 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	argumentsNodes := aRBMessageNode children allButFirst.
 	arguments := argumentsNodes collect: [:node | node acceptVisitor: self].
-	
+	"the next call if for controlling the execution of the interpreter 
+	depending on the debuggerService mode"
+	self onTracePoint: aRBMessageNode .
 	^ receiver perform: aRBMessageNode selector withArguments: arguments asArray
 ]
 

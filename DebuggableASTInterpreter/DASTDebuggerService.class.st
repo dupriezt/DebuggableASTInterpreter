@@ -22,9 +22,11 @@ DASTDebuggerService >> addBreakPointAt: aRBNode [
 
 { #category : #initialization }
 DASTDebuggerService >> initializeWithProgram: aString [ 
+	| aRBNode |
+	aRBNode := RBParser parseExpression: aString.
 	
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgramString: aString.
+	interpreter initializeWithProgram: aRBNode.
 	mode := DASTDebuggerModeContinue new.
 	self addBreakPointAt: interpreter currentNode.
 ]
