@@ -1,3 +1,6 @@
+"
+I store variables and its values. I also contain a reference to my parent context. My method find: looks for a variable in myself and up in my predecessor contexts
+"
 Class {
 	#name : #DASTContext,
 	#superclass : #Object,

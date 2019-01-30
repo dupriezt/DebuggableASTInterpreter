@@ -1,3 +1,6 @@
+"
+I can interpret a program represented as an AST tree
+"
 Class {
 	#name : #DASTInterpreter,
 	#superclass : #Object,
