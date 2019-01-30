@@ -17,6 +17,11 @@ DASTInterpreter >> currentContext [
 	^ currentContext.
 ]
 
+{ #category : #execution }
+DASTInterpreter >> currentNode [
+	^ currentNode
+]
+
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
 	^ currentNode acceptVisitor: self
@@ -37,6 +42,13 @@ DASTInterpreter >> initialize [
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [ 
 	currentNode := aRBNode
+]
+
+{ #category : #initialization }
+DASTInterpreter >> initializeWithProgramString: aString [
+	| aRBNode |
+	aRBNode := RBParser parseExpression: aString.
+	self initializeWithProgram: aRBNode 
 ]
 
 { #category : #visiting }

@@ -13,7 +13,7 @@ Class {
 
 { #category : #accessing }
 DASTContext >> at: aByteSymbol put: anObject [
-	"store variable and its value"
+	"store variable and its value. TODO: implement the modification of variables in parent context"
 	variablesDict at: aByteSymbol put: anObject
 ]
 
