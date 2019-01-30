@@ -18,5 +18,5 @@ DASTDebuggerMode >> debuggerService: aDASTDebuggerService [
 
 { #category : #running }
 DASTDebuggerMode >> onTracePoint: aRBNode [
-	debuggerService tracepointReachedFor: aRBNode
+	self subclassResponsibility 
 ]

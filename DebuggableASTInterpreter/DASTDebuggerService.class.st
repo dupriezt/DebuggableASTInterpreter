@@ -32,8 +32,13 @@ DASTDebuggerService >> initializeWithProgram: aString [
 	
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: aRBNode debuggerService: self.
-	mode := DASTDebuggerModeContinue new debuggerService: self.
+	mode := DASTDebuggerModeStepInto new debuggerService: self.
 	self addBreakPointAt: interpreter currentNode.
+]
+
+{ #category : #initialization }
+DASTDebuggerService >> isBreakpoint: aRBNode [
+	^ breakpoints contains: aRBNode
 ]
 
 { #category : #running }

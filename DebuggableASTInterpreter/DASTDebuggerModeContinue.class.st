@@ -6,3 +6,17 @@ Class {
 	#superclass : #DASTDebuggerMode,
 	#category : #DebuggableASTInterpreter
 }
+
+{ #category : #running }
+DASTDebuggerModeContinue >> continue [
+	debuggerService runInterpreter 
+]
+
+{ #category : #running }
+DASTDebuggerModeContinue >> onTracePoint: aRBNode [
+	(debuggerService isBreakpoint: aRBNode) ifTrue: [  
+		debuggerService tracepointReachedFor: aRBNode
+		].
+	
+	
+]
