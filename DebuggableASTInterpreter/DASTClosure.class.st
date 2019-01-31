@@ -13,6 +13,16 @@ Class {
 }
 
 { #category : #accessing }
+DASTClosure >> argumentCount [
+	^ blockNode arguments size.
+]
+
+{ #category : #accessing }
+DASTClosure >> argumentNames [
+	^ (blockNode arguments collect: [:arg | arg name]) asArray.
+]
+
+{ #category : #accessing }
 DASTClosure >> asText [
 	^ self sourceCode asText
 ]

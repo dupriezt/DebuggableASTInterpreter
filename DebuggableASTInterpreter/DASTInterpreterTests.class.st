@@ -68,16 +68,6 @@ DASTInterpreterTests >> testBinaryMessageSendPushesReceiverAndArguments [
 	self assert: interpreter evaluate equals: 3.
 ]
 
-{ #category : #'tests-blocks' }
-DASTInterpreterTests >> testEvaluateBlock [
-
-	| interpreter |
-	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '[ 1 ]').
-	interpreter evaluate.
-	self assert: interpreter stackTop asText equals: [ 1 ] asText
-]
-
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateConstant [
 
@@ -115,6 +105,43 @@ DASTInterpreterTests >> testExceptionZeroDivide [
 	interpreter evaluate.
 	self assert: interpreter exceptions isEmpty not.
 	self assert: interpreter exceptions last asString equals: 'ZeroDivide'
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testInterpretBlockDeclarationWithArguments [
+
+	| interpreter value block |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '[ :x :y | 1 ]').
+	interpreter evaluate.
+	value := interpreter stackTop.
+	block := [ :x : y | 1 ].
+	self assert: value asText equals: block asText.
+	self assert: value argumentNames equals: block argumentNames. 
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testInterpretBlockDeclarationWithOuterContext [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 3 . [ 1 ]').
+	interpreter evaluate.
+	value := interpreter stackTop.
+	self assert: value asText equals: [ 1 ] asText.
+	self assert: (value outerContext find: #x) equals: 3.
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testInterpretBlockDeclarationWithoutOuterContext [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '[ 1 ]').
+	interpreter evaluate.
+	value := interpreter stackTop.
+	self assert: value asText equals: [ 1 ] asText.
+	self assert: value outerContext isEmpty.
 ]
 
 { #category : #tests }

@@ -41,6 +41,12 @@ DASTContext >> initializeInContext: aDASTContext [
 ]
 
 { #category : #accessing }
+DASTContext >> isEmpty [
+	
+	^ variablesDict isEmpty.
+]
+
+{ #category : #accessing }
 DASTContext >> parentContext [
 	^ parentContext
 ]
