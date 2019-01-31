@@ -34,7 +34,7 @@ DASTDebuggerService >> initializeWithProgram: aRBNode [
 
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: aRBNode debuggerService: self.
-	mode := DASTDebuggerModeStepInto new debuggerService: self.
+	mode := DASTDebuggerModeContinue new debuggerService: self.
 ]
 
 { #category : #'accessing - private' }
@@ -44,7 +44,12 @@ DASTDebuggerService >> interpreter [
 
 { #category : #initialization }
 DASTDebuggerService >> isBreakpoint: aRBNode [
-	^ breakpoints contains: [:bp | bp = aRBNode ]
+	^ self breakpoints contains: [:bp | bp = aRBNode ]
+]
+
+{ #category : #accessing }
+DASTDebuggerService >> mode [
+	^ mode class
 ]
 
 { #category : #running }

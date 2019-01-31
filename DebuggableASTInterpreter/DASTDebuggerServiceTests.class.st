@@ -33,8 +33,9 @@ DASTDebuggerServiceTests >> testInterpretComplexMessageAllWithoutBreakPoint [
 	| ds |
 	ds := DASTDebuggerService new.
 	ds initializeWithProgram: (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
-
+	self assert: ds mode = DASTDebuggerModeContinue.
 	ds runInterpreter.
+	ds assert: ds interpreter process isTerminated.
 	self assert: ds returnedValue equals: 3 
 	
 ]

@@ -30,7 +30,7 @@ DASTInterpreter >> evaluate [
 	semaphore := Semaphore new: 0.
 	currentContext := DASTContext new.
 	process := [value := [[self visit: currentNode] 
-									on: Exception 
+									on: Error
 									do: [ :e | Transcript show: e asString; cr . semaphore signal]]
 					ensure: [semaphore signal]] fork.
 	semaphore wait.
