@@ -15,9 +15,13 @@ Class {
 
 { #category : #breakpoints }
 DASTDebuggerService >> addBreakPointAt: aRBNode [ 
-	breakpoints ifNil: [ 
+	self breakpoints add: aRBNode.
+]
+
+{ #category : #accessing }
+DASTDebuggerService >> breakpoints [
+	^ breakpoints ifNil: [ 
 		breakpoints := OrderedCollection new ].
-	breakpoints add: aRBNode.
 ]
 
 { #category : #accessing }
@@ -26,19 +30,16 @@ DASTDebuggerService >> currentNode [
 ]
 
 { #category : #initialization }
-DASTDebuggerService >> initializeWithProgram: aString [ 
-	| aRBNode |
-	aRBNode := RBParser parseExpression: aString.
-	
+DASTDebuggerService >> initializeWithProgram: aRBNode [ 
+
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: aRBNode debuggerService: self.
 	mode := DASTDebuggerModeStepInto new debuggerService: self.
-	self addBreakPointAt: interpreter currentNode.
 ]
 
 { #category : #initialization }
 DASTDebuggerService >> isBreakpoint: aRBNode [
-	^ breakpoints contains: aRBNode
+	^ breakpoints contains: [:bp | bp = aRBNode ]
 ]
 
 { #category : #running }
