@@ -41,6 +41,20 @@ DASTDebuggerServiceTests >> testInterpretComplexMessageAllWithoutBreakPoint [
 ]
 
 { #category : #'tests-interpreter-process-state' }
+DASTDebuggerServiceTests >> testInterpreterIsInTheRightNodeWhenReachingABreakpoint [
+	| ds ast break |
+	ds := DASTDebuggerService new.
+	
+	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	ds initializeWithProgram: ast .
+	break := ast children second.
+	ds addBreakPointAt: break.
+	ds runInterpreter.
+	self assert: ds currentNode equals: break.
+	
+]
+
+{ #category : #'tests-interpreter-process-state' }
 DASTDebuggerServiceTests >> testInterpreterProcessIsSuspendedWhenReachingBreakpoint [
 	| ds ast |
 	ds := DASTDebuggerService new.
@@ -62,6 +76,20 @@ DASTDebuggerServiceTests >> testInterpreterProcessIsTerminatedAfterFullEvaluatio
 	ds runInterpreter.
 	self assert: ds interpreter process isTerminated 
 	
+]
+
+{ #category : #'tests-interpreter-process-state' }
+DASTDebuggerServiceTests >> testInterpreterProcessIsTerminatedWhenRunningAfterReachingABreakpoint [
+	| ds ast |
+	ds := DASTDebuggerService new.
+	
+	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	ds initializeWithProgram: ast .
+	ds addBreakPointAt: ast children second.
+	ds runInterpreter.
+	self assert: ds interpreter process isSuspended.
+	ds runInterpreter.
+	self assert: ds interpreter process isTerminated.
 ]
 
 { #category : #'tests-breakpoints' }

@@ -79,6 +79,7 @@ DASTDebuggerService >> runInterpreter [
 
 { #category : #running }
 DASTDebuggerService >> tracepointReachedFor: aRBNode [
+	interpreter semaphore signal.
+	interpreter semaphore wait.
 	
-	[interpreter process suspend] fork
 ]

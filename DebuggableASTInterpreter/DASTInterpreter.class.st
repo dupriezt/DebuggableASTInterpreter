@@ -9,7 +9,8 @@ Class {
 		'currentContext',
 		'process',
 		'debuggerService',
-		'stackTop'
+		'stackTop',
+		'semaphore'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -26,7 +27,7 @@ DASTInterpreter >> currentNode [
 
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
-	| semaphore value |
+	| value |
 	semaphore := Semaphore new: 0.
 	currentContext := DASTContext new.
 	process := [value := [[self visit: currentNode] 
@@ -53,7 +54,9 @@ DASTInterpreter >> onTracePoint: aRBNode [
 	"if debuggerService is not set, then it's not necessary to implement stepping 
 	and this message does nothing"
 	debuggerService ifNil: [ ^ self ].
-	debuggerService onTracePoint: aRBNode
+	debuggerService onTracePoint: aRBNode.
+
+	
 ]
 
 { #category : #execution }
@@ -65,9 +68,14 @@ DASTInterpreter >> process [
 DASTInterpreter >> run [
 	
 	process 
-		ifNil: [ self evaluate "this method will fork the process" ]
-		ifNotNil: [ process isTerminated ifFalse: [ process resume ] ].
+		ifNil: [ self evaluate ]
+		ifNotNil: [ "process isTerminated ifFalse: [ "semaphore signal. semaphore wait. "]" ].
 	
+]
+
+{ #category : #accessing }
+DASTInterpreter >> semaphore [
+	^semaphore
 ]
 
 { #category : #evaluation }
@@ -90,7 +98,6 @@ DASTInterpreter >> visit: aRBNode [
 { #category : #visiting }
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
-	"The evaluation is eager, therefore the stack will contain the value already evaluated"
 	self assert: (aRBAssignmentNode children size = 2).
 	name := self visit: aRBAssignmentNode children last.
 	value := self visit: aRBAssignmentNode children first.
@@ -111,6 +118,7 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
+	self onTracePoint: aRBLiteralValueNode.
 	^ aRBLiteralValueNode value
 ]
 
@@ -134,12 +142,14 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
 	| results |
 	results := aRBSequenceNode children collect: [:node | self visit: node ].
+	self onTracePoint: aRBSequenceNode.
 	^ results last
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	| varName |
+	self onTracePoint: aRBVariableNode .
 	varName := aRBVariableNode name.
 	^ (aRBVariableNode parent isAssignment 
 			ifTrue: [ varName ]
