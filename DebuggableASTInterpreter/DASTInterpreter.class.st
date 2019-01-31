@@ -31,7 +31,7 @@ DASTInterpreter >> evaluate [
 	| value |
 	semaphore := Semaphore new: 0.
 	currentContext := DASTContext new.
-	process := [value := [[self visit: currentNode] 
+	process := [value := [[self visit: currentNode ] 
 									on: Error
 									do: [ :e | self exceptions add: e . Transcript show: e asString; cr . semaphore signal]]
 					ensure: [semaphore signal]] fork.
@@ -129,7 +129,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver receiverNode argumentsNodes |
+	| arguments receiver receiverNode argumentsNodes blockContext blockValue |
 	
 	receiverNode := aRBMessageNode children first.
 	receiver := self visit: receiverNode.
@@ -140,7 +140,18 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	depending on the debuggerService mode"
 	self onTracePoint: aRBMessageNode .
 	
-	^ receiver perform: aRBMessageNode selector withArguments: arguments asArray
+	receiver class = DASTClosure 
+		ifTrue: [  blockContext := DASTContext new initializeInContext: self currentContext.
+					  arguments doWithIndex: [ :arg :index | 
+							blockContext 
+								at: (receiver argumentNames at: index)
+								put: arg ].
+					  currentContext := blockContext.
+					  blockValue := self visit: receiver blockNode body.
+					  currentContext := blockContext parent.
+					  ^ blockValue
+					]
+		ifFalse: [ ^ receiver perform: aRBMessageNode selector withArguments: arguments asArray ]
 ]
 
 { #category : #visiting }

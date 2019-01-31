@@ -6,7 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'variablesDict',
-		'parentContext'
+		'parent'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -22,7 +22,7 @@ DASTContext >> find: aByteSymbol [
 	"store variable and its value.
 	In case this context redefines a variable defined by its parent context, this method will return the variable value for this context"
 	^ variablesDict at: aByteSymbol ifAbsent: [ 
-		parentContext 
+		parent 
 			ifNil: [ nil ] 
 			ifNotNil: [ :pc | pc find: aByteSymbol ]
 		 ]
@@ -37,7 +37,7 @@ DASTContext >> initialize [
 { #category : #accessing }
 DASTContext >> initializeInContext: aDASTContext [
 	"initializes an empty context whose parent is aDASTContext"
-	parentContext := aDASTContext
+	parent := aDASTContext
 ]
 
 { #category : #accessing }
@@ -47,8 +47,8 @@ DASTContext >> isEmpty [
 ]
 
 { #category : #accessing }
-DASTContext >> parentContext [
-	^ parentContext
+DASTContext >> parent [
+	^ parent
 ]
 
 { #category : #accessing }
