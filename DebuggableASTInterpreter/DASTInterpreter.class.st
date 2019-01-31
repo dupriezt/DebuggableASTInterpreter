@@ -10,7 +10,8 @@ Class {
 		'process',
 		'debuggerService',
 		'stackTop',
-		'semaphore'
+		'semaphore',
+		'exceptions'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -32,10 +33,15 @@ DASTInterpreter >> evaluate [
 	currentContext := DASTContext new.
 	process := [value := [[self visit: currentNode] 
 									on: Error
-									do: [ :e | Transcript show: e asString; cr . semaphore signal]]
+									do: [ :e | self exceptions add: e . Transcript show: e asString; cr . semaphore signal]]
 					ensure: [semaphore signal]] fork.
 	semaphore wait.
 	^ value
+]
+
+{ #category : #exceptios }
+DASTInterpreter >> exceptions [
+	^ exceptions ifNil: [ exceptions := OrderedCollection new ]
 ]
 
 { #category : #initialization }

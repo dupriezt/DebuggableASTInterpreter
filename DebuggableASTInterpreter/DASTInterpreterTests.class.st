@@ -97,6 +97,17 @@ DASTInterpreterTests >> testEvaluateFullUnaryExpression [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testExceptionZeroDivide [
+
+	| interpreter |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 / 0').
+	interpreter evaluate.
+	self assert: interpreter exceptions isEmpty not.
+	self assert: interpreter exceptions last asString equals: 'ZeroDivide'
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testParenthesisForOperationAndUnaryMessage [
 
 	| interpreter |
