@@ -68,6 +68,16 @@ DASTInterpreterTests >> testBinaryMessageSendPushesReceiverAndArguments [
 	self assert: interpreter evaluate equals: 3.
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testEvaluateBlock [
+
+	| interpreter |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '[ 1 ]').
+	interpreter evaluate.
+	self assert: interpreter stackTop asText equals: [ 1 ] asText
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateConstant [
 

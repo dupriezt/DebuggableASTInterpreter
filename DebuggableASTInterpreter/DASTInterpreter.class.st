@@ -117,10 +117,8 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	"A new context must be created, and its parent must be the current context"
+	^ DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext.
 	
-	| blockContext |
-	blockContext := DASTContext new initializeInContext: currentContext.
-	currentContext := blockContext 
 ]
 
 { #category : #visiting }
