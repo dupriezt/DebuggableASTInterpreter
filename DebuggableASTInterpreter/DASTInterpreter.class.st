@@ -73,8 +73,9 @@ DASTInterpreter >> run [
 	
 ]
 
-{ #category : #accessing }
+{ #category : #'control-flow' }
 DASTInterpreter >> semaphore [
+	"used for coordinating the Process process with the main process"
 	^semaphore
 ]
 

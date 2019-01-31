@@ -56,14 +56,15 @@ DASTDebuggerServiceTests >> testInterpreterIsInTheRightNodeWhenReachingABreakpoi
 
 { #category : #'tests-interpreter-process-state' }
 DASTDebuggerServiceTests >> testInterpreterProcessIsSuspendedWhenReachingBreakpoint [
-	| ds ast |
+	| ds ast break |
 	ds := DASTDebuggerService new.
 	
 	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
 	ds initializeWithProgram: ast .
-	ds addBreakPointAt: ast children second.
+	break := ast children second children first.
+	ds addBreakPointAt: break.
 	ds runInterpreter.
-	self assert: ds interpreter process isSuspended.
+	self assert: ds interpreter currentNode equals: break.
 	
 ]
 
@@ -87,7 +88,7 @@ DASTDebuggerServiceTests >> testInterpreterProcessIsTerminatedWhenRunningAfterRe
 	ds initializeWithProgram: ast .
 	ds addBreakPointAt: ast children second.
 	ds runInterpreter.
-	self assert: ds interpreter process isSuspended.
+	
 	ds runInterpreter.
 	self assert: ds interpreter process isTerminated.
 ]
