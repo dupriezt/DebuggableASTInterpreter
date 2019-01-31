@@ -34,6 +34,7 @@ DASTInterpreter >> evaluate [
 									do: [ :e | Transcript show: e asString; cr . semaphore signal]]
 					ensure: [semaphore signal]] fork.
 	semaphore wait.
+	^ value
 ]
 
 { #category : #initialization }
