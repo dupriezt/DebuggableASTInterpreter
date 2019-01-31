@@ -30,13 +30,23 @@ DASTDebuggerServiceTests >> testInterpretAllWithoutBreakPoints [
 
 { #category : #'tests-mode-continue' }
 DASTDebuggerServiceTests >> testInterpretComplexMessageAllWithoutBreakPoint [
-	| ds |
+	| ds ast step1 step2 step3 step4 |
 	ds := DASTDebuggerService new.
-	ds initializeWithProgram: (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
-	self assert: ds mode = DASTDebuggerModeContinue.
+	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	step1 := ast children first. "Assignation x:=1"
+	step2 := ast children second children first. "Message x+2"
+	step3 := ast children second. "Assignation x:=x+2"
+	
+	ds initializeWithProgram: ast.
+	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
+	
+	ds runInterpreter.	
+	self assert: ds currentNode = step1.
 	ds runInterpreter.
-	ds assert: ds interpreter process isTerminated.
-	self assert: ds returnedValue equals: 3 
+	self assert: ds currentNode = step2.
+	ds runInterpreter.
+	self assert: ds currentNode = step3.
+	
 	
 ]
 

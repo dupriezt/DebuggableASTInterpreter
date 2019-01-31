@@ -49,7 +49,12 @@ DASTDebuggerService >> isBreakpoint: aRBNode [
 
 { #category : #accessing }
 DASTDebuggerService >> mode [
-	^ mode class
+	^ mode
+]
+
+{ #category : #accessing }
+DASTDebuggerService >> mode: aDASTDebuggerMode [ 
+	mode := aDASTDebuggerMode
 ]
 
 { #category : #running }

@@ -68,8 +68,8 @@ DASTInterpreter >> process [
 DASTInterpreter >> run [
 	
 	process 
-		ifNil: [ self evaluate ]
-		ifNotNil: [ "process isTerminated ifFalse: [ "semaphore signal. semaphore wait. "]" ].
+		ifNil: [ self evaluate "this message will initialize the process that evaluates the tree"]
+		ifNotNil: [ semaphore signal. semaphore wait.  ].
 	
 ]
 
@@ -119,7 +119,7 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
-	self onTracePoint: aRBLiteralValueNode.
+	"self onTracePoint: aRBLiteralValueNode."
 	^ aRBLiteralValueNode value
 ]
 
@@ -143,14 +143,14 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
 	| results |
 	results := aRBSequenceNode children collect: [:node | self visit: node ].
-	self onTracePoint: aRBSequenceNode.
+	"self onTracePoint: aRBSequenceNode."
 	^ results last
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	| varName |
-	self onTracePoint: aRBVariableNode .
+	"self onTracePoint: aRBVariableNode ."
 	varName := aRBVariableNode name.
 	^ (aRBVariableNode parent isAssignment 
 			ifTrue: [ varName ]
