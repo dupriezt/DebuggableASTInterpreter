@@ -26,7 +26,7 @@ DASTInterpreter >> currentNode [
 
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
-	| value semaphore |
+	| semaphore value |
 	semaphore := Semaphore new: 0.
 	currentContext := DASTContext new.
 	process := [value := [[self visit: currentNode] 
@@ -34,7 +34,6 @@ DASTInterpreter >> evaluate [
 									do: [ :e | Transcript show: e asString; cr . semaphore signal]]
 					ensure: [semaphore signal]] fork.
 	semaphore wait.
-	^ stackTop := value
 ]
 
 { #category : #initialization }
@@ -63,9 +62,10 @@ DASTInterpreter >> process [
 
 { #category : #execution }
 DASTInterpreter >> run [
+	
 	process 
-		ifNil: [ ^ self evaluate ]
-		ifNotNil: [ process resume ].
+		ifNil: [ self evaluate "this method will fork the process" ]
+		ifNotNil: [ process isTerminated ifFalse: [ process resume ] ].
 	
 ]
 
@@ -81,6 +81,7 @@ DASTInterpreter >> visit: aRBNode [
 	currentNode := aRBNode.
 	"Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr ."
 	value := aRBNode acceptVisitor: self.
+	stackTop := value.
 	currentNode := previousNode.
 	^ value
 ]

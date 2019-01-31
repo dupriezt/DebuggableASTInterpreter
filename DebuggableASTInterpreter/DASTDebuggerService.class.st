@@ -37,6 +37,11 @@ DASTDebuggerService >> initializeWithProgram: aRBNode [
 	mode := DASTDebuggerModeStepInto new debuggerService: self.
 ]
 
+{ #category : #'accessing - private' }
+DASTDebuggerService >> interpreter [
+	^ interpreter
+]
+
 { #category : #initialization }
 DASTDebuggerService >> isBreakpoint: aRBNode [
 	^ breakpoints contains: [:bp | bp = aRBNode ]
@@ -55,6 +60,11 @@ DASTDebuggerService >> removeAllBreakPoints [
 { #category : #breakpoints }
 DASTDebuggerService >> removeBreakPointAt: aRBNode [ 
 	self breakpoints remove: aRBNode 
+]
+
+{ #category : #running }
+DASTDebuggerService >> returnedValue [
+	^ interpreter stackTop
 ]
 
 { #category : #running }
