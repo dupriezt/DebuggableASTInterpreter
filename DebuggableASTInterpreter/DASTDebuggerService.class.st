@@ -47,6 +47,16 @@ DASTDebuggerService >> onTracePoint: aRBNode [
 	mode onTracePoint: aRBNode
 ]
 
+{ #category : #breakpoints }
+DASTDebuggerService >> removeAllBreakPoints [
+	self breakpoints removeAll
+]
+
+{ #category : #breakpoints }
+DASTDebuggerService >> removeBreakPointAt: aRBNode [ 
+	self breakpoints remove: aRBNode 
+]
+
 { #category : #running }
 DASTDebuggerService >> runInterpreter [
 	^ interpreter run
