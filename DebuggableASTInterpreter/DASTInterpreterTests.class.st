@@ -5,12 +5,6 @@ Class {
 }
 
 { #category : #tests }
-DASTInterpreterTests >> runCaseManaged [
-
-	^ self runCase
-]
-
-{ #category : #tests }
 DASTInterpreterTests >> testAddTwoNumbersPushesResultInStack [
 
 	| interpreter |
