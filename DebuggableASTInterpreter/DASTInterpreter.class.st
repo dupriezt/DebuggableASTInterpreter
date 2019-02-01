@@ -11,7 +11,8 @@ Class {
 		'debuggerService',
 		'stackTop',
 		'semaphore',
-		'exceptions'
+		'exceptions',
+		'signalExceptions'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -33,7 +34,7 @@ DASTInterpreter >> evaluate [
 	currentContext := DASTContext new.
 	process := [value := [[self visit: currentNode ] 
 									on: Error
-									do: [ :e | self exceptions add: e . Transcript show: e asString; cr . semaphore signal]]
+									do: [ :e | self exceptions add: e . Transcript show: e asString; cr . semaphore signal. signalExceptions ifTrue: [ e pass ] ]]
 					ensure: [semaphore signal]] fork.
 	semaphore wait.
 	^ value
@@ -85,6 +86,16 @@ DASTInterpreter >> semaphore [
 	^semaphore
 ]
 
+{ #category : #flagging }
+DASTInterpreter >> signalExceptions [
+	^ signalExceptions ifNil: [ signalExceptions := true ]
+]
+
+{ #category : #flagging }
+DASTInterpreter >> signalExceptions: aBoolean [
+	signalExceptions := aBoolean
+]
+
 { #category : #evaluation }
 DASTInterpreter >> stackTop [
 	^stackTop
@@ -129,7 +140,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver receiverNode argumentsNodes blockContext blockValue |
+	| arguments receiver receiverNode argumentsNodes blockContext blockValue compiledMethod selectorIsValue |
 	
 	receiverNode := aRBMessageNode children first.
 	receiver := self visit: receiverNode.
@@ -139,9 +150,14 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	"the next call if for controlling the execution of the interpreter 
 	depending on the debuggerService mode"
 	self onTracePoint: aRBMessageNode .
-	
-	receiver class = DASTClosure 
-		ifTrue: [  blockContext := DASTContext new initializeInContext: self currentContext.
+	"this is looking the method in the current image installed classes. TODO: implement lookup in a better way"
+	compiledMethod := receiver systemClass lookupSelector: aRBMessageNode selector.
+	"determine if the message is value: or one of its variants"
+	selectorIsValue := (201 to: 206) includes: compiledMethod primitive.
+			
+	(receiver class = DASTClosure and: [ selectorIsValue ])
+		ifTrue: [  
+			blockContext := DASTContext new initializeInContext: self currentContext.
 					  arguments doWithIndex: [ :arg :index | 
 							blockContext 
 								at: (receiver argumentNames at: index)

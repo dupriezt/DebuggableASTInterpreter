@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #tests }
+DASTInterpreterTests >> runCaseManaged [
+
+	^ self runCase
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testAddTwoNumbersPushesResultInStack [
 
 	| interpreter |
@@ -102,9 +108,13 @@ DASTInterpreterTests >> testExceptionZeroDivide [
 	| interpreter |
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: '1 / 0').
+	"prevent that the exceptions are signaled"
+	interpreter signalExceptions: false. 
 	interpreter evaluate.
 	self assert: interpreter exceptions isEmpty not.
-	self assert: interpreter exceptions last asString equals: 'ZeroDivide'
+	self assert: interpreter exceptions last asString equals: 'ZeroDivide'.
+	
+
 ]
 
 { #category : #'tests-blocks' }
@@ -164,6 +174,18 @@ DASTInterpreterTests >> testInterpretBlockEvaluationWithoutArgumentsAndWithoutOu
 	interpreter evaluate.
 	value := interpreter stackTop.
 	blockValue := [ 1 ] value.
+	self assert: value equals: blockValue.
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testInterpretSendingMessageDifferentFromValueToBlock [
+
+	| interpreter value blockValue |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '[ :x :y :z | 1 ] argumentCount').
+	interpreter evaluate.
+	value := interpreter stackTop.
+	blockValue := [ :x :y :z | 1 ] argumentCount.
 	self assert: value equals: blockValue.
 ]
 

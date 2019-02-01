@@ -54,3 +54,8 @@ DASTClosure >> outerContext [
 DASTClosure >> sourceCode [
 	^ sourceCode
 ]
+
+{ #category : #accessing }
+DASTClosure >> systemClass [
+	^ BlockClosure
+]
