@@ -84,6 +84,7 @@ DASTDebuggerService >> runInterpreter [
 
 { #category : #running }
 DASTDebuggerService >> tracepointReachedFor: aRBNode [
+	Transcript show: 'stopping in '; show: aRBNode asString; cr;cr.
 	interpreter semaphore signal.
 	interpreter semaphore wait.
 	

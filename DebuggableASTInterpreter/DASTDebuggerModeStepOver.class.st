@@ -9,3 +9,17 @@ Class {
 	],
 	#category : #DebuggableASTInterpreter
 }
+
+{ #category : #'debugging actions' }
+DASTDebuggerModeStepOver >> onTracePoint: aRBNode [
+	(context = debuggerService currentNode) ifTrue: [ 
+		debuggerService tracepointReachedFor: aRBNode	
+		 ]
+
+]
+
+{ #category : #'debugging actions' }
+DASTDebuggerModeStepOver >> stepOver [
+	context := debuggerService currentNode.
+	debuggerService runInterpreter 
+]

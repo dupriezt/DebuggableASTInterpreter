@@ -134,6 +134,87 @@ DASTDebuggerServiceTests >> testRemoveBreakpoint [
 ]
 
 { #category : #'tests-mode-stepinto' }
+DASTDebuggerServiceTests >> testStepIntoAssignation [
+	| ds ast |
+	ds := DASTDebuggerService new.
+	ast := (RBParser parseExpression: 'x:=1').
+		
+	ds initializeWithProgram: ast.
+	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
+	
+	ds runInterpreter.		
+	self assert: (ds currentNode) equals: (RBParser parseExpression: 'x:=1').
+	
+]
+
+{ #category : #'tests-mode-stepinto' }
+DASTDebuggerServiceTests >> testStepIntoAssignationAndMessage [
+	| ds ast |
+	ds := DASTDebuggerService new.
+	ast := (RBParser parseExpression: 'x:=3+2').
+		
+	ds initializeWithProgram: ast.
+	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
+	
+	ds runInterpreter.	
+	self assert: (ds currentNode) equals: (RBParser parseExpression: '3+2').
+	ds runInterpreter.	
+	self assert: (ds currentNode) equals: (RBParser parseExpression: 'x := 3+2').
+]
+
+{ #category : #'tests-mode-stepinto' }
+DASTDebuggerServiceTests >> testStepIntoDoesntStepInsideBlockDeclaration [
+	| ds ast |
+	ds := DASTDebuggerService new.
+	ast := (RBParser parseExpression: 'x:=1 . [ x:=x+2 ] . x := 3').
+		
+	ds initializeWithProgram: ast.
+	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
+	
+	ds runInterpreter.	
+	self assert: (ds currentNode) equals: (RBParser parseExpression: 'x:=1').
+	ds runInterpreter.	
+	self assert: (ds currentNode) equals: (RBParser parseExpression: 'x := 3').
+
+
+]
+
+{ #category : #'tests-mode-stepinto' }
+DASTDebuggerServiceTests >> testStepIntoStepsAtValuedBlockOnEnterAndOnExit [
+	| ds ast |
+	ds := DASTDebuggerService new.
+	ast := (RBParser parseExpression: '[ x:=2  ] value').
+		
+	ds initializeWithProgram: ast.
+	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
+	
+	ds runInterpreter.	
+	self assert: (ds currentNode) equals: (RBParser parseExpression: '[ x:=2 ] ').	
+	ds runInterpreter.	
+	self assert: (ds currentNode) equals: (RBParser parseExpression: '[ x:=2 ] value ').	
+	ds runInterpreter.
+	self assert: (ds currentNode) equals: (RBParser parseExpression: 'x:=2').	
+	ds runInterpreter.
+	self assert: (ds currentNode) equals: (RBParser parseExpression: '[ x:=2 ] ').	
+	
+]
+
+{ #category : #'tests-mode-stepinto' }
+DASTDebuggerServiceTests >> testStepIntoStepsInsideBlockDeclaration [
+	| ds ast |
+	ds := DASTDebuggerService new.
+	ast := (RBParser parseExpression: '[ x:=x+2 ]').
+		
+	ds initializeWithProgram: ast.
+	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
+	
+	ds runInterpreter.	
+		
+	self assert: (ds currentNode) equals: (RBParser parseExpression: '[ x:=x+2 ]').
+
+]
+
+{ #category : #'tests-mode-stepinto' }
 DASTDebuggerServiceTests >> testStepIntoStopsInTheRightNodes [
 	| ds ast step1 step2 step3 |
 	ds := DASTDebuggerService new.

@@ -106,8 +106,9 @@ DASTInterpreter >> visit: aRBNode [
 	| value previousNode |
 	previousNode := currentNode.
 	currentNode := aRBNode.
-	"Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr ."
+	
 	value := aRBNode acceptVisitor: self.
+	"Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr ."
 	stackTop := value.
 	currentNode := previousNode.
 	^ value
@@ -128,6 +129,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	"A new context must be created, and its parent must be the current context"
+	self onTracePoint: aRBBlockNode.
 	^ DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext.
 	
 ]
@@ -144,12 +146,12 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	receiverNode := aRBMessageNode children first.
 	receiver := self visit: receiverNode.
-	
+	self onTracePoint: aRBMessageNode .
 	argumentsNodes := aRBMessageNode children allButFirst.
 	arguments := argumentsNodes collect: [:node | self visit: node].
 	"the next call if for controlling the execution of the interpreter 
 	depending on the debuggerService mode"
-	self onTracePoint: aRBMessageNode .
+
 	"this is looking the method in the current image installed classes. TODO: implement lookup in a better way"
 	compiledMethod := receiver systemClass lookupSelector: aRBMessageNode selector.
 	"determine if the message is value: or one of its variants"
@@ -164,16 +166,25 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 								put: arg ].
 					  currentContext := blockContext.
 					  blockValue := self visit: receiver blockNode body.
+					  self visit: receiver blockNode.
 					  currentContext := blockContext parent.
 					  ^ blockValue
 					]
-		ifFalse: [ ^ receiver perform: aRBMessageNode selector withArguments: arguments asArray ]
+		ifFalse: [ 
+			^ receiver perform: aRBMessageNode selector withArguments: arguments asArray ]
+]
+
+{ #category : #visiting }
+DASTInterpreter >> visitReturnNode: aRBReturneNode [
+	
+	self onTracePoint: aRBReturneNode .
+	self visit: aRBReturneNode
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
 	| results |
-	results := aRBSequenceNode children collect: [:node | self visit: node ].
+	results := (aRBSequenceNode children reject: [ :node | node class = RBBlockNode  ]) collect: [:node | self visit: node ].
 	"self onTracePoint: aRBSequenceNode."
 	^ results last
 ]
@@ -181,9 +192,9 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 { #category : #visiting }
 DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	| varName |
-	"self onTracePoint: aRBVariableNode ."
+
 	varName := aRBVariableNode name.
 	^ (aRBVariableNode parent isAssignment 
 			ifTrue: [ varName ]
-			ifFalse: [ currentContext find: varName  ])
+			ifFalse: [ self onTracePoint: aRBVariableNode . currentContext find: varName  ])
 ]
