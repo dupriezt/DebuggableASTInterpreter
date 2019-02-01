@@ -161,6 +161,19 @@ DASTInterpreterTests >> testInterpretBlockEvaluationThatModifiesOuterContext [
 ]
 
 { #category : #'tests-blocks' }
+DASTInterpreterTests >> testInterpretBlockEvaluationThatModifiesOuterContextTwice [
+
+	| interpreter value blockValue |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '| x | x := 3 . [ x := 2 ] value . x:= 1 . x').
+	interpreter evaluate.
+	value := interpreter stackTop.
+	blockValue :=  [ | x | x := 3 . [ x := 2 ] value . x:= 1 . x ] value.
+	self assert: value equals: blockValue .
+	
+]
+
+{ #category : #'tests-blocks' }
 DASTInterpreterTests >> testInterpretBlockEvaluationWithArgumentsAndWithoutOuterContext [
 
 	| interpreter value blockValue |
