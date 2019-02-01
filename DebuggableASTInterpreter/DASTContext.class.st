@@ -13,8 +13,23 @@ Class {
 
 { #category : #accessing }
 DASTContext >> at: aByteSymbol put: anObject [
-	"store variable and its value. TODO: implement the modification of variables in parent context"
-	variablesDict at: aByteSymbol put: anObject
+	| varSet |
+		"if the variable is already declared, I modify its value"
+	
+	((self parent isNil) or: [self variablesDict includes: aByteSymbol ]) 
+	ifTrue: [ 
+		variablesDict at: aByteSymbol put: anObject.
+		^ anObject
+		 ].
+	"since a block can modify its outer context variables, 
+	it's necessary to check if the variable is defined in an antecesor context"
+	varSet := self parent update: aByteSymbol put: anObject.
+	
+	varSet ifNil: [ 
+		"the variable wasn't updated, I have to create it"
+		 self variablesDict at: aByteSymbol put: anObject
+		]
+	
 ]
 
 { #category : #accessing }
@@ -49,6 +64,19 @@ DASTContext >> isEmpty [
 { #category : #accessing }
 DASTContext >> parent [
 	^ parent
+]
+
+{ #category : #'as yet unclassified' }
+DASTContext >> update: aByteSymbol put: anObject [
+	"if the variable is already declared, I modify its value"
+	((self parent isNil) or: [self variablesDict includes: aByteSymbol ])
+	ifTrue: [ 
+		variablesDict at: aByteSymbol put: anObject.
+		^ anObject
+		 ].
+
+	^ self parent update: aByteSymbol put: anObject.
+	
 ]
 
 { #category : #accessing }
