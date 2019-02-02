@@ -16,7 +16,7 @@ DASTContext >> at: aByteSymbol put: anObject [
 	| varSet |
 		"if the variable is already declared, I modify its value"
 	
-	((self parent isNil) or: [self variablesDict includes: aByteSymbol ]) 
+	((self parent class = DASTContextRootSmalltalk ) or: [self variablesDict includes: aByteSymbol ]) 
 	ifTrue: [ 
 		variablesDict at: aByteSymbol put: anObject.
 		^ anObject
@@ -34,6 +34,7 @@ DASTContext >> at: aByteSymbol put: anObject [
 
 { #category : #accessing }
 DASTContext >> find: aByteSymbol [
+	
 	"Return the value of a variable.
 	In case this context redefines a variable defined by its parent context, this method will return the variable value for this context"
 	^ variablesDict at: aByteSymbol ifAbsent: [ 
@@ -69,7 +70,7 @@ DASTContext >> parent [
 { #category : #'as yet unclassified' }
 DASTContext >> update: aByteSymbol put: anObject [
 	"if the variable is already declared, I modify its value"
-	((self parent isNil) or: [self variablesDict includes: aByteSymbol ])
+	((self parent class = DASTContextRootSmalltalk ) or: [self variablesDict includes: aByteSymbol ])
 	ifTrue: [ 
 		variablesDict at: aByteSymbol put: anObject.
 		^ anObject
