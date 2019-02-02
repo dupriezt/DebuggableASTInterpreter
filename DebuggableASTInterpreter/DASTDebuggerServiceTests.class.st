@@ -200,6 +200,27 @@ DASTDebuggerServiceTests >> testStepIntoStepsAtValuedBlockOnEnterAndOnExit [
 ]
 
 { #category : #'tests-mode-stepinto' }
+DASTDebuggerServiceTests >> testStepIntoStepsInMessageBeforeAssignation [
+	| ds ast |
+	ds := DASTDebuggerService new.
+	ast := (RBParser parseExpression: 'x:=1 . x:= x+2').
+	
+	ds initializeWithProgram: ast.
+	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
+	
+	ds runInterpreter.	
+	self assert: ds currentNode = (RBParser parseExpression: 'x:=1 ').
+	ds runInterpreter.
+	self assert: ds currentNode = (RBParser parseExpression: 'x').
+	ds runInterpreter.
+	self assert: ds currentNode = (RBParser parseExpression: 'x+2').
+	ds runInterpreter.
+	self assert: ds currentNode = (RBParser parseExpression: 'x:= x+2').
+	
+	
+]
+
+{ #category : #'tests-mode-stepinto' }
 DASTDebuggerServiceTests >> testStepIntoStepsInsideBlockDeclaration [
 	| ds ast |
 	ds := DASTDebuggerService new.
@@ -212,26 +233,4 @@ DASTDebuggerServiceTests >> testStepIntoStepsInsideBlockDeclaration [
 		
 	self assert: (ds currentNode) equals: (RBParser parseExpression: '[ x:=x+2 ]').
 
-]
-
-{ #category : #'tests-mode-stepinto' }
-DASTDebuggerServiceTests >> testStepIntoStopsInTheRightNodes [
-	| ds ast step1 step2 step3 |
-	ds := DASTDebuggerService new.
-	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
-	step1 := ast children first. "Assignation x:=1"
-	step2 := ast children second children first. "Message x+2"
-	step3 := ast children second. "Assignation x:=x+2"
-	
-	ds initializeWithProgram: ast.
-	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
-	
-	ds runInterpreter.	
-	self assert: ds currentNode = step1.
-	ds runInterpreter.
-	self assert: ds currentNode = step2.
-	ds runInterpreter.
-	self assert: ds currentNode = step3.
-	
-	
 ]

@@ -34,7 +34,10 @@ DASTInterpreter >> evaluate [
 	currentContext := DASTContext new.
 	process := [value := [[self visit: currentNode ] 
 									on: Error
-									do: [ :e | self exceptions add: e . Transcript show: e asString; cr . semaphore signal. self signalExceptions ifTrue: [ e pass ] ]]
+									do: [ :e | self exceptions add: e . 
+												 "Transcript show: e asString; cr ." 
+												 semaphore signal. 
+												 self signalExceptions ifTrue: [ e pass ] ]]
 					ensure: [semaphore signal]] fork.
 	semaphore wait.
 	^ value
@@ -131,6 +134,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	name := self visit: aRBAssignmentNode children last.
 	value := self visit: aRBAssignmentNode children first.
 	self onTracePoint: aRBAssignmentNode.
+	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	self currentContext at: name put: value.
 	^ value
 	
@@ -138,15 +142,16 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
-	"A new context must be created, and its parent must be the current context"
 	self onTracePoint: aRBBlockNode.
+	
+	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	^ DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext.
 	
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
-	"self onTracePoint: aRBLiteralValueNode."
+	self onTracePoint: aRBLiteralValueNode.
 	^ aRBLiteralValueNode value
 ]
 
@@ -156,17 +161,17 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	receiverNode := aRBMessageNode children first.
 	receiver := self visit: receiverNode.
-	self onTracePoint: aRBMessageNode .
+	
 	argumentsNodes := aRBMessageNode children allButFirst.
 	arguments := argumentsNodes collect: [:node | self visit: node].
-	"the next call if for controlling the execution of the interpreter 
-	depending on the debuggerService mode"
 
+	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
+	self onTracePoint: aRBMessageNode.
+	
 	"this is looking the method in the current image installed classes. TODO: implement lookup in a better way"
 	compiledMethod := receiver systemClass lookupSelector: aRBMessageNode selector.
 	"determine if the message is value: or one of its variants"
-	selectorIsValue := (201 to: 206) includes: compiledMethod primitive.
-			
+	selectorIsValue := (201 to: 206) includes: compiledMethod primitive.			
 	(receiver class = DASTClosure and: [ selectorIsValue ])
 		ifTrue: [  
 			blockContext := DASTContext new initializeInContext: self currentContext.
@@ -194,8 +199,8 @@ DASTInterpreter >> visitReturnNode: aRBReturneNode [
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
 	| results |
-	results := (aRBSequenceNode children reject: [ :node | node class = RBBlockNode  ]) collect: [:node | self visit: node ].
-	"self onTracePoint: aRBSequenceNode."
+	results := aRBSequenceNode children collect: [:node | self visit: node ].
+	self onTracePoint: aRBSequenceNode.
 	^ results last
 ]
 
