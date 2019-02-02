@@ -116,7 +116,7 @@ DASTInterpreterTests >> testInterpretBlockDeclarationWithArguments [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 3 . [ 1 ]').
+	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 3 . ^ [ 1 ]').
 	interpreter evaluate.
 	value := interpreter stackTop.
 	self assert: value asText equals: [ 1 ] asText.
@@ -128,7 +128,7 @@ DASTInterpreterTests >> testInterpretBlockDeclarationWithOuterContext [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 3 . [ 1 ]').
+	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 3 . ^ [ 1 ]').
 	interpreter evaluate.
 	value := interpreter stackTop.
 	self assert: value asText equals: [ 1 ] asText.

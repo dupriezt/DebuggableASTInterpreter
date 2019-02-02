@@ -17,7 +17,7 @@ Class {
 	#category : #DebuggableASTInterpreter
 }
 
-{ #category : #contexts }
+{ #category : #accessors }
 DASTInterpreter >> currentContext [
 	^ currentContext.
 ]
@@ -34,13 +34,13 @@ DASTInterpreter >> evaluate [
 	currentContext := DASTContext new.
 	process := [value := [[self visit: currentNode ] 
 									on: Error
-									do: [ :e | self exceptions add: e . Transcript show: e asString; cr . semaphore signal. signalExceptions ifTrue: [ e pass ] ]]
+									do: [ :e | self exceptions add: e . Transcript show: e asString; cr . semaphore signal. self signalExceptions ifTrue: [ e pass ] ]]
 					ensure: [semaphore signal]] fork.
 	semaphore wait.
 	^ value
 ]
 
-{ #category : #exceptios }
+{ #category : #accessors }
 DASTInterpreter >> exceptions [
 	^ exceptions ifNil: [ exceptions := OrderedCollection new ]
 ]
@@ -56,7 +56,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode debuggerService: aDebuggerServ
 	debuggerService := aDebuggerService.
 ]
 
-{ #category : #execution }
+{ #category : #'control-flow' }
 DASTInterpreter >> onTracePoint: aRBNode [
 	"if debuggerService is not set, then it's not necessary to implement stepping 
 	and this message does nothing"
@@ -71,19 +71,21 @@ DASTInterpreter >> process [
 	^process
 ]
 
+{ #category : #'control-flow' }
+DASTInterpreter >> resumeProcess [
+	"the debugger service thread will call this method for resuming the interpreter process" 
+	semaphore signal.
+	semaphore wait.
+	
+]
+
 { #category : #execution }
 DASTInterpreter >> run [
 	
 	process 
 		ifNil: [ self evaluate "this message will initialize the process that evaluates the tree"]
-		ifNotNil: [ semaphore signal. semaphore wait.  ].
+		ifNotNil: [ self resumeProcess  ].
 	
-]
-
-{ #category : #'control-flow' }
-DASTInterpreter >> semaphore [
-	"used for coordinating the Process process with the main process"
-	^semaphore
 ]
 
 { #category : #flagging }
@@ -99,6 +101,14 @@ DASTInterpreter >> signalExceptions: aBoolean [
 { #category : #evaluation }
 DASTInterpreter >> stackTop [
 	^stackTop
+]
+
+{ #category : #'control-flow' }
+DASTInterpreter >> suspendProcess [
+	"the thread that interprets will call this method when a tracePoint is reached" 
+	semaphore signal.
+	semaphore wait.
+	
 ]
 
 { #category : #evaluation }
@@ -178,7 +188,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	
 	self onTracePoint: aRBReturneNode .
-	self visit: aRBReturneNode
+	^ self visit: aRBReturneNode children first
 ]
 
 { #category : #visiting }
