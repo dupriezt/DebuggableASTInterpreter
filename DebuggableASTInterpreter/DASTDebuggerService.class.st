@@ -49,7 +49,7 @@ DASTDebuggerService >> currentNode [
 DASTDebuggerService >> initializeWithProgram: aRBNode [ 
 
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: aRBNode debuggerService: self.
+	interpreter initializeWithProgram: aRBNode; debuggerService: self.
 	mode := DASTDebuggerModeContinue new debuggerService: self.
 ]
 

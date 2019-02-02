@@ -27,6 +27,11 @@ DASTInterpreter >> currentNode [
 	^ currentNode
 ]
 
+{ #category : #accessors }
+DASTInterpreter >> debuggerService: aDASTDebuggerService [
+	debuggerService := aDASTDebuggerService 
+]
+
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
 	| value |
@@ -53,17 +58,9 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	currentNode := aRBNode.
 ]
 
-{ #category : #initialization }
-DASTInterpreter >> initializeWithProgram: aRBNode debuggerService: aDebuggerService [
-	currentNode := aRBNode.
-	debuggerService := aDebuggerService.
-]
-
 { #category : #'control-flow' }
 DASTInterpreter >> onTracePoint: aRBNode [
-	"if debuggerService is not set, then it's not necessary to implement stepping 
-	and this message does nothing"
-	debuggerService ifNil: [ ^ self ].
+	debuggerService ifNil: [ ^ self "if the debugger service is not set, the interpreter never steps." ].
 	debuggerService onTracePoint: aRBNode.
 
 	
