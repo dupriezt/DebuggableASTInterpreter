@@ -209,6 +209,17 @@ DASTInterpreterTests >> testInterpretSendingMessageDifferentFromValueToBlock [
 	self assert: value equals: blockValue.
 ]
 
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testLookupGlobalVariable [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'Point x: 1 y: 2').
+	
+	value := Point x: 1 y: 2.
+	self assert: interpreter evaluate equals: value
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testParenthesisForOperationAndUnaryMessage [
 

@@ -36,7 +36,7 @@ DASTInterpreter >> debuggerService: aDASTDebuggerService [
 DASTInterpreter >> evaluate [
 	| value |
 	semaphore := Semaphore new: 0.
-	currentContext := DASTContext new.
+	currentContext := DASTContext new initializeInContext: DASTContextRootSmalltalk new.
 	process := [value := [[self visit: currentNode ] 
 									on: Error
 									do: [ :e | self exceptions add: e . 

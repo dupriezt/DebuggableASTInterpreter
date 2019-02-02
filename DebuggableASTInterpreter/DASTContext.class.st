@@ -34,7 +34,7 @@ DASTContext >> at: aByteSymbol put: anObject [
 
 { #category : #accessing }
 DASTContext >> find: aByteSymbol [
-	"store variable and its value.
+	"Return the value of a variable.
 	In case this context redefines a variable defined by its parent context, this method will return the variable value for this context"
 	^ variablesDict at: aByteSymbol ifAbsent: [ 
 		parent 
