@@ -32,5 +32,3 @@ More advanced ones
   
   check strategy design pattern
   
-# Limitation
-- Tracepoint order for Step Into
