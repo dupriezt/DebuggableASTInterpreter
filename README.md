@@ -25,6 +25,7 @@ More advanced ones
 *- Exceptions
 
 - Does not understand
+- methods that call super
 - Ejemplos
 
   p := Point new.
