@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #tests }
-DASTInterpreterTests >> testAddTwoNumbersPushesResultInStack [
+DASTInterpreterTests >> testAddTwoNumbers [
 
 	| interpreter |
 	interpreter := DASTInterpreter new.
@@ -97,6 +97,16 @@ DASTInterpreterTests >> testEvaluateFullUnaryExpression [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testEvaluateMessageWithoutArguments [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 abs').
+	value := 1 abs.
+	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testExceptionZeroDivide [
 
 	| interpreter |
@@ -109,6 +119,48 @@ DASTInterpreterTests >> testExceptionZeroDivide [
 	self assert: interpreter exceptions last asString equals: 'ZeroDivide'.
 	
 
+]
+
+{ #category : #'tests-primitives' }
+DASTInterpreterTests >> testFalse [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'false').
+	
+	value := false.
+	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testIfTrue [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'true ifTrue: [^ 3]').
+	value := interpreter evaluate.
+	self assert: value equals: 3.
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '(1<2) ifTrue: [^ 3]').
+	value := interpreter evaluate.
+	self assert: value equals: 3.
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testInstantiateObject [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'Point x: 1 y: 2').
+	
+	value := Point x: 1 y: 2.
+	self assert: interpreter evaluate equals: value
 ]
 
 { #category : #'tests-blocks' }
@@ -209,14 +261,36 @@ DASTInterpreterTests >> testInterpretSendingMessageDifferentFromValueToBlock [
 	self assert: value equals: blockValue.
 ]
 
+{ #category : #'tests-primitives' }
+DASTInterpreterTests >> testLessThan [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1<2').
+	
+	value := 1<2.
+	self assert: interpreter evaluate equals: value
+]
+
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testLookupGlobalVariable [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'Point x: 1 y: 2').
+	interpreter initializeWithProgram: (RBParser parseExpression: 'Point').
 	
-	value := Point x: 1 y: 2.
+	value := Point.
+	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #'tests-primitives' }
+DASTInterpreterTests >> testMoreThan [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1>2').
+	
+	value := 1>2.
 	self assert: interpreter evaluate equals: value
 ]
 
@@ -249,4 +323,37 @@ DASTInterpreterTests >> testPrecedenceForOperationAndUnaryMessage [
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: '1 - 3 abs').
 	self assert: interpreter evaluate equals: -2.
+]
+
+{ #category : #'tests-primitives' }
+DASTInterpreterTests >> testPrimitiveAdd [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1+2').
+	
+	value := 1+2.
+	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #'tests-primitives' }
+DASTInterpreterTests >> testPrimitiveSubstract [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1-2').
+	
+	value := 1-2.
+	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #'tests-primitives' }
+DASTInterpreterTests >> testTrue [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'true').
+	
+	value := true.
+	self assert: interpreter evaluate equals: value
 ]

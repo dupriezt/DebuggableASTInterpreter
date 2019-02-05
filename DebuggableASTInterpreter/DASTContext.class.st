@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'variablesDict',
-		'parent'
+		'parent',
+		'receiver'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -15,7 +16,6 @@ Class {
 DASTContext >> at: aByteSymbol put: anObject [
 	| varSet |
 		"if the variable is already declared, I modify its value"
-	
 	((self parent class = DASTContextRootSmalltalk ) or: [self variablesDict includes: aByteSymbol ]) 
 	ifTrue: [ 
 		variablesDict at: aByteSymbol put: anObject.
@@ -51,12 +51,6 @@ DASTContext >> initialize [
 ]
 
 { #category : #accessing }
-DASTContext >> initializeInContext: aDASTContext [
-	"initializes an empty context whose parent is aDASTContext"
-	parent := aDASTContext
-]
-
-{ #category : #accessing }
 DASTContext >> isEmpty [
 	
 	^ variablesDict isEmpty.
@@ -67,16 +61,32 @@ DASTContext >> parent [
 	^ parent
 ]
 
+{ #category : #accessing }
+DASTContext >> parent: aDASTContext [
+	parent := aDASTContext
+]
+
+{ #category : #accessing }
+DASTContext >> receiver [ 
+	^ receiver
+]
+
+{ #category : #accessing }
+DASTContext >> receiver: anObject [
+	receiver := anObject
+]
+
 { #category : #'as yet unclassified' }
 DASTContext >> update: aByteSymbol put: anObject [
 	"if the variable is already declared, I modify its value"
-	((self parent class = DASTContextRootSmalltalk ) or: [self variablesDict includes: aByteSymbol ])
+	(self variablesDict includes: aByteSymbol )
 	ifTrue: [ 
 		variablesDict at: aByteSymbol put: anObject.
 		^ anObject
 		 ].
 
-	^ self parent update: aByteSymbol put: anObject.
+	^ self parent ifNil: [ ^nil ] 
+		ifNotNil: [ :p | p update: aByteSymbol put: anObject. ] 
 	
 ]
 
