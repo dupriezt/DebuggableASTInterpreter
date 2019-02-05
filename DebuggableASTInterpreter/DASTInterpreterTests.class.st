@@ -108,8 +108,11 @@ DASTInterpreterTests >> testEvaluateMessageWithoutArguments [
 
 { #category : #tests }
 DASTInterpreterTests >> testExceptionZeroDivide [
-
+	<expectedFailure>
 	| interpreter |
+	
+	
+	
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: '1 / 0').
 	"prevent that the exceptions are signaled"

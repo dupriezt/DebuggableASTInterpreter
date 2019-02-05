@@ -122,9 +122,10 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 			currentContext := prevContext.
 			^ blockValue
 		 ].
+	"primitives applied to blocks:"
+	anInteger = 266 ifTrue: [ ^ anObject argumentCount ]. 
 	
-	anInteger = 266 ifTrue: [ ^ anObject argumentCount ].
-	
+	"apply primitive to object"
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
 	((primitiveResult isKindOf: Array ) and: [primitiveResult first = Context primitiveFailToken first ])
 		ifTrue: [self error: 'Fallo primitiva ', anInteger asString ].
