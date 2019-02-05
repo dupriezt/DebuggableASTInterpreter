@@ -14,21 +14,17 @@ Class {
 
 { #category : #accessing }
 DASTContext >> at: aByteSymbol put: anObject [
-	| varSet |
-		"if the variable is already declared, I modify its value"
-	((self parent class = DASTContextRootSmalltalk ) or: [self variablesDict includes: aByteSymbol ]) 
-	ifTrue: [ 
-		variablesDict at: aByteSymbol put: anObject.
-		^ anObject
-		 ].
-	"since a block can modify its outer context variables, 
-	it's necessary to check if the variable is defined in an antecesor context"
-	varSet := self parent update: aByteSymbol put: anObject.
+	^self variablesDict at: aByteSymbol put: anObject.
 	
-	varSet ifNil: [ 
-		"the variable wasn't updated, I have to create it"
-		 self variablesDict at: aByteSymbol put: anObject
-		]
+	
+]
+
+{ #category : #accessing }
+DASTContext >> at: aByteSymbol putInHierarchy: anObject [
+	| node |
+	node := self nodeContainingVariable: aByteSymbol.
+	node ifNil: [ node := self ].
+	^ node variablesDict at: aByteSymbol put: anObject
 	
 ]
 
@@ -57,9 +53,21 @@ DASTContext >> isEmpty [
 ]
 
 { #category : #accessing }
+DASTContext >> isRoot [ 
+	^false
+]
+
+{ #category : #accessing }
 DASTContext >> lookupSelector: aByteString [
 
 	^ receiver systemClass lookupSelector: aByteString.
+]
+
+{ #category : #accessing }
+DASTContext >> nodeContainingVariable: aByteSymbol [
+	((self variablesDict keys includes: aByteSymbol) or: [self parent isRoot]) 
+		ifTrue: [ ^ self ]
+		ifFalse: [ ^ parent nodeContainingVariable: aByteSymbol ]
 ]
 
 { #category : #accessing }
@@ -80,20 +88,6 @@ DASTContext >> receiver [
 { #category : #accessing }
 DASTContext >> receiver: anObject [
 	receiver := anObject
-]
-
-{ #category : #'as yet unclassified' }
-DASTContext >> update: aByteSymbol put: anObject [
-	"if the variable is already declared, I modify its value"
-	((self variablesDict includes: aByteSymbol ) or: [ self parent class = DASTContextRootSmalltalk  ])
-	ifTrue: [ 
-		variablesDict at: aByteSymbol put: anObject.
-		^ anObject
-		 ].
-
-	^ self parent  
-		ifNotNil: [ :p | p update: aByteSymbol put: anObject. ] 
-	
 ]
 
 { #category : #accessing }

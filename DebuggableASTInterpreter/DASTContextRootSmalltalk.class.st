@@ -12,3 +12,8 @@ DASTContextRootSmalltalk >> find: aByteSymbol [
 		"Exception signal: 'Variable ', aByteSymbol , ' not defined!'"
 		 ]
 ]
+
+{ #category : #accessing }
+DASTContextRootSmalltalk >> isRoot [ 
+	^true
+]

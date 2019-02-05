@@ -264,7 +264,7 @@ DASTInterpreterTests >> testInterpretBlockEvaluationWithArgumentsAndWithoutOuter
 
 	| interpreter value blockValue |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '[ :x : y | x + y ] value: 1 value: 2 ').
+	interpreter initializeWithProgram: (RBParser parseExpression: '[ :x :y | x + y ] value: 1 value: 2 ').
 	interpreter evaluate.
 	value := interpreter stackTop.
 	blockValue := [ :x :y | x + y ] value: 1 value: 2.

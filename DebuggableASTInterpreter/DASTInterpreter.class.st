@@ -114,7 +114,7 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 		  [ :arg :index | 
 				blockContext 
 					at: (anObject argumentNames at: index)
-					put: arg ].
+					 putInHierarchy: arg ].
 			prevContext := currentContext.
 			currentContext := blockContext.
 			blockValue := self visit: anObject blockNode body.
@@ -191,9 +191,8 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
-
-	self onTracePoint: aRBMessageNode.
 	
+	self onTracePoint: aRBMessageNode.
 	"TODO: fix this context, it should be different from a block context, since it's the context for a method excecution"
 	methodContext := DASTContext new parent: self currentContext; receiver: receiver.
 	previousContext := currentContext.
@@ -203,7 +202,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	compiledMethod isPrimitive ifTrue: [ ^ self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments. ].
 	methodBodyNode := (RBParser parseCompiledMethod: compiledMethod) addSelfReturn; parent: aRBMessageNode.
 	methodArgsNames := methodBodyNode arguments collect: [:node | self visit: node ].
-
+	
 	arguments doWithIndex: 
 				[ :arg :index | 
 					currentContext 
