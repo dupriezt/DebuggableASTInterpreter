@@ -201,9 +201,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	compiledMethod := self currentContext lookupSelector: aRBMessageNode selector.
 	compiledMethod isPrimitive ifTrue: [ ^ self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments. ].
-	methodBodyNode := RBParser parseCompiledMethod: compiledMethod.
-	methodBodyNode addSelfReturn.
-	methodBodyNode parent: aRBMessageNode.
+	methodBodyNode := (RBParser parseCompiledMethod: compiledMethod) addSelfReturn; parent: aRBMessageNode.
 	methodArgsNames := methodBodyNode arguments collect: [:node | self visit: node ].
 
 	arguments doWithIndex: 
@@ -264,7 +262,7 @@ DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	
 	varName := aRBVariableNode name.
 	^ (aRBVariableNode isVariableNameInAssignation or: [ aRBVariableNode isArgumentInMethod ])
-			ifTrue: [ varName ] "left side of :="
+			ifTrue: [ varName ] "left side of :=, or the argument in a method"
 			ifFalse: [ self onTracePoint: aRBVariableNode . 
 						  currentContext find: varName  ] "right side of :="
 ]

@@ -68,6 +68,26 @@ DASTInterpreterTests >> testBinaryMessageSendPushesReceiverAndArguments [
 	self assert: interpreter evaluate equals: 3.
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockAssignedToVariableAndEvaluated [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'b := [^ 3]. b value').
+	value := interpreter evaluate.
+	self assert: value equals: 3.
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockDeclaredInContextAndEvaluatedInAnotherContext [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'x:=1 . b := [^ x] . x:=2 . b value').
+	value := interpreter evaluate.
+	self assert: value equals: 2.
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateConstant [
 
@@ -157,6 +177,17 @@ DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
 
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testInstantiateObject [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: 'Point basicNew').
+	
+	value := Point basicNew.
+	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testInstantiateObjectAndInitializeVariables [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
