@@ -117,10 +117,13 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 					put: arg ].
 			currentContext := blockContext.
 			blockValue := self visit: anObject blockNode body.
-			self visit: anObject blockNode.
+			"self visit: anObject blockNode."
 			currentContext := blockContext parent.
 			^ blockValue
 		 ].
+	
+	anInteger = 266 ifTrue: [ ^ anObject argumentCount ].
+	
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
 	((primitiveResult isKindOf: Array ) and: [primitiveResult first = Context primitiveFailToken first ])
 		ifTrue: [self error: 'Fallo primitiva ', anInteger asString ].
@@ -183,7 +186,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
 	| arguments receiver compiledMethod methodBodyNode methodArgsNames methodValue methodContext previousContext |
-
+	
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
 
@@ -210,65 +213,6 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	currentContext := previousContext.
 	^ methodValue 
 			
-]
-
-{ #category : #visiting }
-DASTInterpreter >> visitMessageNodeOld: aRBMessageNode [ 
-	| arguments receiver blockContext blockValue compiledMethod selectorIsValue methodBodyNode methodArgsNames methodValue |
-	
-	receiver := self visit: aRBMessageNode receiver.
-	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
-
-	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
-	self onTracePoint: aRBMessageNode.
-	
-	"TODO: implement method lookup in context"
-	compiledMethod := receiver systemClass lookupSelector: aRBMessageNode selector.
-	
-	"determine if the message is value: or one of its variants"
-	selectorIsValue := (201 to: 206) includes: compiledMethod primitive.			
-	(receiver class = DASTClosure and: [ selectorIsValue ])
-		ifTrue: [  
-			blockContext := DASTContext new parent: self currentContext; receiver: receiver.
-			arguments doWithIndex: 
-			  [ :arg :index | 
-					blockContext 
-						at: (receiver argumentNames at: index)
-						put: arg ].
-				currentContext := blockContext.
-				blockValue := self visit: receiver blockNode body.
-				self visit: receiver blockNode.
-				currentContext := blockContext parent.
-				^ blockValue
-			]
-		ifFalse: [ 
-			(compiledMethod isPrimitive and: [selectorIsValue not]) ifTrue: [
-				
-				^ self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments.
-			].
-			methodBodyNode := RBParser parseCompiledMethod: compiledMethod.
-			methodBodyNode addSelfReturn.
-			methodBodyNode parent: self.
-		
-
-			
-			methodArgsNames := methodBodyNode arguments."(methodBodyNode children select: [:node | node class = RBVariableNode ]) collect: [:varNod | varNod name]".
-			
-			blockContext := DASTContext new parent: self currentContext; receiver: receiver.
-			arguments doWithIndex: 
-				[ :arg :index | 
-					blockContext 
-						at: (methodArgsNames at: index)
-						put: arg ].
-			currentContext := blockContext.
-			
-			
-			
-			methodValue := self visit: ((methodBodyNode children select: [:node | node class = RBSequenceNode ] )first).
-			currentContext := blockContext parent.
-			^ methodValue 
-			"^ receiver perform: aRBMessageNode selector withArguments: arguments asArray "
-			]
 ]
 
 { #category : #visiting }
