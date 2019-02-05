@@ -105,7 +105,7 @@ DASTInterpreter >> signalExceptions: aBoolean [
 
 { #category : #private }
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
-	| primitiveResult blockContext blockValue |
+	| primitiveResult blockContext blockValue prevContext |
 	
 	((201 to: 206) includes: anInteger) ifTrue: [ 
 		"primitive is 'value', the receiver is a DASTClosure object"
@@ -115,10 +115,11 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 				blockContext 
 					at: (anObject argumentNames at: index)
 					put: arg ].
+			prevContext := currentContext.
 			currentContext := blockContext.
 			blockValue := self visit: anObject blockNode body.
 			"self visit: anObject blockNode."
-			currentContext := blockContext parent.
+			currentContext := currentContext.
 			^ blockValue
 		 ].
 	
@@ -189,7 +190,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
-
+	
 	self onTracePoint: aRBMessageNode.
 	"TODO: implement method lookup in context"
 	compiledMethod := receiver systemClass lookupSelector: aRBMessageNode selector.
@@ -258,9 +259,10 @@ DASTInterpreter >> visitSuperNode: aRBSuperNode [
 { #category : #visiting }
 DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	| varName |
-
+	
 	varName := aRBVariableNode name.
 	^ (aRBVariableNode isVariableNameInAssignation or: [ aRBVariableNode isArgumentInMethod ])
 			ifTrue: [ varName ] "left side of :="
-			ifFalse: [ self onTracePoint: aRBVariableNode . currentContext find: varName  ] "right side of :="
+			ifFalse: [ self onTracePoint: aRBVariableNode . 
+						  currentContext find: varName  ] "right side of :="
 ]

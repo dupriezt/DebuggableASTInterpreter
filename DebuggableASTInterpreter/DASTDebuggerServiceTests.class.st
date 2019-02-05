@@ -195,7 +195,7 @@ DASTDebuggerServiceTests >> testStepIntoStepsAtValuedBlockOnEnterAndOnExit [
 	ds runInterpreter.
 	self assert: (ds currentNode) equals: (RBParser parseExpression: 'x:=2').	
 	ds runInterpreter.
-	self assert: (ds currentNode) equals: (RBParser parseExpression: '[ x:=2 ] ').	
+	self assert: (ds currentNode) equals: (RBParser parseExpression: '[ x:=2 ] value').	
 	
 ]
 
