@@ -119,7 +119,7 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 			currentContext := blockContext.
 			blockValue := self visit: anObject blockNode body.
 			"self visit: anObject blockNode."
-			currentContext := currentContext.
+			currentContext := prevContext.
 			^ blockValue
 		 ].
 	

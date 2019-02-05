@@ -79,13 +79,13 @@ DASTContext >> receiver: anObject [
 { #category : #'as yet unclassified' }
 DASTContext >> update: aByteSymbol put: anObject [
 	"if the variable is already declared, I modify its value"
-	(self variablesDict includes: aByteSymbol )
+	((self variablesDict includes: aByteSymbol ) or: [ self parent class = DASTContextRootSmalltalk  ])
 	ifTrue: [ 
 		variablesDict at: aByteSymbol put: anObject.
 		^ anObject
 		 ].
 
-	^ self parent ifNil: [ ^nil ] 
+	^ self parent  
 		ifNotNil: [ :p | p update: aByteSymbol put: anObject. ] 
 	
 ]
