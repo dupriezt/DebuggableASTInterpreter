@@ -191,26 +191,27 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
-	
+
 	self onTracePoint: aRBMessageNode.
-	"TODO: implement method lookup in context"
-	compiledMethod := receiver systemClass lookupSelector: aRBMessageNode selector.
+	
+	"TODO: fix this context, it should be different from a block context, since it's the context for a method excecution"
+	methodContext := DASTContext new parent: self currentContext; receiver: receiver.
+	previousContext := currentContext.
+	currentContext := methodContext.
+	
+	compiledMethod := self currentContext lookupSelector: aRBMessageNode selector.
 	compiledMethod isPrimitive ifTrue: [ ^ self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments. ].
 	methodBodyNode := RBParser parseCompiledMethod: compiledMethod.
 	methodBodyNode addSelfReturn.
 	methodBodyNode parent: aRBMessageNode.
 	methodArgsNames := methodBodyNode arguments collect: [:node | self visit: node ].
-	
-	"TODO: fix this context, it should be different from a block context, since it's the context for a method excecution"
-	methodContext := DASTContext new parent: self currentContext; receiver: receiver.
+
 	arguments doWithIndex: 
 				[ :arg :index | 
-					methodContext 
+					currentContext 
 						at: (methodArgsNames at: index)
 						put: arg ].
-	previousContext := currentContext.
-	currentContext := methodContext.
-			
+				
 	methodValue := self visit: methodBodyNode body.
 	currentContext := previousContext.
 	^ methodValue 

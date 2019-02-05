@@ -57,6 +57,12 @@ DASTContext >> isEmpty [
 ]
 
 { #category : #accessing }
+DASTContext >> lookupSelector: aByteString [
+
+	^ receiver systemClass lookupSelector: aByteString.
+]
+
+{ #category : #accessing }
 DASTContext >> parent [
 	^ parent
 ]
