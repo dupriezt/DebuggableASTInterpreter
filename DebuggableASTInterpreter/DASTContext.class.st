@@ -35,7 +35,7 @@ DASTContext >> find: aByteSymbol [
 	In case this context redefines a variable defined by its parent context, this method will return the variable value for this context"
 	^ variablesDict at: aByteSymbol ifAbsent: [ 
 		parent 
-			ifNil: [ nil ] 
+			ifNil: [ self error: 'Variable ', aByteSymbol , ' not defined!'  ] 
 			ifNotNil: [ :pc | pc find: aByteSymbol ]
 		 ]
 ]

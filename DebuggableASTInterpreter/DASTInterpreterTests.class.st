@@ -99,6 +99,18 @@ DASTInterpreterTests >> testBlockDeclaredInContextAndEvaluatedInAnotherContext [
 ]
 
 { #category : #'tests-blocks-vars-local' }
+DASTInterpreterTests >> testBlockVarsLocalAccessUndeclaredVariable [
+
+	| interpreter |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '[ x := 1 ] value').
+	interpreter signalExceptions: false.
+	interpreter evaluate.
+	self assert: interpreter exceptions isNotEmpty
+	
+]
+
+{ #category : #'tests-blocks-vars-local' }
 DASTInterpreterTests >> testBlockVarsLocalDeclaredInsideBlock [
 
 	| interpreter value |

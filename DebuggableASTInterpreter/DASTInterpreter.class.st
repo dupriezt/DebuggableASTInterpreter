@@ -266,10 +266,10 @@ DASTInterpreter >> visitSuperNode: aRBSuperNode [
 { #category : #visiting }
 DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	| varName |
-	
 	varName := aRBVariableNode name.
-	^ (aRBVariableNode isVariableNameInAssignation or: [ aRBVariableNode isArgumentInMethod ])
-			ifTrue: [ varName ] "left side of :=, or the argument in a method"
+	(aRBVariableNode isVariableNameInAssignation or: [ aRBVariableNode isArgumentInMethod ])
+			ifTrue: [ currentContext find: varName. 
+						 ^ varName ] "left side of :=, or the argument in a method"
 			ifFalse: [ self onTracePoint: aRBVariableNode . 
-						  currentContext find: varName  ] "right side of :="
+						  ^ currentContext find: varName  ] "right side of :="
 ]

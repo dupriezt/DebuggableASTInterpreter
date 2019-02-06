@@ -8,8 +8,7 @@ Class {
 DASTContextRootSmalltalk >> find: aByteSymbol [
 
 	^ Smalltalk globals at: aByteSymbol ifAbsent: [ 
-		nil
-		"Exception signal: 'Variable ', aByteSymbol , ' not defined!'"
+		self error: 'Variable ', aByteSymbol , ' not defined!'
 		 ]
 ]
 
