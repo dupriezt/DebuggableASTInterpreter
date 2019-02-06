@@ -62,7 +62,7 @@ DASTInterpreter >> exceptions [
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
 		
-	currentNode := aRBNode 
+	currentNode := aRBNode asBlockEvaluated  
 ]
 
 { #category : #'control-flow' }
