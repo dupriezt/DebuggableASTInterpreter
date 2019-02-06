@@ -176,7 +176,7 @@ DASTInterpreterTests >> testEvaluateMessageWithoutArguments [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '1 abs').
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 abs') asBlockEvaluated.
 	value := 1 abs.
 	self assert: interpreter evaluate equals: value
 ]
@@ -445,6 +445,18 @@ DASTInterpreterTests >> testPrimitiveSubstract [
 	
 	value := 1-2.
 	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #'tests-rbnodes' }
+DASTInterpreterTests >> testSequenceWrappenInBlockValued [
+	| original wrapped |
+	original := (RBParser parseExpression: '1').
+	wrapped := original asBlockEvaluated.
+	
+	self assert: wrapped isMessage .
+	self assert: wrapped selector equals: #value.
+	self assert: (original parents includes: wrapped)
+	
 ]
 
 { #category : #'tests-primitives' }

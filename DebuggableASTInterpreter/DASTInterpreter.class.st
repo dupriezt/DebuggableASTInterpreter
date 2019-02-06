@@ -41,6 +41,7 @@ DASTInterpreter >> debuggerService: aDASTDebuggerService [
 DASTInterpreter >> evaluate [
 	| value |
 	semaphore := Semaphore new: 0.
+	
 	currentContext := DASTContext new parent: DASTContextRootSmalltalk new.
 	process := [value := [[self visit: currentNode ] 
 									on: Error
@@ -60,7 +61,8 @@ DASTInterpreter >> exceptions [
 
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
-	currentNode := aRBNode.
+		
+	currentNode := aRBNode 
 ]
 
 { #category : #'control-flow' }
@@ -194,7 +196,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver compiledMethod methodBodyNode methodArgsNames methodValue methodContext previousContext |
+	| arguments receiver compiledMethod methodBodyNode methodArgsNames methodValue methodContext previousContext methodLocalVars |
 	
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
@@ -208,7 +210,12 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	compiledMethod isPrimitive ifTrue: [ ^ self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments. ].
 	methodBodyNode := (RBParser parseCompiledMethod: compiledMethod) addSelfReturn; parent: aRBMessageNode.
 	methodArgsNames := methodBodyNode arguments collect: [:node | self visit: node ].
-	
+	methodLocalVars := methodBodyNode allDefinedVariables.
+	methodLocalVars do: [ :arg |
+		currentContext
+			at: arg
+			put: nil
+	] .
 	arguments doWithIndex: 
 				[ :arg :index | 
 					currentContext 
