@@ -40,7 +40,7 @@ DASTClosure >> blockNode [
 { #category : #initialization }
 DASTClosure >> initializeWith: aRBBlockNode outerContext: aDASTContext [
 	self assert: aRBBlockNode isBlock.
-	sourceCode := [aRBBlockNode sourceCode] on: Exception do: [ nil ].
+	aRBBlockNode sourceCode.
 	outerContext := aDASTContext.
 	blockNode := aRBBlockNode.
 ]
