@@ -48,6 +48,11 @@ DASTContext >> find: aByteSymbol [
 ]
 
 { #category : #accessing }
+DASTContext >> findInstVarNamed: aName [
+	^  self receiver instVarNamed: aName
+]
+
+{ #category : #accessing }
 DASTContext >> initialize [
 	super initialize.
 	variablesDict := Dictionary new

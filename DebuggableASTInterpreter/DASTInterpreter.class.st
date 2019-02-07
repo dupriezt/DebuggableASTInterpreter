@@ -198,7 +198,7 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 { #category : #visiting }
 DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
 	
-	^ self visitVariableNode: aRBInstanceVariableNode
+	^ self currentContext findInstVarNamed: aRBInstanceVariableNode name
 ]
 
 { #category : #visiting }
@@ -210,7 +210,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
 	| arguments receiver compiledMethod methodArgsNames methodValue methodContext previousContext result selector receiverClass method |
-
+	
 	" Resolve Arguments "
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
@@ -224,7 +224,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	compiledMethod := receiverClass lookupSelector: selector.
 	
 	self onTracePoint: aRBMessageNode.
-	method := ((receiver isKindOf: DASTClosure) and: [ selector = #value ])
+	method := ((receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ])
 		ifTrue: [ receiver ]
 		ifFalse: [ compiledMethod ast ].
 
@@ -244,7 +244,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 		^ result
 		].
 
-	methodArgsNames := compiledMethod ast argumentNames.
+	methodArgsNames := method argumentNames.
 	arguments doWithIndex: 
 				[ :arg :index | 
 					currentContext 
@@ -289,7 +289,7 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 	| lastResult |
 	aRBSequenceNode children collect: [:node | 
 		lastResult := self visit: node.
-		hasReturned ifTrue: [ ^ lastResult ]. 
+		hasReturned ifTrue: [ hasReturned := false. ^ lastResult ]. 
 	].
 	self onTracePoint: aRBSequenceNode.
 	

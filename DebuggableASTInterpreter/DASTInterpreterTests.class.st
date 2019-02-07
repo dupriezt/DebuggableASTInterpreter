@@ -97,31 +97,6 @@ DASTInterpreterTests >> testBlockDeclaredInContextAndEvaluatedInAnotherContext [
 	self assert: value equals: 2.
 ]
 
-{ #category : #'tests-incorrect-syntax' }
-DASTInterpreterTests >> testBlockVarsLocalAccessUndeclaredVariable [
-
-	| interpreter |
-	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '[ x := 1 ] value').
-	interpreter signalExceptions: false.
-	interpreter evaluate.
-	self assert: interpreter exceptions isNotEmpty
-	
-]
-
-{ #category : #'tests-incorrect-syntax' }
-DASTInterpreterTests >> testBlockVarsLocalDeclaredInsideBlock [
-
-	| interpreter value |
-	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '[|x| x:=1 ] value . x') .
-	"exception variable x not found!"
-	interpreter signalExceptions: false.
-	value := interpreter evaluate.
-	
-	self assert: interpreter exceptions isNotEmpty .
-]
-
 { #category : #'tests-blocks-vars-local' }
 DASTInterpreterTests >> testBlockVarsLocalDeclaredOutsideBlockAndModifiedInAnidatedBlock [
 
@@ -243,7 +218,7 @@ DASTInterpreterTests >> testInstantiateObject [
 ]
 
 { #category : #'tests-contexts' }
-DASTInterpreterTests >> testInstantiateObjectAndInitializeVariables [
+DASTInterpreterTests >> testInstantiateObjectAndSetInstanceVariables [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
@@ -251,6 +226,16 @@ DASTInterpreterTests >> testInstantiateObjectAndInitializeVariables [
 	
 	value := Point x: 1 y: 2.
 	self assert: interpreter evaluate equals: value
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testInstantiateObjectAndSetInstanceVariablesAndGetInstanceVariables [
+
+	| interpreter |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '|p| p:= Point x: 1 y: 2 .^ p x').
+	
+	self assert: interpreter evaluate equals: 1
 ]
 
 { #category : #'tests-blocks' }
@@ -328,6 +313,17 @@ DASTInterpreterTests >> testInterpretBlockEvaluationWithArgumentsAndWithoutOuter
 ]
 
 { #category : #'tests-blocks' }
+DASTInterpreterTests >> testInterpretBlockEvaluationWithOneArgumentAndWithoutOuterContext [
+
+	| interpreter value |
+	interpreter := DASTInterpreter new.
+	interpreter initializeWithProgram: (RBParser parseExpression: '^ [ :x | x ] value: 2').
+	interpreter evaluate.
+	value := interpreter stackTop.
+	self assert: value equals: 2.
+]
+
+{ #category : #'tests-blocks' }
 DASTInterpreterTests >> testInterpretBlockEvaluationWithoutArgumentsAndWithoutOuterContext [
 
 	| interpreter value blockValue |
@@ -360,18 +356,6 @@ DASTInterpreterTests >> testLessThan [
 	
 	value := 1<2.
 	self assert: interpreter evaluate equals: value
-]
-
-{ #category : #'tests-methods-local-vars' }
-DASTInterpreterTests >> testLocalVariableAccessUndeclaredVariable [
-
-	| interpreter value |
-	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'x').
-	interpreter signalExceptions: false. 
-	value := interpreter evaluate.
-	self assert: interpreter exceptions isEmpty not.
-	"self assert: interpreter exceptions last asString equals: 'ZeroDivide'."
 ]
 
 { #category : #'tests-contexts' }
@@ -447,18 +431,6 @@ DASTInterpreterTests >> testPrimitiveSubstract [
 	
 	value := 1-2.
 	self assert: interpreter evaluate equals: value
-]
-
-{ #category : #'tests-rbnodes' }
-DASTInterpreterTests >> testSequenceWrappenInBlockValued [
-	| original wrapped |
-	original := (RBParser parseExpression: '1').
-	wrapped := original asDoit.
-	
-	self assert: wrapped isMessage .
-	self assert: wrapped selector equals: #value.
-	self assert: (original parents includes: wrapped)
-	
 ]
 
 { #category : #'tests-primitives' }
