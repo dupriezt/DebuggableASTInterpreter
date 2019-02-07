@@ -24,22 +24,6 @@ DASTDebuggerService >> breakpoints [
 		breakpoints := OrderedCollection new ].
 ]
 
-{ #category : #private }
-DASTDebuggerService >> canBeTracePoint: aRBNode [
-	^ 
-	{ RBBlockNode 
-		-> (aRBNode parent isSequence) not. "a block node declaration (without evaluation) inside a sequence, cannot be a tracepoint"
-	  RBLiteralValueNode -> false. "literal nodes are not traced"
-	  RBAssignmentNode -> true.
-	  RBMessageNode -> true.
-	  RBSequenceNode -> false.
-	  RBVariableNode 
-		-> (aRBNode parent isAssignment 
-			and: [ aRBNode parent children last = aRBNode ]) not . "variable name to the left of an assignation are not traced" 
-	} asDictionary
-	at: aRBNode class
-]
-
 { #category : #accessing }
 DASTDebuggerService >> currentNode [
 	^interpreter currentNode
@@ -75,7 +59,7 @@ DASTDebuggerService >> mode: aDASTDebuggerMode [
 
 { #category : #running }
 DASTDebuggerService >> onTracePoint: aRBNode [
-	(self canBeTracePoint: aRBNode) 
+	(aRBNode canBeTracePoint ) 
 		ifTrue: [ mode onTracePoint: aRBNode ]
 	
 ]

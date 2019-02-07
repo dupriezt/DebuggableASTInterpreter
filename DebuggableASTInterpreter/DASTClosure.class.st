@@ -37,12 +37,40 @@ DASTClosure >> blockNode [
 	^ blockNode
 ]
 
+{ #category : #accessing }
+DASTClosure >> body [
+	
+	^ blockNode body
+]
+
+{ #category : #accessing }
+DASTClosure >> home [
+	
+	^ outerContext
+]
+
 { #category : #initialization }
 DASTClosure >> initializeWith: aRBBlockNode outerContext: aDASTContext [
 	self assert: aRBBlockNode isBlock.
-	aRBBlockNode sourceCode.
+	sourceCode := aRBBlockNode sourceCode.
 	outerContext := aDASTContext.
 	blockNode := aRBBlockNode.
+]
+
+{ #category : #accessing }
+DASTClosure >> isBlock [ 
+	^ true
+]
+
+{ #category : #accessing }
+DASTClosure >> isDASTClosure [ 
+	^true
+]
+
+{ #category : #testing }
+DASTClosure >> isPrimitive [
+	" A closure always has code inside, and cannot have a primitive declaration "
+	^ false
 ]
 
 { #category : #accessing }

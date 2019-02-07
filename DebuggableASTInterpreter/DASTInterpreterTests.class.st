@@ -19,8 +19,7 @@ DASTInterpreterTests >> testAssignAndEvaluateTemporaryVariable [
 
 	| interpreter |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 1 . x + 2').
-	
+	interpreter initializeWithProgram: (RBParser parseExpression: '|x| x := 1 . ^ x + 2')  .
 	
 	self assert: interpreter evaluate equals: 3
 ]
@@ -30,7 +29,7 @@ DASTInterpreterTests >> testAssignTemporaryVariableUsingItsOwnValue [
 
 	| interpreter |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 1 . x := x + 2 . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '|x| x := 1 . x := x + 2 . ^ x').
 	
 	
 	self assert: interpreter evaluate equals: 3
@@ -41,7 +40,7 @@ DASTInterpreterTests >> testAssignmentTemporaryVariable [
 
 	| interpreter |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 1').
+	interpreter initializeWithProgram: (RBParser parseExpression: '|x| x := 1. ^ x').
 	
 	
 	self assert: interpreter evaluate equals: 1
@@ -52,7 +51,7 @@ DASTInterpreterTests >> testAssignmentTemporaryVariableTwice [
 
 	| interpreter |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'x := 1 . x := 2 . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '|x| x := 1 . x := 2 . ^ x').
 	
 	
 	self assert: interpreter evaluate equals: 2
@@ -83,9 +82,9 @@ DASTInterpreterTests >> testBlockAssignsOuterContextVariable [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: ' b := [ x:=1 ] . b value . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '|b x| b := [ x:=1 ] . b value . ^ x').
 	value := interpreter evaluate.
-	self assert: value equals: 2.
+	self assert: value equals: 1.
 ]
 
 { #category : #'tests-blocks' }
@@ -98,7 +97,7 @@ DASTInterpreterTests >> testBlockDeclaredInContextAndEvaluatedInAnotherContext [
 	self assert: value equals: 2.
 ]
 
-{ #category : #'tests-blocks-vars-local' }
+{ #category : #'tests-incorrect-syntax' }
 DASTInterpreterTests >> testBlockVarsLocalAccessUndeclaredVariable [
 
 	| interpreter |
@@ -110,15 +109,17 @@ DASTInterpreterTests >> testBlockVarsLocalAccessUndeclaredVariable [
 	
 ]
 
-{ #category : #'tests-blocks-vars-local' }
+{ #category : #'tests-incorrect-syntax' }
 DASTInterpreterTests >> testBlockVarsLocalDeclaredInsideBlock [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '[|x| x:=1 ] value . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '[|x| x:=1 ] value . x') .
+	"exception variable x not found!"
+	interpreter signalExceptions: false.
 	value := interpreter evaluate.
 	
-	self assert: value equals: nil.
+	self assert: interpreter exceptions isNotEmpty .
 ]
 
 { #category : #'tests-blocks-vars-local' }
@@ -126,7 +127,7 @@ DASTInterpreterTests >> testBlockVarsLocalDeclaredOutsideBlockAndModifiedInAnida
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '|x| [ [ x:=1 ] value  ] value . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '|x| [ [ x:=1 ] value  ] value . ^ x').
 	value := interpreter evaluate.
 	
 	self assert: value equals: 1.
@@ -137,7 +138,7 @@ DASTInterpreterTests >> testBlockVarsLocalDeclaredOutsideBlockAndModifiedInBlock
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '|x| [ x:=1 ] value . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '|x| [ x:=1 ] value . ^ x').
 	value := interpreter evaluate.
 	
 	self assert: value equals: 1.
@@ -176,7 +177,7 @@ DASTInterpreterTests >> testEvaluateMessageWithoutArguments [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '1 abs') asBlockEvaluated.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 abs') .
 	value := 1 abs.
 	self assert: interpreter evaluate equals: value
 ]
@@ -215,7 +216,7 @@ DASTInterpreterTests >> testIfTrue [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: 'true ifTrue: [^ 3]').
+	interpreter initializeWithProgram: (RBParser parseExpression: 'true ifTrue: [3]').
 	value := interpreter evaluate.
 	self assert: value equals: 3.
 ]
@@ -225,7 +226,7 @@ DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
 
 	| interpreter value |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '(1<2) ifTrue: [^ 3]').
+	interpreter initializeWithProgram: (RBParser parseExpression: '(1<2) ifTrue: [3]').
 	value := interpreter evaluate.
 	self assert: value equals: 3.
 ]
@@ -293,7 +294,7 @@ DASTInterpreterTests >> testInterpretBlockEvaluationThatModifiesOuterContext [
 
 	| interpreter value blockValue |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '| x | x := 3 . [ x := 2 ] value . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '| x | x := 3 . [ x := 2 ] value . ^ x').
 	interpreter evaluate.
 	value := interpreter stackTop.
 	blockValue :=  [ | x | x := 3 . [ x := 2 ] value . x ] value.
@@ -306,7 +307,7 @@ DASTInterpreterTests >> testInterpretBlockEvaluationThatModifiesOuterContextTwic
 
 	| interpreter value blockValue |
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '| x | x := 3 . [ x := 2 ] value . x:= 1 . x').
+	interpreter initializeWithProgram: (RBParser parseExpression: '| x | x := 3 . [ x := 2 ] value . x:= 1 . ^ x').
 	interpreter evaluate.
 	value := interpreter stackTop.
 	blockValue :=  [ | x | x := 3 . [ x := 2 ] value . x:= 1 . x ] value.
@@ -367,6 +368,7 @@ DASTInterpreterTests >> testLocalVariableAccessUndeclaredVariable [
 	| interpreter value |
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: 'x').
+	interpreter signalExceptions: false. 
 	value := interpreter evaluate.
 	self assert: interpreter exceptions isEmpty not.
 	"self assert: interpreter exceptions last asString equals: 'ZeroDivide'."
@@ -451,7 +453,7 @@ DASTInterpreterTests >> testPrimitiveSubstract [
 DASTInterpreterTests >> testSequenceWrappenInBlockValued [
 	| original wrapped |
 	original := (RBParser parseExpression: '1').
-	wrapped := original asBlockEvaluated.
+	wrapped := original asDoit.
 	
 	self assert: wrapped isMessage .
 	self assert: wrapped selector equals: #value.

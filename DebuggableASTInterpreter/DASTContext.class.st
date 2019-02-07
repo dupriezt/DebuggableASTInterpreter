@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'variablesDict',
 		'parent',
-		'receiver'
+		'receiver',
+		'method'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -21,11 +22,17 @@ DASTContext >> at: aByteSymbol put: anObject [
 
 { #category : #accessing }
 DASTContext >> at: aByteSymbol putInHierarchy: anObject [
-	| node |
-	node := self nodeContainingVariable: aByteSymbol.
-	node ifNil: [ node := self ].
-	^ node variablesDict at: aByteSymbol put: anObject
+	| definingContext |
+	definingContext := self lookupContextDefining: aByteSymbol.
+	definingContext ifNil: [ definingContext := self ].
+	^ definingContext variablesDict at: aByteSymbol put: anObject
 	
+]
+
+{ #category : #accessing }
+DASTContext >> definesVariableNamed: aName [
+	"Return if the variable is locally defined as a temporary or as an argument"
+	^ self variablesDict keys includes: aName
 ]
 
 { #category : #accessing }
@@ -47,6 +54,12 @@ DASTContext >> initialize [
 ]
 
 { #category : #accessing }
+DASTContext >> isBlockContext [
+
+	^ method isBlock
+]
+
+{ #category : #accessing }
 DASTContext >> isEmpty [
 	
 	^ variablesDict isEmpty.
@@ -58,16 +71,34 @@ DASTContext >> isRoot [
 ]
 
 { #category : #accessing }
-DASTContext >> lookupSelector: aByteString [
-
-	^ receiver systemClass lookupSelector: aByteString.
+DASTContext >> lookupContextDefining: aByteSymbol [
+	
+	(self definesVariableNamed: aByteSymbol) ifTrue: [ ^ self ].
+	
+	^ self isBlockContext
+		ifTrue: [ method outerContext lookupContextDefining: aByteSymbol ]
+		ifFalse: [ nil ]
 ]
 
 { #category : #accessing }
-DASTContext >> nodeContainingVariable: aByteSymbol [
-	((self variablesDict keys includes: aByteSymbol) or: [self parent isRoot]) 
-		ifTrue: [ ^ self ]
-		ifFalse: [ ^ parent nodeContainingVariable: aByteSymbol ]
+DASTContext >> lookupSelector: aByteString [
+	| aClass |
+	aClass := (receiver isNil and: [ aByteString = #value ]) 
+		ifTrue: [ BlockClosure ] "ugly hack to handle the first block value with nil as receiver"
+		ifFalse: [ receiver systemClass ].
+		
+	 ^aClass lookupSelector: aByteString.
+]
+
+{ #category : #accessing }
+DASTContext >> method [
+	^ method
+]
+
+{ #category : #accessing }
+DASTContext >> method: aMethod [
+
+	method := aMethod
 ]
 
 { #category : #accessing }
@@ -81,8 +112,11 @@ DASTContext >> parent: aDASTContext [
 ]
 
 { #category : #accessing }
-DASTContext >> receiver [ 
-	^ receiver
+DASTContext >> receiver [
+	
+	^ self isBlockContext
+		ifTrue: [ method home receiver ]
+		ifFalse: [ receiver ]
 ]
 
 { #category : #accessing }

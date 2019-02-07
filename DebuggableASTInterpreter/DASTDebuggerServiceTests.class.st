@@ -8,7 +8,7 @@ Class {
 DASTDebuggerServiceTests >> testAddBreakpoint [
 	| ds ast nodeBreak |
 	ds := DASTDebuggerService new.
-	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	ast := (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
 	ds initializeWithProgram: ast.
 	self assert: ds breakpoints isEmpty.
 	nodeBreak := ast children first.
@@ -32,7 +32,7 @@ DASTDebuggerServiceTests >> testInterpretAllWithoutBreakPoints [
 DASTDebuggerServiceTests >> testInterpretComplexMessageAllWithoutBreakPoint [
 	| ds |
 	ds := DASTDebuggerService new.
-	ds initializeWithProgram: (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	ds initializeWithProgram: (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
 	self assert: ds mode class = DASTDebuggerModeContinue.
 	ds runInterpreter.
 	ds assert: ds interpreter process isTerminated.
@@ -45,7 +45,7 @@ DASTDebuggerServiceTests >> testInterpreterIsInTheRightNodeWhenReachingABreakpoi
 	| ds ast break |
 	ds := DASTDebuggerService new.
 	
-	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	ast := (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
 	ds initializeWithProgram: ast .
 	break := ast children second.
 	ds addBreakPointAt: break.
@@ -59,9 +59,9 @@ DASTDebuggerServiceTests >> testInterpreterProcessIsSuspendedWhenReachingBreakpo
 	| ds ast break |
 	ds := DASTDebuggerService new.
 	
-	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
-	ds initializeWithProgram: ast .
-	break := ast children second children first.
+	ast := (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
+	ds initializeWithProgram: ast.
+	break := (RBParser parseExpression: 'x:=1').
 	ds addBreakPointAt: break.
 	ds runInterpreter.
 	self assert: ds interpreter currentNode equals: break.
@@ -72,7 +72,7 @@ DASTDebuggerServiceTests >> testInterpreterProcessIsSuspendedWhenReachingBreakpo
 DASTDebuggerServiceTests >> testInterpreterProcessIsTerminatedAfterFullEvaluation [
 	| ds |
 	ds := DASTDebuggerService new.
-	ds initializeWithProgram: (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	ds initializeWithProgram: (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
 
 	ds runInterpreter.
 	self assert: ds interpreter process isTerminated 
@@ -84,7 +84,7 @@ DASTDebuggerServiceTests >> testInterpreterProcessIsTerminatedWhenRunningAfterRe
 	| ds ast |
 	ds := DASTDebuggerService new.
 	
-	ast := (RBParser parseExpression: 'x:=1 . x:= x+2 . x').
+	ast := (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
 	ds initializeWithProgram: ast .
 	ds addBreakPointAt: ast children second.
 	ds runInterpreter.
@@ -137,12 +137,13 @@ DASTDebuggerServiceTests >> testRemoveBreakpoint [
 DASTDebuggerServiceTests >> testStepIntoAssignation [
 	| ds ast |
 	ds := DASTDebuggerService new.
-	ast := (RBParser parseExpression: 'x:=1').
+	ast := (RBParser parseExpression: '|x| x:=1').
 		
 	ds initializeWithProgram: ast.
 	ds mode: (DASTDebuggerModeStepInto new debuggerService: ds).
 	
 	ds runInterpreter.		
+		
 	self assert: (ds currentNode) equals: (RBParser parseExpression: 'x:=1').
 	
 ]

@@ -12,7 +12,8 @@ Class {
 		'stackTop',
 		'semaphore',
 		'exceptions',
-		'signalExceptions'
+		'signalExceptions',
+		'hasReturned'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -39,19 +40,8 @@ DASTInterpreter >> debuggerService: aDASTDebuggerService [
 
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
-	| value |
-	semaphore := Semaphore new: 0.
-	
-	currentContext := DASTContext new parent: DASTContextRootSmalltalk new.
-	process := [value := [[self visit: currentNode ] 
-									on: Error
-									do: [ :e | self exceptions add: e . 
-												 "Transcript show: e asString; cr ." 
-												 semaphore signal. 
-												 self signalExceptions ifTrue: [ e pass ] ]]
-					ensure: [semaphore signal]] fork.
-	semaphore wait.
-	^ value
+	self setInitialContext.
+	^ self visit: currentNode.
 ]
 
 { #category : #accessors }
@@ -61,8 +51,8 @@ DASTInterpreter >> exceptions [
 
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
-		
-	currentNode := aRBNode asBlockEvaluated  
+	currentNode := aRBNode.
+	hasReturned := false.
 ]
 
 { #category : #'control-flow' }
@@ -95,6 +85,15 @@ DASTInterpreter >> run [
 	
 ]
 
+{ #category : #private }
+DASTInterpreter >> setInitialContext [
+	"ugly method necessary because we are putting the root expression of the AST inside a block and sending it the message value"
+	currentContext := DASTContext new
+		parent: DASTContextRootSmalltalk new;
+		method: currentNode methodNode;
+		yourself
+]
+
 { #category : #flagging }
 DASTInterpreter >> signalExceptions [
 	^ signalExceptions ifNil: [ signalExceptions := true ]
@@ -107,32 +106,27 @@ DASTInterpreter >> signalExceptions: aBoolean [
 
 { #category : #private }
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
-	| primitiveResult blockContext blockValue prevContext closure blockLocalVars |
+	| primitiveResult closure |
 	
 	((201 to: 206) includes: anInteger) ifTrue: [ 
 		"primitive is 'value', the receiver is a DASTClosure object"
 		closure := anObject.
-		blockContext := DASTContext new parent: self currentContext; receiver: closure outerContext receiver.
-		blockLocalVars := closure blockNode allDefinedVariables.
-		blockLocalVars do: [ :arg |
-				blockContext
-					at: arg
-					put: nil
-			 ] .
+		
 		anArray doWithIndex: 
 		  [ :arg :index | 
-				blockContext 
+				currentContext 
 					at: (closure argumentNames at: index)
-					 putInHierarchy: arg ].
+					 put: arg ].
 		
-		prevContext := currentContext.
-		currentContext := blockContext.
-		blockValue := self visit: closure blockNode body.
-		currentContext := prevContext.
-		^ blockValue
+		^ self visit: closure blockNode body.
 		 ].
+
 	"primitives applied to blocks:"
-	anInteger = 266 ifTrue: [ ^ anObject argumentCount ]. 
+	(anObject isKindOf: DASTClosure) ifTrue: [ 
+		anInteger = 266 ifTrue: [ ^ anObject argumentCount ].
+		self error: 'Fallo primitiva sobre closure ', anInteger asString.
+		 ].
+	 
 	
 	"apply primitive to object"
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
@@ -168,24 +162,43 @@ DASTInterpreter >> visit: aRBNode [
 ]
 
 { #category : #visiting }
+DASTInterpreter >> visitArgumentNode: aRBArgumentNode [ 
+	
+	^ self visitVariableNode: aRBArgumentNode
+]
+
+{ #category : #visiting }
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
 	self assert: (aRBAssignmentNode children size = 2).
-	name := self visit: aRBAssignmentNode children last.
-	value := self visit: aRBAssignmentNode children first.
+	name := aRBAssignmentNode variable name.
+	value := self visit: aRBAssignmentNode value.
 	self onTracePoint: aRBAssignmentNode.
 	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
-	self currentContext at: name put: value.
+	
+	(self currentContext lookupContextDefining: name)
+		ifNotNil: [ :definingContext | 
+			definingContext at: name put: value.
+			^ value ].
+
+	(self currentContext receiver systemClass allInstVarNames includes: name)
+		ifTrue: [ self currentContext receiver instVarNamed: name put: value ].
+
 	^value
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	self onTracePoint: aRBBlockNode.
-	
 	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	^ DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext.
 	
+]
+
+{ #category : #visiting }
+DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
+	
+	^ self visitVariableNode: aRBInstanceVariableNode
 ]
 
 { #category : #visiting }
@@ -196,33 +209,49 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver compiledMethod methodBodyNode methodArgsNames methodValue methodContext previousContext methodLocalVars |
-	
+	| arguments receiver compiledMethod methodArgsNames methodValue methodContext previousContext result selector receiverClass method |
+
+	" Resolve Arguments "
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
+	selector := aRBMessageNode selector.
+	
+	" Lookup "
+	receiverClass := (receiver isNil and: [ selector = #value ]) 
+		ifTrue: [ BlockClosure ] "ugly hack to handle the first block value with nil as receiver"
+		ifFalse: [ receiver systemClass ].
+		
+	compiledMethod := receiverClass lookupSelector: selector.
 	
 	self onTracePoint: aRBMessageNode.
+	method := ((receiver isKindOf: DASTClosure) and: [ selector = #value ])
+		ifTrue: [ receiver ]
+		ifFalse: [ compiledMethod ast ].
+
+	methodContext := DASTContext new
+		parent: self currentContext;
+		receiver: receiver;
+		method: method;
+		yourself.
 	
-	methodContext := DASTContext new parent: self currentContext; receiver: receiver.
+	" Apply - invoke method "
 	previousContext := currentContext.
 	currentContext := methodContext.
-	compiledMethod := self currentContext lookupSelector: aRBMessageNode selector.
-	compiledMethod isPrimitive ifTrue: [ ^ self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments. ].
-	methodBodyNode := (RBParser parseCompiledMethod: compiledMethod) addSelfReturn; parent: aRBMessageNode.
-	methodArgsNames := methodBodyNode arguments collect: [:node | self visit: node ].
-	methodLocalVars := methodBodyNode allDefinedVariables.
-	methodLocalVars do: [ :arg |
-		currentContext
-			at: arg
-			put: nil
-	] .
+	method isPrimitive ifTrue: [ 
+		
+		result := self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments. 
+		currentContext := previousContext.
+		^ result
+		].
+
+	methodArgsNames := compiledMethod ast argumentNames.
 	arguments doWithIndex: 
 				[ :arg :index | 
 					currentContext 
 						at: (methodArgsNames at: index)
 						put: arg ].
 				
-	methodValue := self visit: methodBodyNode body.
+	methodValue := self visit: methodContext method body.
 	
 	currentContext := previousContext.
 	
@@ -241,28 +270,32 @@ DASTInterpreter >> visitMethodNode: aRBBlockNode [
 { #category : #visiting }
 DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	
+	| result |
 	self onTracePoint: aRBReturneNode .
-	^ self visit: aRBReturneNode children first
+	result := self visit: aRBReturneNode value.
+	hasReturned := true.
+	^ result
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitSelfNode: aRBSelfNode [ 
-	| receiver |
-	receiver := self currentContext receiver.
-	"ugly check"
-	receiver class = DASTClosure ifTrue: [ 
-		^self visit: receiver blockNode body
-	].
-	^ receiver
 	
+	^ self currentContext receiver
+
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
-	| results |
-	results := aRBSequenceNode children collect: [:node | self visit: node ].
+	| lastResult |
+	aRBSequenceNode children collect: [:node | 
+		lastResult := self visit: node.
+		hasReturned ifTrue: [ ^ lastResult ]. 
+	].
 	self onTracePoint: aRBSequenceNode.
-	^ results last
+	
+	^ self currentContext isBlockContext
+		ifTrue: [ lastResult ]
+		ifFalse: [ self currentContext receiver ]
 ]
 
 { #category : #visiting }
@@ -274,7 +307,9 @@ DASTInterpreter >> visitSuperNode: aRBSuperNode [
 DASTInterpreter >> visitVariableNode: aRBVariableNode [
 	| varName |
 	varName := aRBVariableNode name.
-	(aRBVariableNode isVariableNameInAssignation or: [ aRBVariableNode isArgumentInMethod ])
+	(aRBVariableNode isDefinition or: [ aRBVariableNode isArgumentInMethod ]) ifTrue: [ currentContext at: varName put: nil. ^ varName ].
+	
+	(aRBVariableNode isVariableNameInAssignation)
 			ifTrue: [ currentContext find: varName. 
 						 ^ varName ] "left side of :=, or the argument in a method"
 			ifFalse: [ self onTracePoint: aRBVariableNode . 
