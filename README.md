@@ -5,31 +5,35 @@ An AST interpreter that accepts stepping operations
 
 *- composed messages (messages with messages as arguments)
 *- Precedence of composed message (unary, binary, keyword)
-- assignments
+*- assignments
   *- temporary
-  - instance variable
-  - global variable / class variable
+  *- instance variable
+  *- global variable / class variable
+*- self 
+- super
+- primitive code evaluation in case the primitive fails
 
 
 - cascades
-*- breakpoints
-*- step into bloques
+- step into bloques
 - step into metodos
-*- step over method
+- step over method
 - step over bloques
 
 
 More advanced ones
-
 *- Blocks
-*- Exceptions
+- Exceptions
+- breakpoints
+- non local return (normal and dead context case)
 
 - Does not understand
-- methods that call super
 - Ejemplos
 
-  p := Point new.
-  p x: 1 y:2.
+ * p := Point new.
+ * p x: 1 y:2.
   
   check strategy design pattern
+  
+
   
