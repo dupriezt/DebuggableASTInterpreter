@@ -28,9 +28,24 @@ DASTInterpreterTests >> testAddTwoNumbers [
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testBlockAssignedToVariableAndEvaluated [
 
-	self assert: (self evaluateProgram: '|b| b := [^ 3]. ^b value' ) 
+	self assert: (self evaluateProgram: '|b| b := [^ 3]. b value' ) 
 		  equals: 3
 	
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockEvaluated [
+
+	self assert: (self evaluateProgram: '[^ 3] value' ) 
+		  equals: 3
+	
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockThatReturns32EvaluatedInThisContext [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests getBlockThatReturns32EvaluatedInThisContext' ) 
+		  equals: 32	
 ]
 
 { #category : #tests }
@@ -50,11 +65,8 @@ DASTInterpreterTests >> testEvaluateFullExpression [
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateMessageWithoutArguments [
 
-	| interpreter value |
-	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '1 abs') .
-	value := 1 abs.
-	self assert: interpreter evaluate equals: value
+	self assert: (self evaluateProgram: '^1 abs' ) 
+		  equals: 1
 ]
 
 { #category : #'tests-exceptions' }
@@ -77,7 +89,6 @@ DASTInterpreterTests >> testExceptionZeroDivide [
 
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testFalse [
-
 	self assert: (self evaluateProgram: 'false')
 		  equals: false
 ]
@@ -85,28 +96,28 @@ DASTInterpreterTests >> testFalse [
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testIfTrue [
 
-	self assert: (self evaluateProgram: 'true ifTrue: [3]' ) 
+	self assert: (self evaluateProgram: '^true ifTrue: [3]' ) 
 		  equals: 3
 ]
 
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
 
-	self assert: (self evaluateProgram: '1<2 ifTrue: [3]' ) 
+	self assert: (self evaluateProgram: '^ 1<2 ifTrue: [3]' ) 
 		  equals: 3
 ]
 
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testInstantiateObject [
 
-	self assert: (self evaluateProgram: 'Point basicNew') 
+	self assert: (self evaluateProgram: '^Point basicNew') 
 		  equals: (Point basicNew)
 ]
 
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testInstantiateObjectAndSetInstanceVariables [
 
-	self assert: (self evaluateProgram: 'Point x: 1 y: 2') 
+	self assert: (self evaluateProgram: '^ Point x: 1 y: 2') 
 		  equals: (Point x: 1 y: 2)
 	
 ]
@@ -154,7 +165,7 @@ DASTInterpreterTests >> testInterpretBlockDeclarationWithoutOuterContext [
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testInterpretBlockEvaluationWithArgumentsAndWithoutOuterContext [
 
-	self assert: (self evaluateProgram: '[ :x :y | x + y ] value: 1 value: 2')
+	self assert: (self evaluateProgram: '^ [ :x :y | x + y ] value: 1 value: 2')
 		  equals:3.
 
 ]
@@ -170,14 +181,14 @@ DASTInterpreterTests >> testInterpretBlockEvaluationWithOneArgumentAndWithoutOut
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testInterpretBlockEvaluationWithoutArgumentsAndWithoutOuterContext [
 
-	self assert: (self evaluateProgram: '[ 1 ] value')
+	self assert: (self evaluateProgram: '^ [ 1 ] value')
 		  equals:1
 ]
 
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testInterpretSendingMessageDifferentFromValueToBlock [
 	
-	self assert: (self evaluateProgram: '[ :x :y :z | 1 ] argumentCount')
+	self assert: (self evaluateProgram: '^ [ :x :y :z | 1 ] argumentCount')
 		  equals: 3
 	
 ]
@@ -185,14 +196,14 @@ DASTInterpreterTests >> testInterpretSendingMessageDifferentFromValueToBlock [
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testLessThan [
 
-	self assert: (self evaluateProgram: '1<2')
+	self assert: (self evaluateProgram: '^ 1<2')
 		  equals: true
 ]
 
 { #category : #'tests-variables-local' }
 DASTInterpreterTests >> testLocalVarAccessedForUpdatingItsOwnValue [
 
-	self assert: (self evaluateProgram: '|x| x := 1 . x := x + 2 . ^ x' ) 
+	self assert: (self evaluateProgram: '|x| x := 1 . x := x + 2 .  x' ) 
 		  equals: 3
 		
 
@@ -271,7 +282,7 @@ DASTInterpreterTests >> testLocalVarScopeWhenModifiedFromBlockAnidated [
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testLookupGlobalVariable [
 
-	self assert: (self evaluateProgram: 'Point') 
+	self assert: (self evaluateProgram: '^ Point') 
 		  equals: Point
 ]
 
@@ -292,38 +303,35 @@ DASTInterpreterTests >> testParenthesisForOperationAndUnaryMessage [
 { #category : #tests }
 DASTInterpreterTests >> testPrecedenceForOperationAndMessageWithArgument [
 	
-	self assert: (self evaluateProgram: '#abc at: 3 - 1')
+	self assert: (self evaluateProgram: '^ #abc at: 3 - 1')
 	   equals: $b
 ]
 
 { #category : #tests }
 DASTInterpreterTests >> testPrecedenceForOperationAndUnaryMessage [
-
-	| interpreter |
-	"The unary message must be evaluated before the Add"
-	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: (RBParser parseExpression: '1 - 3 abs').
-	self assert: interpreter evaluate equals: -2.
+	
+	self assert: (self evaluateProgram: '^ 1 - 3 abs')
+	   equals: -2
 ]
 
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testPrimitiveAdd [
 
-	self assert: (self evaluateProgram: '1+2')
+	self assert: (self evaluateProgram: '^ 1+2')
 		  equals: 3
 ]
 
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testPrimitiveSubstract [
 
-	self assert: (self evaluateProgram: '1-2')
+	self assert: (self evaluateProgram: '^ 1-2')
 		  equals: -1
 ]
 
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testTrue [
 
-	self assert: (self evaluateProgram: 'true')
+	self assert: (self evaluateProgram: '^ true')
 		  equals: true
 ]
 

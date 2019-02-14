@@ -12,8 +12,7 @@ Class {
 		'stackTop',
 		'semaphore',
 		'exceptions',
-		'signalExceptions',
-		'hasReturned'
+		'signalExceptions'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -51,8 +50,8 @@ DASTInterpreter >> exceptions [
 
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
-	currentNode := aRBNode.
-	hasReturned := false.
+	currentNode := aRBNode doSemanticAnalysis body addReturn; yourself.
+	
 ]
 
 { #category : #'control-flow' }
@@ -170,7 +169,6 @@ DASTInterpreter >> visitArgumentNode: aRBArgumentNode [
 { #category : #visiting }
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
-	self assert: (aRBAssignmentNode children size = 2).
 	name := aRBAssignmentNode variable name.
 	value := self visit: aRBAssignmentNode value.
 	self onTracePoint: aRBAssignmentNode.
@@ -196,6 +194,11 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 ]
 
 { #category : #visiting }
+DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
+	^ currentContext find: aRBGlobalNode name
+]
+
+{ #category : #visiting }
 DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
 	
 	^ self currentContext findInstVarNamed: aRBInstanceVariableNode name
@@ -209,7 +212,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver compiledMethod methodArgsNames methodValue methodContext previousContext result selector receiverClass method parent |
+	| arguments receiver compiledMethod methodArgsNames methodValue methodContext previousContext result selector receiverClass method parent valueSentToBlock |
 
 	" Resolve Arguments "
 	receiver := self visit: aRBMessageNode receiver.
@@ -224,10 +227,13 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	compiledMethod := receiverClass lookupSelector: selector.
 	
 	self onTracePoint: aRBMessageNode.
-	method := ((receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ])
+	
+	valueSentToBlock := (receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ].
+	
+	method := valueSentToBlock
 		ifTrue: [ receiver ]
 		ifFalse: [ compiledMethod ast ].
-	parent := ((receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ])
+	parent := valueSentToBlock
 		ifTrue: [ receiver outerContext ]
 		ifFalse: [ self currentContext ].
 
@@ -240,7 +246,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	" Apply - invoke method "
 	previousContext := currentContext.
 	currentContext := methodContext.
-	method isPrimitive ifTrue: [ 
+	(method isPrimitive or: [ valueSentToBlock ]) ifTrue: [ 
 		
 		result := self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments. 
 		currentContext := previousContext.
@@ -254,7 +260,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 						at: (methodArgsNames at: index)
 						put: arg ].
 				
-	methodValue := self visit: methodContext method body.
+	methodValue := self visit: methodContext method body   .
 	
 	currentContext := previousContext.
 	
@@ -276,7 +282,7 @@ DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	| result |
 	self onTracePoint: aRBReturneNode .
 	result := self visit: aRBReturneNode value.
-	hasReturned := true.
+	self currentContext setAsReturned.
 	^ result
 ]
 
@@ -292,7 +298,7 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 	| lastResult |
 	aRBSequenceNode children collect: [:node | 
 		lastResult := self visit: node.
-		hasReturned ifTrue: [ hasReturned := false. ^ lastResult ]. 
+		self currentContext hasReturned ifTrue: [ ^ lastResult ]. 
 	].
 	self onTracePoint: aRBSequenceNode.
 	
@@ -308,7 +314,11 @@ DASTInterpreter >> visitSuperNode: aRBSuperNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
-	^ currentContext find: aRBTemporaryNode name 
+	| name |
+	name := aRBTemporaryNode name.
+	^ (aRBTemporaryNode isDefinition) 
+		ifTrue: [ currentContext at: name put: nil. ^ nil  ]
+		ifFalse: [ currentContext find: name ]
 ]
 
 { #category : #visiting }
