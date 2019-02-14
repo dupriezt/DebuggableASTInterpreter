@@ -209,8 +209,8 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver compiledMethod methodArgsNames methodValue methodContext previousContext result selector receiverClass method |
-	
+	| arguments receiver compiledMethod methodArgsNames methodValue methodContext previousContext result selector receiverClass method parent |
+
 	" Resolve Arguments "
 	receiver := self visit: aRBMessageNode receiver.
 	arguments := aRBMessageNode arguments collect: [:node | self visit: node].
@@ -227,9 +227,12 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	method := ((receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ])
 		ifTrue: [ receiver ]
 		ifFalse: [ compiledMethod ast ].
+	parent := ((receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ])
+		ifTrue: [ receiver outerContext ]
+		ifFalse: [ self currentContext ].
 
 	methodContext := DASTContext new
-		parent: self currentContext;
+		parent: parent;
 		receiver: receiver;
 		method: method;
 		yourself.
@@ -301,6 +304,11 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 { #category : #visiting }
 DASTInterpreter >> visitSuperNode: aRBSuperNode [ 
 	^ self currentContext receiver superclass
+]
+
+{ #category : #visiting }
+DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
+	^ currentContext find: aRBTemporaryNode name 
 ]
 
 { #category : #visiting }
