@@ -294,6 +294,12 @@ DASTInterpreterTests >> testLookupGlobalVariable [
 ]
 
 { #category : #'tests-methods' }
+DASTInterpreterTests >> testMethodMethodArgumentsAreIndependentFromOtherMethodsArguments [
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new testArg: ''foo'' ')
+		  equals: 'foo'
+]
+
+{ #category : #'tests-methods' }
 DASTInterpreterTests >> testMethodReturnsSelfWhenItDoesntContainExplicitReturn [
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests methodEmpty')
 		  equals: DASTInterpreterClassForTests 
@@ -362,4 +368,12 @@ DASTInterpreterTests >> testVarsLocalBlockDeclaredOutsideBlockAndModifiedInAnida
 	self assert: (self evaluateProgram:  '|x| [ [ x:=1 ] value  ] value . ^ x') 
 		  equals: 1
 	
+]
+
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testVarsLocalScopeLookupIsDoneInExceutionTime [
+	
+	self assert: (self evaluateProgram:  '|block t| t := 42 . block := [ t ] .	t := 69 . ^ DASTInterpreterClassForTests evaluateBlock: block') 
+		  equals: 69
+		
 ]

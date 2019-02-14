@@ -1,6 +1,9 @@
 Class {
 	#name : #DASTInterpreterClassForTests,
 	#superclass : #Object,
+	#instVars : [
+		'block'
+	],
 	#category : #DebuggableASTInterpreter
 }
 
@@ -53,4 +56,25 @@ DASTInterpreterClassForTests class >> setVariableAndDefineBlock3 [
 		self evaluateBlock: [ t ] .
 		self evaluateBlock: [ t := 66 . t ] .
 		self evaluateBlock: [ t ] } 
+]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests class >> setVariableAndDefineBlock4 [
+	| t block |
+	"variable lookup is done at excecution time"
+	t := 42.
+	block := [ t ].
+	t := 69.
+	^ self evaluateBlock: block
+]
+
+{ #category : #tests }
+DASTInterpreterClassForTests >> evaluateBlockAndIgnoreArgument: arg [
+	^ block value
+]
+
+{ #category : #tests }
+DASTInterpreterClassForTests >> testArg: arg [
+	block := [ arg ].
+	^ self evaluateBlockAndIgnoreArgument: 'zork'
 ]
