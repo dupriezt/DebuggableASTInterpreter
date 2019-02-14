@@ -96,7 +96,7 @@ DASTInterpreterTests >> testFalse [
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testIfTrue [
 
-	self assert: (self evaluateProgram: '^true ifTrue: [3]' ) 
+	self assert: (self evaluateProgram: 'true ifTrue: [3]' ) 
 		  equals: 3
 ]
 
@@ -246,6 +246,13 @@ DASTInterpreterTests >> testLocalVarLastAssignationPrevails [
 DASTInterpreterTests >> testLocalVarScopeWhenAccessedFromABlockCreatedInADifferentContext [
 	
 	self assert: (self evaluateProgram: '^ DASTInterpreterClassForTests getBlockThatAccessesVariableTSetAs42 value' ) 
+		  equals: 42
+]
+
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testLocalVarScopeWhenAccessedFromABlockCreatedInADifferentContextAndItsModifiedInCurrentContext [
+	
+	self assert: (self evaluateProgram: '|t| t:= 83 . ^ DASTInterpreterClassForTests getBlockThatAccessesVariableTSetAs42 value' ) 
 		  equals: 42
 ]
 
