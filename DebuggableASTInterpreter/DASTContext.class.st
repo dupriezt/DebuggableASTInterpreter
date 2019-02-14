@@ -38,7 +38,9 @@ DASTContext >> definesVariableNamed: aName [
 
 { #category : #accessing }
 DASTContext >> find: aByteSymbol [
-	
+	| value |
+	value := receiver isClass ifTrue: [ receiver bindingOf: aByteSymbol ].
+	value ifNotNil: [ ^ value ].
 	"Return the value of a variable.
 	In case this context redefines a variable defined by its parent context, this method will return the variable value for this context"
 	^ variablesDict at: aByteSymbol ifAbsent: [ 

@@ -8,48 +8,60 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> evaluateBlock: aBlock [
+DASTInterpreterClassForTests >> evaluateBlock: aBlock [
 	|t| 
 	t := nil.
 	^ aBlock value.
 ]
 
+{ #category : #tests }
+DASTInterpreterClassForTests >> evaluateBlockAndIgnoreArgument: arg [
+	^ block value
+]
+
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> getBlockThatAccessesVariableTSetAs42 [
+DASTInterpreterClassForTests >> getBlockThatAccessesVariableTSetAs42 [
 	| t |
 	t := 42.
 	^ [ t ]
 ]
 
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> getBlockThatEvaluatesConstant42 [
+DASTInterpreterClassForTests >> getBlockThatEvaluatesConstant42 [
 	^ [ 42 ]
 ]
 
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> getBlockThatReturns32 [
+DASTInterpreterClassForTests >> getBlockThatReturns32 [
 	^ [ ^ 32 ]
 ]
 
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> getBlockThatReturns32EvaluatedInThisContext [
+DASTInterpreterClassForTests >> getBlockThatReturns32EvaluatedInThisContext [
 	^ [ ^ 32 ] value
 ]
 
+{ #category : #tests }
+DASTInterpreterClassForTests >> initialize [ 
+	| x |
+	super initialize.
+	x := 123
+]
+
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> methodEmpty [
+DASTInterpreterClassForTests >> methodEmpty [
 	
 ]
 
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> setVariableAndDefineBlock2 [
+DASTInterpreterClassForTests >> setVariableAndDefineBlock2 [
 	| t |
 	t := 42.
 	^ self evaluateBlock: [ t := 33 . t ]
 ]
 
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> setVariableAndDefineBlock3 [
+DASTInterpreterClassForTests >> setVariableAndDefineBlock3 [
 	| t |
 	t := 42.
 	^{ self evaluateBlock: [ t := 33 . t ] .
@@ -59,18 +71,13 @@ DASTInterpreterClassForTests class >> setVariableAndDefineBlock3 [
 ]
 
 { #category : #'as yet unclassified' }
-DASTInterpreterClassForTests class >> setVariableAndDefineBlock4 [
+DASTInterpreterClassForTests >> setVariableAndDefineBlock4 [
 	| t block |
 	"variable lookup is done at excecution time"
 	t := 42.
 	block := [ t ].
 	t := 69.
 	^ self evaluateBlock: block
-]
-
-{ #category : #tests }
-DASTInterpreterClassForTests >> evaluateBlockAndIgnoreArgument: arg [
-	^ block value
 ]
 
 { #category : #tests }

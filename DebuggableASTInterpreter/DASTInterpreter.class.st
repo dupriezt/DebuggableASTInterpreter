@@ -314,7 +314,11 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitSuperNode: aRBSuperNode [ 
-	^ self currentContext receiver superclass
+	| receiver |
+	receiver := self currentContext receiver.
+	^ receiver isClass 
+	ifTrue: [ receiver superclass  ] 
+	ifFalse: [ receiver class superclass ]
 ]
 
 { #category : #visiting }
