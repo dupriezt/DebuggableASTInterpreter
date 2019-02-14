@@ -266,7 +266,7 @@ DASTInterpreterTests >> testLocalVarScopeWhenAccessedFromBlockAnidated [
 { #category : #'tests-variables-local' }
 DASTInterpreterTests >> testLocalVarScopeWhenAsignedInOuterContextOfBlockAndUpdatedFromBlock [
 	
-	self assert: (self evaluateProgram: '^ DASTInterpreterClassForTests new getBlockThatUpdatesVariableT42WithValue33 value' ) 
+	self assert: (self evaluateProgram: '^ DASTInterpreterClassForTests new getBlockThatAccessesVariableTSetAs42 value' ) 
 		  equals: 42
 ]
 
