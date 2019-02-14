@@ -41,13 +41,6 @@ DASTInterpreterTests >> testBlockEvaluated [
 	
 ]
 
-{ #category : #'tests-blocks' }
-DASTInterpreterTests >> testBlockThatReturns32EvaluatedInThisContext [
-
-	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests getBlockThatReturns32EvaluatedInThisContext' ) 
-		  equals: 32	
-]
-
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateConstant [
 
@@ -103,7 +96,7 @@ DASTInterpreterTests >> testIfTrue [
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
 
-	self assert: (self evaluateProgram: '^ 1<2 ifTrue: [3]' ) 
+	self assert: (self evaluateProgram: '1<2 ifTrue: [3]' ) 
 		  equals: 3
 ]
 
@@ -163,18 +156,18 @@ DASTInterpreterTests >> testInterpretBlockDeclarationWithoutOuterContext [
 ]
 
 { #category : #'tests-blocks' }
-DASTInterpreterTests >> testInterpretBlockEvaluationWithArgumentsAndWithoutOuterContext [
+DASTInterpreterTests >> testInterpretBlockEvaluationWithOneArgument [
 
-	self assert: (self evaluateProgram: '^ [ :x :y | x + y ] value: 1 value: 2')
-		  equals:3.
+	self assert: (self evaluateProgram: '[ :x | x ] value: 2')
+		  equals:2
 
 ]
 
 { #category : #'tests-blocks' }
-DASTInterpreterTests >> testInterpretBlockEvaluationWithOneArgumentAndWithoutOuterContext [
+DASTInterpreterTests >> testInterpretBlockEvaluationWithTwoArguments [
 
-	self assert: (self evaluateProgram: '^ [ :x | x ] value: 2')
-		  equals:2
+	self assert: (self evaluateProgram: '[ :x :y | x + y ] value: 1 value: 2')
+		  equals:3.
 
 ]
 
@@ -252,7 +245,7 @@ DASTInterpreterTests >> testLocalVarScopeWhenAccessedFromABlockCreatedInADiffere
 { #category : #'tests-variables-local' }
 DASTInterpreterTests >> testLocalVarScopeWhenAccessedFromABlockCreatedInADifferentContextAndItsModifiedInCurrentContext [
 	
-	self assert: (self evaluateProgram: '|t| t:= 83 . ^ DASTInterpreterClassForTests getBlockThatAccessesVariableTSetAs42 value' ) 
+	self assert: (self evaluateProgram: '|t| t:= nil . ^ DASTInterpreterClassForTests getBlockThatAccessesVariableTSetAs42 value' ) 
 		  equals: 42
 ]
 
@@ -286,11 +279,24 @@ DASTInterpreterTests >> testLocalVarScopeWhenModifiedFromBlockAnidated [
 	
 ]
 
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testLocalVarScopeWhenUpdatedFromABlockAndEvaluatedInDifferentContext [
+	
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests setVariableAndDefineBlock3' ) 
+		  equals:  { 33 . 33 . 66 . 66 }
+]
+
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testLookupGlobalVariable [
 
-	self assert: (self evaluateProgram: '^ Point') 
+	self assert: (self evaluateProgram: 'Point') 
 		  equals: Point
+]
+
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testMethodReturnsSelfWhenItDoesntContainExplicitReturn [
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests methodEmpty')
+		  equals: DASTInterpreterClassForTests 
 ]
 
 { #category : #'tests-primitives' }

@@ -167,6 +167,11 @@ DASTInterpreter >> visitArgumentNode: aRBArgumentNode [
 ]
 
 { #category : #visiting }
+DASTInterpreter >> visitArrayNode: aRBArrayNode [ 
+	^ (aRBArrayNode statements collect: [:statement | self visit: statement]) asArray
+]
+
+{ #category : #visiting }
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
 	name := aRBAssignmentNode variable name.
