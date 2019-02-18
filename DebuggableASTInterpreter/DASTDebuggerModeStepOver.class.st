@@ -13,8 +13,10 @@ Class {
 { #category : #'debugging actions' }
 DASTDebuggerModeStepOver >> onTracePoint: aRBNode [
 	(context = debuggerService currentNode) ifTrue: [ 
-		debuggerService tracepointReachedFor: aRBNode	
-		 ]
+		debuggerService tracepointReachedFor: aRBNode	.
+		^ true
+		 ].
+	^ false
 
 ]
 

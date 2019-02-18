@@ -33,7 +33,9 @@ DASTDebuggerService >> currentNode [
 DASTDebuggerService >> initializeWithProgram: aRBNode [ 
 
 	interpreter := DASTInterpreter new.
-	interpreter initializeWithProgram: aRBNode; debuggerService: self.
+	interpreter 
+		debuggerService: self;
+		initializeWithProgram: aRBNode.
 	mode := DASTDebuggerModeContinue new debuggerService: self.
 ]
 
@@ -60,7 +62,8 @@ DASTDebuggerService >> mode: aDASTDebuggerMode [
 { #category : #running }
 DASTDebuggerService >> onTracePoint: aRBNode [
 	(aRBNode canBeTracePoint ) 
-		ifTrue: [ mode onTracePoint: aRBNode ]
+		ifTrue: [ ^ mode onTracePoint: aRBNode ].
+	^ false
 	
 ]
 
@@ -81,7 +84,7 @@ DASTDebuggerService >> returnedValue [
 
 { #category : #running }
 DASTDebuggerService >> runInterpreter [
-	^ interpreter run
+	^ interpreter evaluate
 ]
 
 { #category : #running }

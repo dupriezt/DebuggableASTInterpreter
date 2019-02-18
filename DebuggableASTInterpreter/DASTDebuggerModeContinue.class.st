@@ -15,8 +15,10 @@ DASTDebuggerModeContinue >> continue [
 { #category : #running }
 DASTDebuggerModeContinue >> onTracePoint: aRBNode [
 	(debuggerService isBreakpoint: aRBNode) ifTrue: [  
-		debuggerService tracepointReachedFor: aRBNode
+		debuggerService tracepointReachedFor: aRBNode.
+		^ true
 		].
+	^ false
 	
 	
 ]

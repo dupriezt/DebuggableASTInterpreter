@@ -9,7 +9,8 @@ Class {
 		'parent',
 		'receiver',
 		'method',
-		'hasReturned'
+		'hasReturned',
+		'nodes'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -113,6 +114,16 @@ DASTContext >> method [
 DASTContext >> method: aMethod [
 
 	method := aMethod
+]
+
+{ #category : #accessing }
+DASTContext >> nodes [ 
+	^nodes
+]
+
+{ #category : #accessing }
+DASTContext >> nodes: aStack [ 
+	nodes := aStack
 ]
 
 { #category : #accessing }

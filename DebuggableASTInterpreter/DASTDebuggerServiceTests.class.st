@@ -35,7 +35,7 @@ DASTDebuggerServiceTests >> testInterpretComplexMessageAllWithoutBreakPoint [
 	ds initializeWithProgram: (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
 	self assert: ds mode class = DASTDebuggerModeContinue.
 	ds runInterpreter.
-	ds assert: ds interpreter process isTerminated.
+	ds assert: ds interpreter isTerminated.
 	self assert: ds returnedValue equals: 3 
 	
 ]
@@ -75,7 +75,7 @@ DASTDebuggerServiceTests >> testInterpreterProcessIsTerminatedAfterFullEvaluatio
 	ds initializeWithProgram: (RBParser parseExpression: '|x| x:=1 . x:= x+2 . x').
 
 	ds runInterpreter.
-	self assert: ds interpreter process isTerminated 
+	self assert: ds interpreter isTerminated 
 	
 ]
 
@@ -90,7 +90,7 @@ DASTDebuggerServiceTests >> testInterpreterProcessIsTerminatedWhenRunningAfterRe
 	ds runInterpreter.
 	
 	ds runInterpreter.
-	self assert: ds interpreter process isTerminated.
+	self assert: ds interpreter isTerminated.
 ]
 
 { #category : #'tests-breakpoints' }

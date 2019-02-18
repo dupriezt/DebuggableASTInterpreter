@@ -1,22 +1,8 @@
 Class {
 	#name : #DASTInterpreterTests,
-	#superclass : #TestCase,
-	#instVars : [
-		'interpreter'
-	],
+	#superclass : #DASTAbstractInterpreterTests,
 	#category : #DebuggableASTInterpreter
 }
-
-{ #category : #running }
-DASTInterpreterTests >> evaluateProgram: aString [
-	interpreter initializeWithProgram: (RBParser parseExpression: aString).
-	^ interpreter evaluate
-]
-
-{ #category : #running }
-DASTInterpreterTests >> setUp [
-	interpreter := DASTInterpreter new.
-]
 
 { #category : #tests }
 DASTInterpreterTests >> testAddTwoNumbers [
@@ -138,7 +124,7 @@ DASTInterpreterTests >> testInterpretBlockDeclarationWithOuterContext [
 	anInterpreter := DASTInterpreter new.
 	anInterpreter initializeWithProgram: (RBParser parseExpression: '|x| x := 3 . ^ [ 1 ]').
 	anInterpreter evaluate.
-	value := anInterpreter stackTop.
+	value := anInterpreter stack top.
 	self assert: value asText equals: [ 1 ] asText.
 	self assert: (value outerContext find: #x) equals: 3.
 ]

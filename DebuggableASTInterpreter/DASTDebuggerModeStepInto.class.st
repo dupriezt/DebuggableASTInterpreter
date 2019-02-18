@@ -9,7 +9,8 @@ Class {
 
 { #category : #running }
 DASTDebuggerModeStepInto >> onTracePoint: aRBNode [
-	debuggerService tracepointReachedFor: aRBNode
+	debuggerService tracepointReachedFor: aRBNode.
+	^ true
 ]
 
 { #category : #running }

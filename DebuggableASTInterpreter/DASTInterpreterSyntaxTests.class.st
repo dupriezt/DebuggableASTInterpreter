@@ -8,6 +8,7 @@ Class {
 DASTInterpreterSyntaxTests >> testBlockVarsLocalAccessUndeclaredVariable [
 
 	| interpreter |
+	self skip.
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: '[ x := 1 ] value').
 	interpreter signalExceptions: false.
@@ -20,6 +21,7 @@ DASTInterpreterSyntaxTests >> testBlockVarsLocalAccessUndeclaredVariable [
 DASTInterpreterSyntaxTests >> testBlockVarsLocalDeclaredInsideBlock [
 
 	| interpreter value |
+	self skip.
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: '[|x| x:=1 ] value . x') .
 	"exception variable x not found!"
@@ -33,6 +35,7 @@ DASTInterpreterSyntaxTests >> testBlockVarsLocalDeclaredInsideBlock [
 DASTInterpreterSyntaxTests >> testLocalVariableAccessUndeclaredVariable [
 
 	| interpreter value |
+	self skip.
 	interpreter := DASTInterpreter new.
 	interpreter initializeWithProgram: (RBParser parseExpression: 'x').
 	interpreter signalExceptions: false. 
