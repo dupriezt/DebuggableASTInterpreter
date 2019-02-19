@@ -59,6 +59,12 @@ DASTPostOrderTreeVisitor >> visitInstanceVariableNode: aRBInstanceVariableNode [
 ]
 
 { #category : #visiting }
+DASTPostOrderTreeVisitor >> visitLiteralArrayNode: aRBLiteralArrayNode [ 
+	stack push: aRBLiteralArrayNode.
+	aRBLiteralArrayNode contents do: [ :e | e acceptVisitor: self ].	
+]
+
+{ #category : #visiting }
 DASTPostOrderTreeVisitor >> visitLiteralNode: aRBLiteralValueNode [ 
 
 	stack push: aRBLiteralValueNode

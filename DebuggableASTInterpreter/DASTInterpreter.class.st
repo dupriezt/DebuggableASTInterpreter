@@ -208,6 +208,16 @@ DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [
 ]
 
 { #category : #visiting }
+DASTInterpreter >> visitLiteralArrayNode: aRBLiteralArrayNode [ 
+	| literals size |
+	size := aRBLiteralArrayNode contents size.
+	literals := Array new: size.
+	(1 to: size) do: [:i |
+		literals at: i put: self stackPop ].
+	self stackPush: literals
+]
+
+{ #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
 	self onTracePoint: aRBLiteralValueNode.
 	^self stackPush: aRBLiteralValueNode value
