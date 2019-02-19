@@ -43,7 +43,7 @@ DASTInterpreterClassForTests >> getBlockThatReturns32EvaluatedInThisContext [
 
 { #category : #tests }
 DASTInterpreterClassForTests >> initialize [ 
-	| x |
+	|x|
 	super initialize.
 	x := 123
 ]

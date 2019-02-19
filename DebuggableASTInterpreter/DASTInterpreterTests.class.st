@@ -128,6 +128,15 @@ DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
 		  equals: 3
 ]
 
+{ #category : #'tests-variables-instance' }
+DASTInterpreterTests >> testInstanceVarIsCapturedInBlockCreation [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests3 new evaluateBlock' ) 
+		  equals: 123
+		
+
+]
+
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testInstantiateObject [
 
