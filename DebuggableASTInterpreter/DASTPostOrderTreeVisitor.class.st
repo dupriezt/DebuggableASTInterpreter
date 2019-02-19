@@ -31,6 +31,12 @@ DASTPostOrderTreeVisitor >> visitArgumentNode: aRBArgumentNode [
 ]
 
 { #category : #visiting }
+DASTPostOrderTreeVisitor >> visitArrayNode: aRBArrayNode [ 
+	stack push: aRBArrayNode.
+	aRBArrayNode children do: [ :e | e acceptVisitor: self ].	
+]
+
+{ #category : #visiting }
 DASTPostOrderTreeVisitor >> visitAssignmentNode: aRBAssignmentNode [ 
 
 	stack push: aRBAssignmentNode.

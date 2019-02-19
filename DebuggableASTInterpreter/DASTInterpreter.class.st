@@ -7,11 +7,9 @@ Class {
 	#instVars : [
 		'currentContext',
 		'debuggerService',
-		'stackTop',
 		'exceptions',
 		'signalExceptions',
-		'suspended',
-		'stack'
+		'suspended'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -41,7 +39,7 @@ DASTInterpreter >> evaluate [
 	[ currentContext nodes isEmpty ] whileFalse: [  
 		self visit: currentContext nodes pop .
 		 ].
-	^ stack top
+	^ self stackTop
 ]
 
 { #category : #accessors }
@@ -51,17 +49,18 @@ DASTInterpreter >> exceptions [
 
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
-	| visitor nodes|
+	| visitor nodes rootContext |
 	visitor := DASTPostOrderTreeVisitor new.
-	stack := Stack new.
 	
 	(aRBNode doSemanticAnalysis body addReturn; yourself) acceptVisitor: visitor.
 	nodes := visitor stack.
+	rootContext := DASTContextRootSmalltalk new. 
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
 	currentContext := DASTContext new
-		parent: DASTContextRootSmalltalk new;
+		parent: rootContext;
 		method: nodes last methodNode;
 		nodes: nodes;
+		senderContext: rootContext;
 		yourself
 	
 ]
@@ -110,10 +109,14 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 		
 		^ self evaluate.
 		 ].
-
+	"the primitive call doesn't require a context for now"
+	currentContext := currentContext senderContext.
+		 
 	"primitives applied to blocks:"
 	(anObject isKindOf: DASTClosure) ifTrue: [ 
-		anInteger = 266 ifTrue: [ ^ anObject argumentCount ].
+		anInteger = 266 ifTrue: [ 
+			^self stackPush: anObject argumentCount. 
+		 ].
 		self error: 'Fallo primitiva sobre closure ', anInteger asString.
 		 ].
 	 
@@ -122,35 +125,39 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
 	((primitiveResult isKindOf: Array ) and: [primitiveResult first = Context primitiveFailToken first ])
 		ifTrue: [self error: 'Fallo primitiva ', anInteger asString ].
-	^ primitiveResult
+	^ self stackPush: primitiveResult
 
 ]
 
-{ #category : #evaluation }
+{ #category : #visiting }
+DASTInterpreter >> stackPop [
+	^ currentContext stack pop
+]
+
+{ #category : #visiting }
+DASTInterpreter >> stackPush: anObject [ 
+	currentContext stack push: anObject
+]
+
+{ #category : #visiting }
 DASTInterpreter >> stackTop [
-	^stack top
-]
-
-{ #category : #'control-flow' }
-DASTInterpreter >> suspendProcess [
-	suspended := true
-	
+	^ currentContext stack top
 ]
 
 { #category : #evaluation }
 DASTInterpreter >> visit: aRBNode [
-	Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr .
-	Transcript show: stack asString;cr.
-	Transcript show: currentContext nodes asString;cr.
+	"Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr .
+	Transcript show: currentContext stack asString;cr.
+	Transcript show: currentContext nodes asString;cr."
 	aRBNode acceptVisitor: self.
-	Transcript show: stack asString;cr.
+	"Transcript show: currentContext stack asString;cr.
 	Transcript show: currentContext nodes asString;cr.
-	^ stack top
+	"
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitArgumentNode: aRBArgumentNode [ 
-	^ stack push: (currentContext find: aRBArgumentNode name)
+	^self stackPush: (currentContext find: aRBArgumentNode name)
 ]
 
 { #category : #visiting }
@@ -162,7 +169,7 @@ DASTInterpreter >> visitArrayNode: aRBArrayNode [
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
 	name := aRBAssignmentNode variable name.
-	value := self visit: aRBAssignmentNode value.
+	value := self stackPop.
 	self onTracePoint: aRBAssignmentNode.
 	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	
@@ -183,38 +190,39 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 	self onTracePoint: aRBBlockNode.
 	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	closure := DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext.
-	stack push: closure.
-	^ stack top.
+	^self stackPush: closure.
+	
 	
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
-	^ stack push: (currentContext find: aRBGlobalNode name)
+	^self stackPush: (currentContext find: aRBGlobalNode name)
 	
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
 	
-	^ stack push: (self currentContext findInstVarNamed: aRBInstanceVariableNode name)
+	^self stackPush: (self currentContext findInstVarNamed: aRBInstanceVariableNode name)
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
 	self onTracePoint: aRBLiteralValueNode.
-	^ stack push: aRBLiteralValueNode value
+	^self stackPush: aRBLiteralValueNode value
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver compiledMethod methodArgsNames methodValue methodContext previousContext result selector receiverClass method parent valueSentToBlock visitor nodes |
-
+	| arguments receiver compiledMethod methodArgsNames methodContext selector receiverClass method parent valueSentToBlock visitor nodes |
+	
 	" Resolve Arguments "
 	arguments := Array new: aRBMessageNode numArgs.
 	(1 to: aRBMessageNode numArgs) do: [:i |
-		arguments at: i put: stack pop ].
-	receiver := stack pop.
+		arguments at: i put: self stackPop ].
+	arguments := arguments reverse.
+	receiver := self stackPop.
 	selector := aRBMessageNode selector.
 	
 	" Lookup "
@@ -248,16 +256,14 @@ self flag: 'ToDo: Refactoring!!'.
 		receiver: receiver;
 		method: method;
 		nodes: nodes;
+		senderContext: currentContext; 
 		yourself.
 	" Apply - invoke method "
-	previousContext := currentContext.
 	currentContext := methodContext.
 	(method isPrimitive or: [ valueSentToBlock ]) ifTrue: [ 
 		
-		result := self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments.
-		currentContext := previousContext.
-		stack push: result.
-		^ result
+		self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments.
+		^ self
 		].
 	methodArgsNames := method argumentNames.
 	arguments doWithIndex: 
@@ -266,11 +272,9 @@ self flag: 'ToDo: Refactoring!!'.
 						at: (methodArgsNames at: index)
 						put: arg ].
 				
-	methodValue := self evaluate .
+	"self evaluate ."
 	
-	currentContext := previousContext.
-	stack push: methodValue.
-	^ methodValue 
+	^ self 
 			
 ]
 
@@ -284,14 +288,23 @@ DASTInterpreter >> visitMethodNode: aRBBlockNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitReturnNode: aRBReturneNode [
+	| value senderContext |
 	self onTracePoint: aRBReturneNode.
 	self currentContext setAsReturned.
-	^ stack top
+	value := currentContext stack top.
+	
+	senderContext := 
+		self currentContext isBlockContext 
+			ifTrue: [ currentContext parent senderContext]
+			ifFalse: [ currentContext senderContext ].
+	
+	currentContext := senderContext.
+	self stackPush: value
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitSelfNode: aRBSelfNode [ 
-	^ stack push: self currentContext receiver
+	^ self stackPush: self currentContext receiver
 
 ]
 
@@ -302,9 +315,16 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 		lastResult := self visit: node.
 		self currentContext hasReturned ifTrue: [ ^ lastResult ]. 
 	]."
+	| lastResult |
 	self onTracePoint: aRBSequenceNode.
+	lastResult := self currentContext isBlockContext 
+		ifTrue: [ self stackPop ]
+		ifFalse: [ self currentContext receiver ].
 	
-	^ stack top "self currentContext isBlockContext
+	currentContext := currentContext senderContext.
+	self stackPush: lastResult. 
+	
+	"self currentContext isBlockContext
 		ifTrue: [ lastResult ]
 		ifFalse: [ self currentContext receiver ]"
 ]
@@ -314,8 +334,8 @@ DASTInterpreter >> visitSuperNode: aRBSuperNode [
 	| receiver |
 	receiver := self currentContext receiver.
 	^ receiver isClass 
-	ifTrue: [ receiver superclass  ] 
-	ifFalse: [ receiver class superclass ]
+	ifTrue: [ self stackPush: receiver superclass  ] 
+	ifFalse: [ self stackPush: receiver class superclass ]
 ]
 
 { #category : #visiting }
@@ -324,7 +344,7 @@ DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 	name := aRBTemporaryNode name.
 	^ (aRBTemporaryNode isDefinition) 
 		ifTrue: [ currentContext at: name put: nil ]
-		ifFalse: [ stack push: (currentContext find: name)]
+		ifFalse: [ self stackPush: (currentContext find: name)]
 ]
 
 { #category : #visiting }

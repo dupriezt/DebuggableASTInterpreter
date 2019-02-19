@@ -28,6 +28,13 @@ DASTInterpreterTests >> testBlockEvaluated [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testEvaluateArgumentOrder [ 
+	
+	self assert: (self evaluateProgram: 'Array braceWith: 1 with: 2' ) 
+		  equals: #(1 2)
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testEvaluateConstant [
 
 	self assert: (self evaluateProgram: '1' ) 
@@ -44,8 +51,15 @@ DASTInterpreterTests >> testEvaluateFullExpression [
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateMessageWithoutArguments [
 
-	self assert: (self evaluateProgram: '^1 abs' ) 
+	self assert: (self evaluateProgram: '-1 abs' ) 
 		  equals: 1
+]
+
+{ #category : #tests }
+DASTInterpreterTests >> testEvaluateSubstraction [
+	
+	self assert: (self evaluateProgram: '1 - 3' ) 
+		  equals: -2
 ]
 
 { #category : #'tests-exceptions' }
@@ -96,7 +110,7 @@ DASTInterpreterTests >> testInstantiateObject [
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testInstantiateObjectAndSetInstanceVariables [
 
-	self assert: (self evaluateProgram: '^ Point x: 1 y: 2') 
+	self assert: (self evaluateProgram: 'Point x: 1 y: 2') 
 		  equals: (Point x: 1 y: 2)
 	
 ]
@@ -124,7 +138,7 @@ DASTInterpreterTests >> testInterpretBlockDeclarationWithOuterContext [
 	anInterpreter := DASTInterpreter new.
 	anInterpreter initializeWithProgram: (RBParser parseExpression: '|x| x := 3 . ^ [ 1 ]').
 	anInterpreter evaluate.
-	value := anInterpreter stack top.
+	value := anInterpreter stackTop.
 	self assert: value asText equals: [ 1 ] asText.
 	self assert: (value outerContext find: #x) equals: 3.
 ]
@@ -337,6 +351,13 @@ DASTInterpreterTests >> testPrimitiveSubstract [
 
 	self assert: (self evaluateProgram: '^ 1-2')
 		  equals: -1
+]
+
+{ #category : #'tests-self' }
+DASTInterpreterTests >> testSelf [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests yourself')
+		  equals: DASTInterpreterClassForTests 
 ]
 
 { #category : #'tests-primitives' }

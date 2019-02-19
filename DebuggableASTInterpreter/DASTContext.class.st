@@ -6,11 +6,13 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'variablesDict',
-		'parent',
 		'receiver',
 		'method',
 		'hasReturned',
-		'nodes'
+		'nodes',
+		'stack',
+		'senderContext',
+		'parent'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -65,6 +67,7 @@ DASTContext >> hasReturned [
 DASTContext >> initialize [
 	super initialize.
 	hasReturned := false.
+	stack := Stack new.
 	variablesDict := Dictionary new
 ]
 
@@ -118,7 +121,7 @@ DASTContext >> method: aMethod [
 
 { #category : #accessing }
 DASTContext >> nodes [ 
-	^nodes
+	^nodes ifNil: [ nodes := Stack new ]
 ]
 
 { #category : #accessing }
@@ -150,12 +153,32 @@ DASTContext >> receiver: anObject [
 ]
 
 { #category : #accessing }
+DASTContext >> senderContext [
+	^ senderContext
+]
+
+{ #category : #accessing }
+DASTContext >> senderContext: aDASTContext [
+	senderContext := aDASTContext
+]
+
+{ #category : #accessing }
 DASTContext >> setAsReturned [
 	hasReturned := true.
 	"if I'm the context of a block and I return, I must mark my parents as returned until I reach a method node" 
 	self isBlockContext 
 		ifTrue: [ self parent setAsReturned ]
 	
+]
+
+{ #category : #accessing }
+DASTContext >> stack [
+	^ stack
+]
+
+{ #category : #accessing }
+DASTContext >> stack: anObject [
+	stack := anObject
 ]
 
 { #category : #accessing }

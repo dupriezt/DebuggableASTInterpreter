@@ -79,7 +79,7 @@ DASTDebuggerService >> removeBreakPointAt: aRBNode [
 
 { #category : #running }
 DASTDebuggerService >> returnedValue [
-	^ interpreter stackTop
+	^ interpreter returnedValue
 ]
 
 { #category : #running }
@@ -90,5 +90,5 @@ DASTDebuggerService >> runInterpreter [
 { #category : #running }
 DASTDebuggerService >> tracepointReachedFor: aRBNode [
 	Transcript show: 'Tracepoint reached in '; show: aRBNode asString; cr;cr.
-	interpreter suspendProcess
+	self shouldBeImplemented 
 ]
