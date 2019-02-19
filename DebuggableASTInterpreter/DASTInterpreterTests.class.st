@@ -273,7 +273,7 @@ DASTInterpreterTests >> testLocalVarScopeWhenAsignedInOuterContextOfBlockAndUpda
 { #category : #'tests-variables-local' }
 DASTInterpreterTests >> testLocalVarScopeWhenModifiedFromBlock [
 
-	self assert: (self evaluateProgram:  '|x| [[ x:=1 ]] value value . ^ x ') 
+	self assert: (self evaluateProgram:  '|x| [ x:=1 ] value  . ^ x ') 
 		  equals: 1
 	
 ]

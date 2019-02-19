@@ -107,7 +107,7 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 					at: (closure argumentNames at: index)
 					 put: arg ].
 		
-		^ self evaluate.
+		^self
 		 ].
 	"the primitive call doesn't require a context for now"
 	currentContext := currentContext senderContext.
@@ -169,7 +169,7 @@ DASTInterpreter >> visitArrayNode: aRBArrayNode [
 DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [ 
 	| name value |
 	name := aRBAssignmentNode variable name.
-	value := self stackPop.
+	value := self stackTop.
 	self onTracePoint: aRBAssignmentNode.
 	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	
