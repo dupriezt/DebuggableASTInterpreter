@@ -38,7 +38,6 @@ DASTInterpreter >> debuggerService: aDASTDebuggerService [
 
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
-	
 	[ currentContext nodes isEmpty ] whileFalse: [  
 		self visit: currentContext nodes pop .
 		 ].
@@ -140,10 +139,12 @@ DASTInterpreter >> suspendProcess [
 
 { #category : #evaluation }
 DASTInterpreter >> visit: aRBNode [
-	Transcript show: stack asString.
-	aRBNode acceptVisitor: self.
 	Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr .
-	
+	Transcript show: stack asString;cr.
+	Transcript show: currentContext nodes asString;cr.
+	aRBNode acceptVisitor: self.
+	Transcript show: stack asString;cr.
+	Transcript show: currentContext nodes asString;cr.
 	^ stack top
 ]
 
@@ -236,8 +237,9 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 
 self flag: 'ToDo: Refactoring!!'.
 "please refactor me!"
+
 	visitor := DASTPostOrderTreeVisitor new.
-	(method body doSemanticAnalysis; yourself) acceptVisitor: visitor.
+	(method doSemanticAnalysis body) acceptVisitor: visitor.
 	nodes := visitor stack.
 	
 
@@ -289,8 +291,7 @@ DASTInterpreter >> visitReturnNode: aRBReturneNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitSelfNode: aRBSelfNode [ 
-	
-	^ self currentContext receiver
+	^ stack push: self currentContext receiver
 
 ]
 
@@ -321,9 +322,9 @@ DASTInterpreter >> visitSuperNode: aRBSuperNode [
 DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 	| name |
 	name := aRBTemporaryNode name.
-	^ stack push: ((aRBTemporaryNode isDefinition) 
+	^ (aRBTemporaryNode isDefinition) 
 		ifTrue: [ currentContext at: name put: nil ]
-		ifFalse: [ currentContext find: name ])
+		ifFalse: [ stack push: (currentContext find: name)]
 ]
 
 { #category : #visiting }

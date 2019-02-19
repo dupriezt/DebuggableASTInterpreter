@@ -62,9 +62,10 @@ DASTPostOrderTreeVisitor >> visitLiteralNode: aRBLiteralValueNode [
 DASTPostOrderTreeVisitor >> visitMessageNode: aRBMessageNode [ 
 
 	stack push: aRBMessageNode.
-
 	aRBMessageNode arguments reverse do: [ :e | e acceptVisitor: self ].
 	aRBMessageNode receiver acceptVisitor: self.
+	
+
 ]
 
 { #category : #visiting }
@@ -80,6 +81,11 @@ DASTPostOrderTreeVisitor >> visitReturnNode: aRBReturnNode [
 	stack push: aRBReturnNode.
 
 	aRBReturnNode value acceptVisitor: self
+]
+
+{ #category : #visiting }
+DASTPostOrderTreeVisitor >> visitSelfNode: aRBSelfNode [ 
+	stack push: aRBSelfNode
 ]
 
 { #category : #visiting }

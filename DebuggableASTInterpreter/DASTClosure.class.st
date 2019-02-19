@@ -44,6 +44,12 @@ DASTClosure >> body [
 	^ blockNode body
 ]
 
+{ #category : #testing }
+DASTClosure >> doSemanticAnalysis [
+
+	^ blockNode 
+]
+
 { #category : #accessing }
 DASTClosure >> home [
 	
