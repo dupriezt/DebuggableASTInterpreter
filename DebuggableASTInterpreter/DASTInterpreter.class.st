@@ -194,8 +194,8 @@ DASTInterpreter >> visitGlobalNode: aRBGlobalNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
-	self halt.
-	^ self currentContext findInstVarNamed: aRBInstanceVariableNode name
+	
+	^ stack push: (self currentContext findInstVarNamed: aRBInstanceVariableNode name)
 ]
 
 { #category : #visiting }

@@ -43,6 +43,11 @@ DASTPostOrderTreeVisitor >> visitBlockNode: aRBBlockNode [
 ]
 
 { #category : #visiting }
+DASTPostOrderTreeVisitor >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
+	stack push: aRBInstanceVariableNode
+]
+
+{ #category : #visiting }
 DASTPostOrderTreeVisitor >> visitLiteralNode: aRBLiteralValueNode [ 
 
 	stack push: aRBLiteralValueNode
