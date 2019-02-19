@@ -189,7 +189,8 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
-	^ currentContext find: aRBGlobalNode name
+	^ stack push: (currentContext find: aRBGlobalNode name)
+	
 ]
 
 { #category : #visiting }
