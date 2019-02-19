@@ -162,7 +162,12 @@ DASTInterpreter >> visitArgumentNode: aRBArgumentNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitArrayNode: aRBArrayNode [ 
-	^ (aRBArrayNode statements collect: [:statement | self visit: statement]) asArray
+	| literals size |
+	size := aRBArrayNode statements size.
+	literals := Array new: size.
+	(1 to: size) do: [:i |
+		literals at: i put: self stackPop ].
+	self stackPush: literals
 ]
 
 { #category : #visiting }

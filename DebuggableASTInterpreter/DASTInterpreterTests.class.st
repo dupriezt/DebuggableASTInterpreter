@@ -14,8 +14,22 @@ DASTInterpreterTests >> testAddTwoNumbers [
 { #category : #tests }
 DASTInterpreterTests >> testArray [
 
-	self assert: (self evaluateProgram: '#(1 2 3)') 
-		  equals: #(1 2 3)
+	self assert: (self evaluateProgram: '{1 . 2 .  3}') 
+		  equals: {1 . 2 . 3}
+]
+
+{ #category : #tests }
+DASTInterpreterTests >> testArrayWithEvaluatedContents [
+
+	self assert: (self evaluateProgram: '{1 + 6 . 2 .  3}') 
+		  equals: {1 + 6 . 2 . 3}
+]
+
+{ #category : #tests }
+DASTInterpreterTests >> testArrayWithEvaluatedContentsFromMessage [
+
+	self assert: (self evaluateProgram: '{-6 abs . 2 .  3}') 
+		  equals: {-6 abs . 2 . 3}
 ]
 
 { #category : #'tests-blocks' }
@@ -198,6 +212,13 @@ DASTInterpreterTests >> testLessThan [
 
 	self assert: (self evaluateProgram: '^ 1<2')
 		  equals: true
+]
+
+{ #category : #tests }
+DASTInterpreterTests >> testLiteralArray [
+
+	self assert: (self evaluateProgram: '#(1 2 3)') 
+		  equals: #(1 2 3)
 ]
 
 { #category : #'tests-variables-local' }
