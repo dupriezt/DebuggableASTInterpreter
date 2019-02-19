@@ -33,7 +33,7 @@ DASTPostOrderTreeVisitor >> visitArgumentNode: aRBArgumentNode [
 { #category : #visiting }
 DASTPostOrderTreeVisitor >> visitArrayNode: aRBArrayNode [ 
 	stack push: aRBArrayNode.
-	aRBArrayNode children do: [ :e | e acceptVisitor: self ].	
+	aRBArrayNode children reverse do: [ :e | e acceptVisitor: self ].	
 ]
 
 { #category : #visiting }

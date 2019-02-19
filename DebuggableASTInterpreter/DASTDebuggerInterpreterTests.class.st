@@ -12,7 +12,7 @@ DASTDebuggerInterpreterTests >> testFirstNodeToEvaluateInASum [
 	ast := (RBParser parseExpression: '^ 1 + 2').
 	ds initializeWithProgram: ast.
 	
-	self assert: ds currentNode equals: ast	
+	self assert: ds currentNode equals: (RBParser parseExpression:'1')	
 	
 ]
 

@@ -97,6 +97,7 @@ DASTInterpreter >> signalExceptions: aBoolean [
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
 	| primitiveResult closure |
 	
+	"the primitive call doesn't require a context for now"
 	((201 to: 206) includes: anInteger) ifTrue: [ 
 		"primitive is 'value', the receiver is a DASTClosure object"
 		closure := anObject.
@@ -106,10 +107,8 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 				currentContext 
 					at: (closure argumentNames at: index)
 					 put: arg ].
-		
 		^self
 		 ].
-	"the primitive call doesn't require a context for now"
 	currentContext := currentContext senderContext.
 		 
 	"primitives applied to blocks:"
@@ -167,7 +166,7 @@ DASTInterpreter >> visitArrayNode: aRBArrayNode [
 	literals := Array new: size.
 	(1 to: size) do: [:i |
 		literals at: i put: self stackPop ].
-	self stackPush: literals
+	self stackPush: literals reverse
 ]
 
 { #category : #visiting }
@@ -307,7 +306,6 @@ DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	self onTracePoint: aRBReturneNode.
 	self currentContext setAsReturned.
 	value := currentContext stack top.
-	
 	senderContext := 
 		self currentContext isBlockContext 
 			ifTrue: [ currentContext parent senderContext]
@@ -325,11 +323,7 @@ DASTInterpreter >> visitSelfNode: aRBSelfNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
-	"| lastResult |
-	aRBSequenceNode children collect: [:node | 
-		lastResult := self visit: node.
-		self currentContext hasReturned ifTrue: [ ^ lastResult ]. 
-	]."
+	
 	| lastResult |
 	self onTracePoint: aRBSequenceNode.
 	lastResult := self currentContext isBlockContext 
@@ -339,9 +333,6 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 	currentContext := currentContext senderContext.
 	self stackPush: lastResult. 
 	
-	"self currentContext isBlockContext
-		ifTrue: [ lastResult ]
-		ifFalse: [ self currentContext receiver ]"
 ]
 
 { #category : #visiting }

@@ -19,6 +19,13 @@ DASTInterpreterTests >> testArray [
 ]
 
 { #category : #tests }
+DASTInterpreterTests >> testArrayWithBlocksThatReturnEvaluated [
+
+	self assert: (self evaluateProgram: '{[^1] value . [^2] value . [^3] value}') 
+		  equals: 1
+]
+
+{ #category : #tests }
 DASTInterpreterTests >> testArrayWithEvaluatedContents [
 
 	self assert: (self evaluateProgram: '{1 + 6 . 2 .  3}') 
@@ -409,6 +416,14 @@ DASTInterpreterTests >> testVarsLocalBlockDeclaredOutsideBlockAndModifiedInAnida
 	self assert: (self evaluateProgram:  '|x| [ [ x:=1 ] value  ] value . ^ x') 
 		  equals: 1
 	
+]
+
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testVarsLocalEvaluateBlockInDifferentContext [
+	
+	self assert: (self evaluateProgram:  'DASTInterpreterClassForTests new evaluateBlock: [^33]') 
+		  equals: 33
+		
 ]
 
 { #category : #'tests-variables-local' }
