@@ -144,6 +144,12 @@ DASTInterpreter >> stackTop [
 ]
 
 { #category : #evaluation }
+DASTInterpreter >> stepInto [
+	self visit: currentContext nodes pop .
+	^ self stackTop
+]
+
+{ #category : #evaluation }
 DASTInterpreter >> visit: aRBNode [
 	"Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr .
 	Transcript show: currentContext stack asString;cr.

@@ -18,11 +18,8 @@ DASTDebuggerInterpreterTests >> testFirstNodeToEvaluateInASum [
 
 { #category : #tests }
 DASTDebuggerInterpreterTests >> testStepInto [
-	| ds ast |
-	self skip.
-	ds := DASTDebuggerService new.
-	ast := (RBParser parseExpression: '1 + 1').
-	ds initializeWithProgram: ast.
-	ds stepInto
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 + 2').
+	self assert: interpreter stepInto equals: 1.
+	self assert: interpreter stepInto equals: 2.
 	
 ]
