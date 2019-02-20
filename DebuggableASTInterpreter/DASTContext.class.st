@@ -125,12 +125,12 @@ DASTContext >> nodes: aStack [
 ]
 
 { #category : #accessing }
-DASTContext >> parent [
+DASTContext >> parentContext [
 	^ parent
 ]
 
 { #category : #accessing }
-DASTContext >> parent: aDASTContext [
+DASTContext >> parentContext: aDASTContext [
 	parent := aDASTContext
 ]
 

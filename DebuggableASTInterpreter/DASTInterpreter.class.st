@@ -57,7 +57,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	rootContext := DASTContextRootSmalltalk new. 
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
 	currentContext := DASTContext new
-		parent: rootContext;
+		parentContext: rootContext;
 		methodOrClosure: nodes last methodNode;
 		nodes: nodes;
 		senderContext: rootContext;
@@ -68,7 +68,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 { #category : #testing }
 DASTInterpreter >> isTerminated [
 	self flag: 'ToDo: is this method necessary?'.
-	^ self currentContext nodes isEmpty and: [self currentContext parent isRoot].
+	^ self currentContext nodes isEmpty and: [self currentContext parentContext isRoot].
 ]
 
 { #category : #private }
@@ -105,7 +105,7 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 					 put: arg ].
 		^self
 		 ].
-	currentContext := currentContext senderContext.
+	currentContext := currentContext parentContext.
 		 
 	"primitives applied to blocks:"
 	(anObject isKindOf: DASTClosure) ifTrue: [ 
@@ -130,6 +130,15 @@ DASTInterpreter >> stackPop [
 ]
 
 { #category : #stack }
+DASTInterpreter >> stackPop: anInteger [
+	| pops |
+	pops := Array new: anInteger.
+	(1 to: anInteger) do: [:i |
+		pops at: i put: self stackPop ].
+	^ pops
+]
+
+{ #category : #stack }
 DASTInterpreter >> stackPush: anObject [ 
 	currentContext stack push: anObject
 ]
@@ -147,6 +156,7 @@ DASTInterpreter >> stepInto [
 
 { #category : #visiting }
 DASTInterpreter >> visit: aRBNode [
+
 	aRBNode acceptVisitor: self
 ]
 
@@ -159,10 +169,9 @@ DASTInterpreter >> visitArgumentNode: aRBArgumentNode [
 { #category : #visiting }
 DASTInterpreter >> visitArrayNode: aRBArrayNode [ 
 	| literals size |
+	
 	size := aRBArrayNode statements size.
-	literals := Array new: size.
-	(1 to: size) do: [:i |
-		literals at: i put: self stackPop ].
+	literals := self stackPop: size.
 	self stackPush: literals reverse
 ]
 
@@ -185,18 +194,14 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
-	| closure |
-	self onTracePoint: aRBBlockNode.
-	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
-	closure := DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext.
-	self stackPush: closure.
 	
-	
+	self stackPush: (DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext)
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
-	^self stackPush: (currentContext find: aRBGlobalNode name)
+	 
+	self stackPush: (currentContext find: aRBGlobalNode name)
 	
 ]
 
@@ -208,17 +213,16 @@ DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralArrayNode: aRBLiteralArrayNode [ 
+	
 	| literals size |
 	size := aRBLiteralArrayNode contents size.
-	literals := Array new: size.
-	(1 to: size) do: [:i |
-		literals at: i put: self stackPop ].
+	literals := self stackPop: size.
 	self stackPush: literals
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
-	self onTracePoint: aRBLiteralValueNode.
+
 	self stackPush: aRBLiteralValueNode value
 ]
 
@@ -241,7 +245,6 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 
 	compiledMethod := receiverClass lookupSelector: selector.
 	
-	self onTracePoint: aRBMessageNode.
 	
 	valueSentToBlock := (receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ].
 	
@@ -261,7 +264,7 @@ self flag: 'ToDo: Refactoring!!'.
 	
 
 	methodContext := DASTContext new
-		parent: parent;
+		parentContext: parent;
 		receiver: receiver;
 		methodOrClosure: method;
 		nodes: nodes;
@@ -290,7 +293,7 @@ self flag: 'ToDo: Refactoring!!'.
 { #category : #visiting }
 DASTInterpreter >> visitMethodNode: aRBBlockNode [ 
 	
-	self onTracePoint: aRBBlockNode.
+	
 	
 	
 ]
@@ -303,7 +306,7 @@ DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	value := currentContext stack top.
 	senderContext := 
 		self currentContext isBlockContext 
-			ifTrue: [ currentContext parent senderContext]
+			ifTrue: [ currentContext parentContext senderContext]
 			ifFalse: [ currentContext senderContext ].
 	
 	currentContext := senderContext.
