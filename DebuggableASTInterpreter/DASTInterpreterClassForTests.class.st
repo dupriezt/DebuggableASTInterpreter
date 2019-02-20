@@ -63,6 +63,15 @@ DASTInterpreterClassForTests >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+DASTInterpreterClassForTests >> jumpingOut [
+	
+	#(1 2 3 4) do: [:each |
+		each = 3
+			ifTrue: [^ 3]].
+	^ 42
+]
+
+{ #category : #'as yet unclassified' }
 DASTInterpreterClassForTests >> methodEmpty [
 	
 ]
@@ -98,4 +107,13 @@ DASTInterpreterClassForTests >> setVariableAndDefineBlock4 [
 DASTInterpreterClassForTests >> testArg: arg [
 	block := [ arg ].
 	^ self evaluateBlockAndIgnoreArgument: 'zork'
+]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests >> testExplicitReturn [
+	|a|
+	a := 1.
+	0 isZero ifTrue: [ ^ a ].
+	a := 2.
+	^ a
 ]

@@ -409,6 +409,18 @@ DASTInterpreterTests >> testPrimitiveSubstract [
 		  equals: -1
 ]
 
+{ #category : #'tests-return' }
+DASTInterpreterTests >> testReturnExplicit [
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new testExplicitReturn')
+		  equals: 1 
+]
+
+{ #category : #'tests-return' }
+DASTInterpreterTests >> testReturnMethodFromBlock [
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new jumpingOut')
+		  equals: 3
+]
+
 { #category : #'tests-self' }
 DASTInterpreterTests >> testSelf [
 
