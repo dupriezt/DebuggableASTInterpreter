@@ -29,11 +29,6 @@ DASTClosure >> asText [
 ]
 
 { #category : #accessing }
-DASTClosure >> block [
-	self shouldBeImplemented 
-]
-
-{ #category : #accessing }
 DASTClosure >> blockNode [
 	^ blockNode
 ]

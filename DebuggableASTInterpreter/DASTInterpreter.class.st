@@ -67,7 +67,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 
 { #category : #testing }
 DASTInterpreter >> isTerminated [
-	^ self currentContext hasReturned.
+	^ self currentContext nodes isEmpty.
 ]
 
 { #category : #'control-flow' }
@@ -151,13 +151,7 @@ DASTInterpreter >> stepInto [
 
 { #category : #evaluation }
 DASTInterpreter >> visit: aRBNode [
-	"Transcript cr;cr;show: 'visiting';space; show:(aRBNode asString);cr .
-	Transcript show: currentContext stack asString;cr.
-	Transcript show: currentContext nodes asString;cr."
-	aRBNode acceptVisitor: self.
-	"Transcript show: currentContext stack asString;cr.
-	Transcript show: currentContext nodes asString;cr.
-	"
+	aRBNode acceptVisitor: self
 ]
 
 { #category : #visiting }
@@ -310,7 +304,7 @@ DASTInterpreter >> visitMethodNode: aRBBlockNode [
 DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	| value senderContext |
 	self onTracePoint: aRBReturneNode.
-	self currentContext setAsReturned.
+	"self currentContext setAsReturned."
 	value := currentContext stack top.
 	senderContext := 
 		self currentContext isBlockContext 

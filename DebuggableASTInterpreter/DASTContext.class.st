@@ -59,11 +59,6 @@ DASTContext >> findInstVarNamed: aName [
 ]
 
 { #category : #accessing }
-DASTContext >> hasReturned [ 
-	^ hasReturned
-]
-
-{ #category : #accessing }
 DASTContext >> initialize [
 	super initialize.
 	hasReturned := false.
@@ -169,15 +164,6 @@ DASTContext >> senderContext [
 { #category : #accessing }
 DASTContext >> senderContext: aDASTContext [
 	senderContext := aDASTContext
-]
-
-{ #category : #accessing }
-DASTContext >> setAsReturned [
-	hasReturned := true.
-	"if I'm the context of a block and I return, I must mark my parents as returned until I reach a method node" 
-	self isBlockContext 
-		ifTrue: [ self parent setAsReturned ]
-	
 ]
 
 { #category : #accessing }
