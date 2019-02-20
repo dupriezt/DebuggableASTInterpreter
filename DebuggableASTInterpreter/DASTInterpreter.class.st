@@ -195,7 +195,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	
-	self stackPush: (DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext)
+	self stackPush: (DASTBlock new initializeWith: aRBBlockNode outerContext: currentContext)
 ]
 
 { #category : #visiting }
@@ -228,56 +228,23 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver compiledMethod methodArgsNames methodContext selector receiverClass method parent valueSentToBlock visitor nodes |
+	| arguments receiver  methodArgsNames selector|
 	
 	" Resolve Arguments "
-	arguments := Array new: aRBMessageNode numArgs.
-	(1 to: aRBMessageNode numArgs) do: [:i |
-		arguments at: i put: self stackPop ].
-	arguments := arguments reverse.
+	arguments := (self stackPop: aRBMessageNode numArgs) reverse.
 	receiver := self stackPop.
 	selector := aRBMessageNode selector.
 	
 	" Lookup "
-	receiverClass := (receiver isNil and: [ selector = #value ]) 
-		ifTrue: [ BlockClosure ] "ugly hack to handle the first block value with nil as receiver"
-		ifFalse: [ receiver systemClass ].
-
-	compiledMethod := receiverClass lookupSelector: selector.
 	
-	
-	valueSentToBlock := (receiver isKindOf: DASTClosure) and: [ compiledMethod isKindOfValue ].
-	
-	method := valueSentToBlock
-		ifTrue: [ receiver ]
-		ifFalse: [ compiledMethod ast ].
-	parent := valueSentToBlock
-		ifTrue: [ receiver outerContext ]
-		ifFalse: [ self currentContext ].
-
-self flag: 'ToDo: Refactoring!!'.
-"please refactor me!"
-
-	visitor := DASTPostOrderTreeVisitor new.
-	(method doSemanticAnalysis body) acceptVisitor: visitor.
-	nodes := visitor stack.
-	
-
-	methodContext := DASTContext new
-		parentContext: parent;
-		receiver: receiver;
-		methodOrClosure: method;
-		nodes: nodes;
-		senderContext: currentContext; 
-		yourself.
 	" Apply - invoke method "
-	currentContext := methodContext.
-	(method isPrimitive or: [ valueSentToBlock ]) ifTrue: [ 
+	currentContext := DASTContext new initializeWithParent: self currentContext receiver: receiver selector: selector.
+	(currentContext methodOrClosure isPrimitive) ifTrue: [ 
 		
-		self solvePrimitive: compiledMethod primitive receiver: receiver arguments: arguments.
+		self solvePrimitive: currentContext methodOrClosure primitive receiver: receiver arguments: arguments.
 		^ self
 		].
-	methodArgsNames := method argumentNames.
+	methodArgsNames := currentContext methodOrClosure argumentNames.
 	arguments doWithIndex: 
 				[ :arg :index | 
 					currentContext 

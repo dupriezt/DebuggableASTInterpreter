@@ -6,9 +6,9 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'outerContext',
-		'blockNode',
 		'sourceCode',
-		'numArgs'
+		'numArgs',
+		'nodeAST'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -20,7 +20,7 @@ DASTClosure >> argumentCount [
 
 { #category : #accessing }
 DASTClosure >> argumentNames [
-	^ (blockNode arguments collect: [:arg | arg name]) asArray.
+	^ (nodeAST arguments collect: [:arg | arg name]) asArray.
 ]
 
 { #category : #accessing }
@@ -29,29 +29,24 @@ DASTClosure >> asText [
 ]
 
 { #category : #accessing }
-DASTClosure >> blockNode [
-	^ blockNode
-]
-
-{ #category : #accessing }
 DASTClosure >> body [
 	
-	^ blockNode body
+	^ nodeAST body
 ]
 
 { #category : #testing }
 DASTClosure >> doSemanticAnalysis [
 
-	^ blockNode 
+	^ nodeAST 
 ]
 
 { #category : #initialization }
-DASTClosure >> initializeWith: aRBBlockNode outerContext: aDASTContext [
-	self assert: aRBBlockNode isBlock.
-	sourceCode := aRBBlockNode sourceCode.
+DASTClosure >> initializeWith: aRBNode outerContext: aDASTContext [
+	
+	sourceCode := aRBNode sourceCode.
 	outerContext := aDASTContext.
-	blockNode := aRBBlockNode.
-	numArgs := blockNode arguments size
+	nodeAST := aRBNode.
+	numArgs := nodeAST arguments size
 ]
 
 { #category : #accessing }
@@ -71,6 +66,11 @@ DASTClosure >> isPrimitive [
 ]
 
 { #category : #accessing }
+DASTClosure >> nodeAST [
+	^ nodeAST
+]
+
+{ #category : #accessing }
 DASTClosure >> outerContext [
 	^ outerContext isBlockContext 
 		ifTrue: [ outerContext methodOrClosure outerContext ]
@@ -79,7 +79,7 @@ DASTClosure >> outerContext [
 
 { #category : #accessing }
 DASTClosure >> selector [
-	^ blockNode sourceCode
+	self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -89,5 +89,5 @@ DASTClosure >> sourceCode [
 
 { #category : #accessing }
 DASTClosure >> systemClass [
-	^ BlockClosure
+	self subclassResponsibility 
 ]

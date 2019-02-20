@@ -67,6 +67,34 @@ DASTContext >> initialize [
 ]
 
 { #category : #accessing }
+DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: aSelector [
+		
+	| parentContext compiledMethod theMethod visitor|
+	parentContext := aReceiver isBlock 
+		ifTrue: [ aReceiver outerContext ]
+		ifFalse: [ aDASTContext ].
+
+	self	parentContext: parentContext;
+			receiver: aReceiver;			
+			senderContext: aDASTContext.
+	
+	compiledMethod := self lookupSelector: aSelector.
+
+	theMethod := (aReceiver isBlock and: [ compiledMethod isKindOfValue ])
+		ifTrue: [ aReceiver ]
+		ifFalse: [ compiledMethod ast ].
+		
+	visitor := DASTPostOrderTreeVisitor new.
+	(theMethod doSemanticAnalysis body) acceptVisitor: visitor.
+	nodes := visitor stack.
+	
+	self 	methodOrClosure: theMethod;
+			nodes: nodes.
+			
+	^self
+]
+
+{ #category : #accessing }
 DASTContext >> isBlockContext [
 
 	^ methodOrClosure isBlock
@@ -96,10 +124,9 @@ DASTContext >> lookupContextDefining: aByteSymbol [
 { #category : #accessing }
 DASTContext >> lookupSelector: aByteString [
 	| aClass |
-	aClass := (receiver isNil and: [ aByteString = #value ]) 
+	aClass := (self receiver isNil and: [ aByteString = #value ]) 
 		ifTrue: [ BlockClosure ] "ugly hack to handle the first block value with nil as receiver"
-		ifFalse: [ receiver systemClass ].
-		
+		ifFalse: [ self receiver systemClass ].
 	 ^aClass lookupSelector: aByteString.
 ]
 
