@@ -65,7 +65,7 @@ DASTInterpreterClassForTests >> initialize [
 { #category : #'as yet unclassified' }
 DASTInterpreterClassForTests >> jumpingOut [
 	
-	#(3) do: [:each |
+	#(1 2 3 4 5) do: [:each |
 		each = 3
 			ifTrue: [^ 3]].
 	^ 42

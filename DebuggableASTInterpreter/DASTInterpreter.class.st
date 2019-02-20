@@ -58,7 +58,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
 	currentContext := DASTContext new
 		parent: rootContext;
-		method: nodes last methodNode;
+		methodOrClosure: nodes last methodNode;
 		nodes: nodes;
 		senderContext: rootContext;
 		yourself
@@ -274,7 +274,7 @@ self flag: 'ToDo: Refactoring!!'.
 	methodContext := DASTContext new
 		parent: parent;
 		receiver: receiver;
-		method: method;
+		methodOrClosure: method;
 		nodes: nodes;
 		senderContext: currentContext; 
 		yourself.

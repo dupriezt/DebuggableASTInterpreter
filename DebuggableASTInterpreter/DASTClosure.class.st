@@ -78,7 +78,7 @@ DASTClosure >> isPrimitive [
 { #category : #accessing }
 DASTClosure >> outerContext [
 	^ outerContext isBlockContext 
-		ifTrue: [ outerContext method outerContext ]
+		ifTrue: [ outerContext methodOrClosure outerContext ]
 		ifFalse: [ outerContext ]
 ]
 

@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'variablesDict',
 		'receiver',
-		'method',
+		'methodOrClosure',
 		'hasReturned',
 		'nodes',
 		'stack',
@@ -74,7 +74,7 @@ DASTContext >> initialize [
 { #category : #accessing }
 DASTContext >> isBlockContext [
 
-	^ method isBlock
+	^ methodOrClosure isBlock
 ]
 
 { #category : #accessing }
@@ -94,7 +94,7 @@ DASTContext >> lookupContextDefining: aByteSymbol [
 	(self definesVariableNamed: aByteSymbol) ifTrue: [ ^ self ].
 	
 	^ self isBlockContext
-		ifTrue: [ method outerContext lookupContextDefining: aByteSymbol ]
+		ifTrue: [ methodOrClosure outerContext lookupContextDefining: aByteSymbol ]
 		ifFalse: [ nil ]
 ]
 
@@ -109,14 +109,14 @@ DASTContext >> lookupSelector: aByteString [
 ]
 
 { #category : #accessing }
-DASTContext >> method [
-	^ method
+DASTContext >> methodOrClosure [
+	^ methodOrClosure
 ]
 
 { #category : #accessing }
-DASTContext >> method: aMethod [
+DASTContext >> methodOrClosure: aMethodOrAClosure [
 
-	method := aMethod
+	methodOrClosure := aMethodOrAClosure
 ]
 
 { #category : #accessing }
@@ -145,14 +145,14 @@ DASTContext >> printOn: aStream [
 		cr;
 		nextPutAll: receiver asString;
 		nextPutAll: ' <- ';
-		nextPutAll: method selector asString.
+		nextPutAll: methodOrClosure selector asString.
 ]
 
 { #category : #accessing }
 DASTContext >> receiver [
 	
 	^ self isBlockContext
-		ifTrue: [ method outerContext receiver ]
+		ifTrue: [ methodOrClosure outerContext receiver ]
 		ifFalse: [ receiver ]
 ]
 
