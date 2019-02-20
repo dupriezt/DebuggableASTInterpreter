@@ -73,7 +73,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: 
 	parentContext := aReceiver isBlock 
 		ifTrue: [ aReceiver outerContext ]
 		ifFalse: [ aDASTContext ].
-
+	
 	self	parentContext: parentContext;
 			receiver: aReceiver;			
 			senderContext: aDASTContext.
@@ -82,7 +82,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: 
 
 	theMethod := (aReceiver isBlock and: [ compiledMethod isKindOfValue ])
 		ifTrue: [ aReceiver ]
-		ifFalse: [ compiledMethod ast ].
+		ifFalse: [ DASTMethod new initializeWith: compiledMethod ast outerContext: aDASTContext ].
 		
 	visitor := DASTPostOrderTreeVisitor new.
 	(theMethod doSemanticAnalysis body) acceptVisitor: visitor.
@@ -90,8 +90,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: 
 	
 	self 	methodOrClosure: theMethod;
 			nodes: nodes.
-			
-	^self
+	
 ]
 
 { #category : #accessing }

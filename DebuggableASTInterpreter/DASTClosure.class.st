@@ -51,18 +51,12 @@ DASTClosure >> initializeWith: aRBNode outerContext: aDASTContext [
 
 { #category : #accessing }
 DASTClosure >> isBlock [ 
-	^ true
-]
-
-{ #category : #accessing }
-DASTClosure >> isDASTClosure [ 
-	^true
+	self subclassResponsibility 
 ]
 
 { #category : #testing }
 DASTClosure >> isPrimitive [
-	" A closure always has code inside, and cannot have a primitive declaration "
-	^ false
+	self subclassResponsibility 
 ]
 
 { #category : #accessing }

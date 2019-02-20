@@ -11,6 +11,17 @@ DASTBlock >> initializeWith: aRBNode outerContext: aDASTContext [
 ]
 
 { #category : #accessing }
+DASTBlock >> isBlock [ 
+	^true
+]
+
+{ #category : #accessing }
+DASTBlock >> isPrimitive [ 
+	"A block always has code inside, and cannot have a primitive declaration "
+	^ false
+]
+
+{ #category : #accessing }
 DASTBlock >> selector [ 
 	nodeAST sourceCode
 ]

@@ -93,7 +93,6 @@ DASTInterpreter >> signalExceptions: aBoolean [
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
 	| primitiveResult closure |
 	
-	"the primitive call doesn't require a context for now"
 	((201 to: 206) includes: anInteger) ifTrue: [ 
 		"primitive is 'value', the receiver is a DASTClosure object"
 		closure := anObject.
@@ -114,13 +113,12 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 		 ].
 		self error: 'Fallo primitiva sobre closure ', anInteger asString.
 		 ].
-	 
-	
+	 	
 	"apply primitive to object"
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
 	((primitiveResult isKindOf: Array ) and: [primitiveResult first = Context primitiveFailToken first ])
 		ifTrue: [self error: 'Fallo primitiva ', anInteger asString ].
-	^ self stackPush: primitiveResult
+	self stackPush: primitiveResult
 
 ]
 
@@ -228,32 +226,31 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver  methodArgsNames selector|
+	| arguments receiver  methodArgsNames selector method|
 	
 	" Resolve Arguments "
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.
 	receiver := self stackPop.
 	selector := aRBMessageNode selector.
 	
-	" Lookup "
-	
-	" Apply - invoke method "
+	"Current context initialization"
 	currentContext := DASTContext new initializeWithParent: self currentContext receiver: receiver selector: selector.
-	(currentContext methodOrClosure isPrimitive) ifTrue: [ 
-		
-		self solvePrimitive: currentContext methodOrClosure primitive receiver: receiver arguments: arguments.
-		^ self
-		].
-	methodArgsNames := currentContext methodOrClosure argumentNames.
-	arguments doWithIndex: 
+	
+	"Lookup"
+	method := currentContext methodOrClosure.
+	" Apply - invoke method "
+	(method isPrimitive) 
+	ifTrue: [ 
+		self solvePrimitive: method primitive receiver: receiver arguments: arguments.
+		]
+	ifFalse: [ 
+		methodArgsNames := method argumentNames.
+		arguments doWithIndex: 
 				[ :arg :index | 
 					currentContext 
 						at: (methodArgsNames at: index)
 						put: arg ].
-				
-	"self evaluate ."
-	
-	^ self 
+	 ]
 			
 ]
 
