@@ -355,6 +355,18 @@ DASTInterpreterTests >> testMethodReturnsSelfWhenItDoesntContainExplicitReturn [
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new methodEmpty') class = DASTInterpreterClassForTests 
 ]
 
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testMethodReturnsVariableDeclaredInItsBody [
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new getVariableDeclaredInMethod') 
+		  equals: 0  
+]
+
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testMethodReturnsVariableDeclaredInItsBodyAndReasignedInArray [
+	self assert: (self evaluateProgram: '|res| res:= DASTInterpreterClassForTests new getTwoBlocksArray. { res second value . res first value . res second value }') 
+		  equals: { 0 . 2 . 2 } 
+]
+
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testMoreThan [
 

@@ -41,6 +41,20 @@ DASTInterpreterClassForTests >> getBlockThatReturns32EvaluatedInThisContext [
 	^ [ ^ 32 ] value
 ]
 
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests >> getTwoBlocksArray [
+	| a |
+	a := 0.
+	^ {[ a := 2] . [a]}
+]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests >> getVariableDeclaredInMethod [
+	| a |
+	[ a := 0 ] value.
+	^ a
+]
+
 { #category : #tests }
 DASTInterpreterClassForTests >> initialize [ 
 	|x|
