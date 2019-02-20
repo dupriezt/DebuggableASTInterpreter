@@ -39,7 +39,7 @@ DASTContext >> definesVariableNamed: aName [
 	^ self variablesDict keys includes: aName
 ]
 
-{ #category : #accessing }
+{ #category : #lookup }
 DASTContext >> find: aByteSymbol [
 	| value |
 	value := receiver isClass ifTrue: [ receiver bindingOf: aByteSymbol ].
@@ -53,7 +53,7 @@ DASTContext >> find: aByteSymbol [
 		 ]
 ]
 
-{ #category : #accessing }
+{ #category : #lookup }
 DASTContext >> findInstVarNamed: aName [
 	^  self receiver instVarNamed: aName
 ]
@@ -66,7 +66,7 @@ DASTContext >> initialize [
 	variablesDict := Dictionary new
 ]
 
-{ #category : #accessing }
+{ #category : #initialization }
 DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: aSelector [
 		
 	| parentContext compiledMethod theMethod visitor|
@@ -93,24 +93,24 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: 
 	
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 DASTContext >> isBlockContext [
 
 	^ methodOrClosure isBlock
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 DASTContext >> isEmpty [
 	
 	^ variablesDict isEmpty.
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 DASTContext >> isRoot [ 
 	^false
 ]
 
-{ #category : #accessing }
+{ #category : #lookup }
 DASTContext >> lookupContextDefining: aByteSymbol [
 	
 	(self definesVariableNamed: aByteSymbol) ifTrue: [ ^ self ].
@@ -120,7 +120,7 @@ DASTContext >> lookupContextDefining: aByteSymbol [
 		ifFalse: [ nil ]
 ]
 
-{ #category : #accessing }
+{ #category : #lookup }
 DASTContext >> lookupSelector: aByteString [
 	| aClass |
 	aClass := (self receiver isNil and: [ aByteString = #value ]) 
@@ -192,17 +192,17 @@ DASTContext >> senderContext: aDASTContext [
 	senderContext := aDASTContext
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - private' }
 DASTContext >> stack [
 	^ stack
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - private' }
 DASTContext >> stack: anObject [
 	stack := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - private' }
 DASTContext >> variablesDict [
 	^ variablesDict
 ]

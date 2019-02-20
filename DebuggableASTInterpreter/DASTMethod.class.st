@@ -26,6 +26,11 @@ DASTMethod >> primitive [
 ]
 
 { #category : #accessing }
+DASTMethod >> selector [
+	self shouldBeImplemented 
+]
+
+{ #category : #accessing }
 DASTMethod >> systemClass [ 
 	^ CompiledMethod
 ]

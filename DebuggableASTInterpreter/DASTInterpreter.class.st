@@ -71,14 +71,6 @@ DASTInterpreter >> isTerminated [
 	^ self currentContext nodes isEmpty and: [self currentContext parentContext isRoot].
 ]
 
-{ #category : #private }
-DASTInterpreter >> onTracePoint: aRBNode [
-	debuggerService ifNil: [ ^ false  ]. "if the debugger service is not set, the interpreter never steps."
-	^ debuggerService onTracePoint: aRBNode. "returns true if the node is a trace point, and therefore the interpreter must step here"
-
-	
-]
-
 { #category : #flagging }
 DASTInterpreter >> signalExceptions [
 	^ signalExceptions ifNil: [ signalExceptions := true ]
@@ -265,7 +257,6 @@ DASTInterpreter >> visitMethodNode: aRBBlockNode [
 { #category : #visiting }
 DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	| value senderContext |
-	self onTracePoint: aRBReturneNode.
 	"self currentContext setAsReturned."
 	value := currentContext stack top.
 	senderContext := 
@@ -287,7 +278,6 @@ DASTInterpreter >> visitSelfNode: aRBSelfNode [
 DASTInterpreter >> visitSequenceNode: aRBSequenceNode [ 
 	
 	| lastResult |
-	self onTracePoint: aRBSequenceNode.
 	lastResult := self currentContext isBlockContext 
 		ifTrue: [ self stackPop ]
 		ifFalse: [ self currentContext receiver ].
