@@ -156,7 +156,7 @@ DASTInterpreter >> visit: aRBNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitArgumentNode: aRBArgumentNode [ 
-	^self stackPush: (currentContext find: aRBArgumentNode name)
+	self stackPush: (currentContext find: aRBArgumentNode name)
 ]
 
 { #category : #visiting }
@@ -180,12 +180,12 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	(self currentContext lookupContextDefining: name)
 		ifNotNil: [ :definingContext | 
 			definingContext at: name put: value.
-			^ value ].
+			^ self ].
 
 	(self currentContext receiver systemClass allInstVarNames includes: name)
 		ifTrue: [ self currentContext receiver instVarNamed: name put: value ].
 
-	^value
+	^ self
 ]
 
 { #category : #visiting }
@@ -194,7 +194,7 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 	self onTracePoint: aRBBlockNode.
 	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	closure := DASTClosure new initializeWith: aRBBlockNode outerContext: currentContext.
-	^self stackPush: closure.
+	self stackPush: closure.
 	
 	
 ]
@@ -208,7 +208,7 @@ DASTInterpreter >> visitGlobalNode: aRBGlobalNode [
 { #category : #visiting }
 DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
 	
-	^self stackPush: (self currentContext findInstVarNamed: aRBInstanceVariableNode name)
+	self stackPush: (self currentContext findInstVarNamed: aRBInstanceVariableNode name)
 ]
 
 { #category : #visiting }
@@ -224,7 +224,7 @@ DASTInterpreter >> visitLiteralArrayNode: aRBLiteralArrayNode [
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
 	self onTracePoint: aRBLiteralValueNode.
-	^self stackPush: aRBLiteralValueNode value
+	self stackPush: aRBLiteralValueNode value
 ]
 
 { #category : #visiting }
@@ -317,7 +317,7 @@ DASTInterpreter >> visitReturnNode: aRBReturneNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitSelfNode: aRBSelfNode [ 
-	^ self stackPush: self currentContext receiver
+	self stackPush: self currentContext receiver
 
 ]
 
@@ -339,29 +339,16 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 DASTInterpreter >> visitSuperNode: aRBSuperNode [ 
 	| receiver |
 	receiver := self currentContext receiver.
-	^ receiver isClass 
-	ifTrue: [ self stackPush: receiver superclass  ] 
-	ifFalse: [ self stackPush: receiver class superclass ]
+	receiver isClass 
+		ifTrue: [ self stackPush: receiver superclass  ] 
+		ifFalse: [ self stackPush: receiver class superclass ]
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 	| name |
 	name := aRBTemporaryNode name.
-	^ (aRBTemporaryNode isDefinition) 
+	aRBTemporaryNode isDefinition 
 		ifTrue: [ currentContext at: name put: nil ]
 		ifFalse: [ self stackPush: (currentContext find: name)]
-]
-
-{ #category : #visiting }
-DASTInterpreter >> visitVariableNode: aRBVariableNode [
-	| varName |
-	varName := aRBVariableNode name.
-	(aRBVariableNode isDefinition or: [ aRBVariableNode isArgumentInMethod ]) ifTrue: [ currentContext at: varName put: nil. ^ varName ].
-	
-	(aRBVariableNode isVariableNameInAssignation)
-			ifTrue: [ currentContext find: varName. 
-						 ^ varName ] "left side of :=, or the argument in a method"
-			ifFalse: [ self onTracePoint: aRBVariableNode . 
-						  ^ currentContext find: varName  ] "right side of :="
 ]
