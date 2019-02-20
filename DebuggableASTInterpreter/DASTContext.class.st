@@ -7,39 +7,30 @@ Class {
 	#instVars : [
 		'variablesDict',
 		'receiver',
-		'methodOrClosure',
 		'hasReturned',
 		'nodes',
 		'stack',
 		'senderContext',
-		'parent'
+		'parent',
+		'closure'
 	],
 	#category : #DebuggableASTInterpreter
 }
 
-{ #category : #accessing }
+{ #category : #'API-store' }
 DASTContext >> at: aByteSymbol put: anObject [
 	^self variablesDict at: aByteSymbol put: anObject.
 	
 	
 ]
 
-{ #category : #accessing }
-DASTContext >> at: aByteSymbol putInHierarchy: anObject [
-	| definingContext |
-	definingContext := self lookupContextDefining: aByteSymbol.
-	definingContext ifNil: [ definingContext := self ].
-	^ definingContext variablesDict at: aByteSymbol put: anObject
-	
-]
-
-{ #category : #accessing }
+{ #category : #'accessing - private' }
 DASTContext >> definesVariableNamed: aName [
 	"Return if the variable is locally defined as a temporary or as an argument"
 	^ self variablesDict keys includes: aName
 ]
 
-{ #category : #lookup }
+{ #category : #'API-lookup' }
 DASTContext >> find: aByteSymbol [
 	| value |
 	value := receiver isClass ifTrue: [ receiver bindingOf: aByteSymbol ].
@@ -53,7 +44,7 @@ DASTContext >> find: aByteSymbol [
 		 ]
 ]
 
-{ #category : #lookup }
+{ #category : #'API-lookup' }
 DASTContext >> findInstVarNamed: aName [
 	^  self receiver instVarNamed: aName
 ]
@@ -88,7 +79,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: 
 	(theMethod doSemanticAnalysis body) acceptVisitor: visitor.
 	nodes := visitor stack.
 	
-	self 	methodOrClosure: theMethod;
+	self 	methodOrBlock: theMethod;
 			nodes: nodes.
 	
 ]
@@ -96,7 +87,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: 
 { #category : #testing }
 DASTContext >> isBlockContext [
 
-	^ methodOrClosure isBlock
+	^ closure isBlock
 ]
 
 { #category : #testing }
@@ -110,17 +101,17 @@ DASTContext >> isRoot [
 	^false
 ]
 
-{ #category : #lookup }
+{ #category : #'accessing - private' }
 DASTContext >> lookupContextDefining: aByteSymbol [
 	
 	(self definesVariableNamed: aByteSymbol) ifTrue: [ ^ self ].
 	
 	^ self isBlockContext
-		ifTrue: [ methodOrClosure outerContext lookupContextDefining: aByteSymbol ]
+		ifTrue: [ closure outerContext lookupContextDefining: aByteSymbol ]
 		ifFalse: [ nil ]
 ]
 
-{ #category : #lookup }
+{ #category : #'accessing - private' }
 DASTContext >> lookupSelector: aByteString [
 	| aClass |
 	aClass := (self receiver isNil and: [ aByteString = #value ]) 
@@ -130,14 +121,14 @@ DASTContext >> lookupSelector: aByteString [
 ]
 
 { #category : #accessing }
-DASTContext >> methodOrClosure [
-	^ methodOrClosure
+DASTContext >> methodOrBlock [
+	^ closure
 ]
 
 { #category : #accessing }
-DASTContext >> methodOrClosure: aMethodOrAClosure [
+DASTContext >> methodOrBlock: aDASTClosure [
 
-	methodOrClosure := aMethodOrAClosure
+	closure := aDASTClosure
 ]
 
 { #category : #accessing }
@@ -166,14 +157,14 @@ DASTContext >> printOn: aStream [
 		cr;
 		nextPutAll: receiver asString;
 		nextPutAll: ' <- ';
-		nextPutAll: methodOrClosure selector asString.
+		nextPutAll: closure selector asString.
 ]
 
 { #category : #accessing }
 DASTContext >> receiver [
 	
 	^ self isBlockContext
-		ifTrue: [ methodOrClosure outerContext receiver ]
+		ifTrue: [ closure outerContext receiver ]
 		ifFalse: [ receiver ]
 ]
 

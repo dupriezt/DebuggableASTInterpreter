@@ -58,7 +58,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
 	currentContext := DASTContext new
 		parentContext: rootContext;
-		methodOrClosure: nodes last methodNode;
+		methodOrBlock: nodes last methodNode;
 		nodes: nodes;
 		senderContext: rootContext;
 		yourself
@@ -229,7 +229,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	currentContext := DASTContext new initializeWithParent: self currentContext receiver: receiver selector: selector.
 	
 	"Lookup"
-	method := currentContext methodOrClosure.
+	method := currentContext methodOrBlock.
 	" Apply - invoke method "
 	(method isPrimitive) 
 	ifTrue: [ 

@@ -7,15 +7,15 @@ Class {
 	#instVars : [
 		'outerContext',
 		'sourceCode',
-		'numArgs',
-		'nodeAST'
+		'nodeAST',
+		'numArgs'
 	],
 	#category : #DebuggableASTInterpreter
 }
 
 { #category : #accessing }
 DASTClosure >> argumentCount [
-	^numArgs .
+	^numArgs 
 ]
 
 { #category : #accessing }
@@ -47,6 +47,7 @@ DASTClosure >> initializeWith: aRBNode outerContext: aDASTContext [
 	outerContext := aDASTContext.
 	nodeAST := aRBNode.
 	numArgs := nodeAST arguments size
+	
 ]
 
 { #category : #accessing }
@@ -67,7 +68,7 @@ DASTClosure >> nodeAST [
 { #category : #accessing }
 DASTClosure >> outerContext [
 	^ outerContext isBlockContext 
-		ifTrue: [ outerContext methodOrClosure outerContext ]
+		ifTrue: [ outerContext methodOrBlock outerContext ]
 		ifFalse: [ outerContext ]
 ]
 
