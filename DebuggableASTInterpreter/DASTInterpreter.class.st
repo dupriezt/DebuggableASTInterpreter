@@ -24,7 +24,7 @@ DASTInterpreter >> currentContext [
 	^ currentContext.
 ]
 
-{ #category : #execution }
+{ #category : #accessors }
 DASTInterpreter >> currentNode [
 	^ currentContext nodes top
 ]
@@ -67,20 +67,16 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 
 { #category : #testing }
 DASTInterpreter >> isTerminated [
-	^ self currentContext nodes isEmpty.
+	self flag: 'ToDo: is this method necessary?'.
+	^ self currentContext nodes isEmpty and: [self currentContext parent isRoot].
 ]
 
-{ #category : #'control-flow' }
+{ #category : #private }
 DASTInterpreter >> onTracePoint: aRBNode [
 	debuggerService ifNil: [ ^ false  ]. "if the debugger service is not set, the interpreter never steps."
 	^ debuggerService onTracePoint: aRBNode. "returns true if the node is a trace point, and therefore the interpreter must step here"
 
 	
-]
-
-{ #category : #'control-flow' }
-DASTInterpreter >> resumeProcess [
-	suspended := false
 ]
 
 { #category : #flagging }
@@ -128,17 +124,17 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 
 ]
 
-{ #category : #visiting }
+{ #category : #stack }
 DASTInterpreter >> stackPop [
 	^ currentContext stack pop
 ]
 
-{ #category : #visiting }
+{ #category : #stack }
 DASTInterpreter >> stackPush: anObject [ 
 	currentContext stack push: anObject
 ]
 
-{ #category : #visiting }
+{ #category : #stack }
 DASTInterpreter >> stackTop [
 	^ currentContext stack top
 ]
@@ -149,13 +145,14 @@ DASTInterpreter >> stepInto [
 	^ self stackTop
 ]
 
-{ #category : #evaluation }
+{ #category : #visiting }
 DASTInterpreter >> visit: aRBNode [
 	aRBNode acceptVisitor: self
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitArgumentNode: aRBArgumentNode [ 
+
 	self stackPush: (currentContext find: aRBArgumentNode name)
 ]
 
@@ -174,18 +171,16 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	| name value |
 	name := aRBAssignmentNode variable name.
 	value := self stackTop.
-	self onTracePoint: aRBAssignmentNode.
-	"if the node is a tracepoint, the action associated to itself is excecuted after the break"
 	
+	"Temporary variables assignment"
 	(self currentContext lookupContextDefining: name)
-		ifNotNil: [ :definingContext | 
-			definingContext at: name put: value.
-			^ self ].
-
+		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
+	
+	"Instance variables assignment"
 	(self currentContext receiver systemClass allInstVarNames includes: name)
-		ifTrue: [ self currentContext receiver instVarNamed: name put: value ].
+		ifTrue: [ self currentContext receiver instVarNamed: name put: value . ^ self].
 
-	^ self
+	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'
 ]
 
 { #category : #visiting }
