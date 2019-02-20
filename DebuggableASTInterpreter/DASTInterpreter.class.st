@@ -309,6 +309,7 @@ DASTInterpreter >> visitMethodNode: aRBBlockNode [
 { #category : #visiting }
 DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	| value senderContext |
+	self halt.
 	self onTracePoint: aRBReturneNode.
 	self currentContext setAsReturned.
 	value := currentContext stack top.

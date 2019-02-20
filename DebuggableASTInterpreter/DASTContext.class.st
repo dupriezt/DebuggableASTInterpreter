@@ -140,10 +140,19 @@ DASTContext >> parent: aDASTContext [
 ]
 
 { #category : #accessing }
+DASTContext >> printOn: aStream [
+	aStream
+		cr;
+		nextPutAll: receiver class asString;
+		nextPutAll: ' >> ';
+		nextPutAll: method selector asString.
+]
+
+{ #category : #accessing }
 DASTContext >> receiver [
 	
 	^ self isBlockContext
-		ifTrue: [ method home receiver ]
+		ifTrue: [ method outerContext receiver ]
 		ifFalse: [ receiver ]
 ]
 

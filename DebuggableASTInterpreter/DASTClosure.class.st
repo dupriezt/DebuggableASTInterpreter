@@ -50,12 +50,6 @@ DASTClosure >> doSemanticAnalysis [
 	^ blockNode 
 ]
 
-{ #category : #accessing }
-DASTClosure >> home [
-	
-	^ outerContext
-]
-
 { #category : #initialization }
 DASTClosure >> initializeWith: aRBBlockNode outerContext: aDASTContext [
 	self assert: aRBBlockNode isBlock.
