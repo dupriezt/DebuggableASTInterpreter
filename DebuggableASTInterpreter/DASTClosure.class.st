@@ -77,7 +77,14 @@ DASTClosure >> isPrimitive [
 
 { #category : #accessing }
 DASTClosure >> outerContext [
-	^ outerContext
+	^ outerContext isBlockContext 
+		ifTrue: [ outerContext method outerContext ]
+		ifFalse: [ outerContext ]
+]
+
+{ #category : #accessing }
+DASTClosure >> selector [
+	^ blockNode sourceCode
 ]
 
 { #category : #accessing }

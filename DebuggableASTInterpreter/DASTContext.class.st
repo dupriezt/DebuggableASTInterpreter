@@ -143,8 +143,8 @@ DASTContext >> parent: aDASTContext [
 DASTContext >> printOn: aStream [
 	aStream
 		cr;
-		nextPutAll: receiver class asString;
-		nextPutAll: ' >> ';
+		nextPutAll: receiver asString;
+		nextPutAll: ' <- ';
 		nextPutAll: method selector asString.
 ]
 
