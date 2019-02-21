@@ -202,7 +202,7 @@ DASTContext >> printOn: aStream [
 		cr;
 		nextPutAll: (receiver ifNotNil: [ receiver asString ] ifNil: [ 'nil' ]);
 		nextPutAll: ' <- ';
-		nextPutAll: closure selector asString.
+		nextPutAll: (closure ifNotNil: [ closure selector asString ] ifNil: ['nil']).
 ]
 
 { #category : #accessing }

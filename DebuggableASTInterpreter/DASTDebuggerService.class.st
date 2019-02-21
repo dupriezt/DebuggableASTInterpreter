@@ -36,7 +36,8 @@ DASTDebuggerService >> initializeWithProgram: aRBNode [
 	interpreter 
 		debuggerService: self;
 		initializeWithProgram: aRBNode.
-	mode := DASTDebuggerModeContinue new debuggerService: self.
+	"mode := DASTDebuggerModeContinue new debuggerService: self."
+	self stepInto.
 ]
 
 { #category : #'accessing - private' }

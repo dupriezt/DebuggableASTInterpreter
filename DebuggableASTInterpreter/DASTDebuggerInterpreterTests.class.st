@@ -23,3 +23,13 @@ DASTDebuggerInterpreterTests >> testStepInto [
 	self assert: interpreter stepInto equals: 2.
 	
 ]
+
+{ #category : #tests }
+DASTDebuggerInterpreterTests >> testStepOver [
+	interpreter initializeWithProgram: (RBParser parseExpression: '2 raisedTo: 3').
+	self assert: interpreter stepOver equals: 2.
+	self assert: interpreter stepOver equals: 3.
+	self assert: interpreter stepOver equals: 8.
+	
+	
+]

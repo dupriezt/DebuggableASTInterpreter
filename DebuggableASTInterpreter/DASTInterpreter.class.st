@@ -56,12 +56,13 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	nodes := visitor stack.
 	rootContext := DASTContextRootSmalltalk new. 
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
+	self flag: 'update next call'.
 	currentContext := DASTContext new
 		parentContext: rootContext;
 		methodOrBlock: nodes last methodNode;
 		nodes: nodes;
 		senderContext: rootContext;
-		yourself
+		yourself.
 	
 ]
 
@@ -135,12 +136,28 @@ DASTInterpreter >> stackPush: anObject [
 
 { #category : #stack }
 DASTInterpreter >> stackTop [
-	^ currentContext stack top
+	^ currentContext stack
+		ifNotNil: [ :s | s ifEmpty: [ nil ]
+								 ifNotEmpty: [s top] ] 
+		ifNil: [ nil ]
 ]
 
 { #category : #evaluation }
 DASTInterpreter >> stepInto [
+	currentContext nodes isEmpty ifTrue: [ self error: 'The evaluation has terminated!' ].
 	self visit: currentContext nodes pop .
+	^ self stackTop
+]
+
+{ #category : #evaluation }
+DASTInterpreter >> stepOver [
+	| initialContext |
+	initialContext := currentContext.
+	self stepInto.
+	[ currentContext ~= initialContext] whileTrue: [ 
+		self stepInto.
+	 ].
+
 	^ self stackTop
 ]
 
@@ -301,9 +318,6 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 { #category : #visiting }
 DASTInterpreter >> visitSuperNode: aRBSuperNode [ 
 	self stackPush: self currentContext receiver.
-	"receiver isClass 
-		ifTrue: [ self stackPush: receiver superclass  ] 
-		ifFalse: [ self stackPush: receiver class superclass ]"
 ]
 
 { #category : #visiting }

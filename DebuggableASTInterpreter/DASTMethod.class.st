@@ -27,7 +27,7 @@ DASTMethod >> primitive [
 
 { #category : #accessing }
 DASTMethod >> selector [
-	self shouldBeImplemented 
+	^ nodeAST selector
 ]
 
 { #category : #accessing }
