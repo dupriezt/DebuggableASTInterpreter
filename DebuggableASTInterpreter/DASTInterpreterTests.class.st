@@ -446,6 +446,24 @@ DASTInterpreterTests >> testSelf [
 		  equals: DASTInterpreterClassForTests 
 ]
 
+{ #category : #'tests-super' }
+DASTInterpreterTests >> testSuperTheReceiverRemains [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests5 new m1' ) 
+		  equals: 3
+		
+
+]
+
+{ #category : #'tests-super' }
+DASTInterpreterTests >> testSuperTheReceiverRemains1 [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests4 new m1' ) 
+		  equals: 42
+		
+
+]
+
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testTrue [
 

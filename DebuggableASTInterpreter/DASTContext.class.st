@@ -12,7 +12,8 @@ Class {
 		'stack',
 		'senderContext',
 		'parent',
-		'closure'
+		'closure',
+		'messageNode'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -74,6 +75,16 @@ DASTContext >> findVariable: aByteSymbol [
 			ifNotNil: [ :pc | pc findVariable: aByteSymbol ]
 ]
 
+{ #category : #'accessing - private' }
+DASTContext >> getClassForLookup [
+	| aClass |
+	
+	aClass := self receiver systemClass.
+	 ^ aClass := (messageNode isSuperSend 
+			ifTrue: [messageNode methodNode methodClass superclass] 
+			ifFalse: [aClass]) .
+]
+
 { #category : #accessing }
 DASTContext >> initialize [
 	super initialize.
@@ -83,18 +94,25 @@ DASTContext >> initialize [
 ]
 
 { #category : #initialization }
-DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver selector: aSelector [
-		
-	| parentContext compiledMethod theMethod visitor|
+DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNode: aRBMessageNode [ 
+	
+	| parentContext compiledMethod theMethod visitor aClass aSelector |
+
 	parentContext := aReceiver isBlock 
 		ifTrue: [ aReceiver outerContext ]
 		ifFalse: [ aDASTContext ].
 	
 	self	parentContext: parentContext;
 			receiver: aReceiver;			
-			senderContext: aDASTContext.
+			senderContext: aDASTContext;
+			messageNode: aRBMessageNode .
+	aSelector := aRBMessageNode selector.
 	
-	compiledMethod := self lookupSelector: aSelector.
+	aClass := (self receiver isNil and: [ aSelector = #value ]) 
+		ifTrue: [ BlockClosure ]
+		ifFalse: [ self getClassForLookup ].
+	
+	compiledMethod := self lookupSelector: aSelector startInClass: aClass.
 
 	theMethod := (aReceiver isBlock and: [ compiledMethod isKindOfValue ])
 		ifTrue: [ aReceiver ]
@@ -136,16 +154,15 @@ DASTContext >> lookupContextDefiningLocalVariable: aByteSymbol [
 		ifFalse: [ nil ]
 ]
 
-{ #category : #'accessing - private' }
-DASTContext >> lookupSelector: aByteString [
-	| aClass |
+{ #category : #'API-lookup' }
+DASTContext >> lookupSelector: aByteString startInClass: aClass [ 
 	
-	"ugly hack to handle the first block value with nil as receiver"
-	aClass := (self receiver isNil and: [ aByteString = #value ]) 
-		ifTrue: [ BlockClosure ] 
-		ifFalse: [ self receiver systemClass ].
-	
-	 ^aClass lookupSelector: aByteString.
+	^ aClass lookupSelector: aByteString.
+]
+
+{ #category : #accessing }
+DASTContext >> messageNode: aRBMessageNode [ 
+	messageNode := aRBMessageNode
 ]
 
 { #category : #accessing }
@@ -183,7 +200,7 @@ DASTContext >> parentContext: aDASTContext [
 DASTContext >> printOn: aStream [
 	aStream
 		cr;
-		nextPutAll: receiver asString;
+		nextPutAll: (receiver ifNotNil: [ receiver asString ] ifNil: [ 'nil' ]);
 		nextPutAll: ' <- ';
 		nextPutAll: closure selector asString.
 ]

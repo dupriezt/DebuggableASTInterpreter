@@ -218,15 +218,18 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver  methodArgsNames selector method|
+	| arguments receiver  methodArgsNames method |
 	
 	" Resolve Arguments "
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.
 	receiver := self stackPop.
-	selector := aRBMessageNode selector.
 	
 	"Current context initialization"
-	currentContext := DASTContext new initializeWithParent: self currentContext receiver: receiver selector: selector.
+	currentContext := 
+		DASTContext new 
+			initializeWithParent: self currentContext 
+			receiver: receiver 
+			messageNode: aRBMessageNode.
 	
 	"Lookup"
 	method := currentContext methodOrBlock.
@@ -289,11 +292,10 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitSuperNode: aRBSuperNode [ 
-	| receiver |
-	receiver := self currentContext receiver.
-	receiver isClass 
+	self stackPush: self currentContext receiver.
+	"receiver isClass 
 		ifTrue: [ self stackPush: receiver superclass  ] 
-		ifFalse: [ self stackPush: receiver class superclass ]
+		ifFalse: [ self stackPush: receiver class superclass ]"
 ]
 
 { #category : #visiting }

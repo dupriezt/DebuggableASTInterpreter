@@ -3,3 +3,13 @@ Class {
 	#superclass : #DASTInterpreterClassForTests5,
 	#category : #DebuggableASTInterpreter
 }
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests4 >> m1 [
+	^super m1
+]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests4 >> m2 [
+	^42
+]

@@ -22,3 +22,13 @@ DASTInterpreterClassForTests5 class >> new [
     count := count +1.
     ^ super new
 ]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests5 >> m1 [
+	^self m2
+]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests5 >> m2 [
+	^3
+]
