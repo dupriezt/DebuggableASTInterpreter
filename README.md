@@ -14,11 +14,11 @@ An AST interpreter that accepts stepping operations
 - +primitive code evaluation in case the primitive fails
 - +Does not understand
 
-- +cascades
-- +step into bloques
-- +step into metodos
-- +step over method
-- +step over bloques
+- *cascades
+- *step into bloques
+- *step into metodos
+- *step over method
+- *step over bloques
 
 
 Preguntas:
