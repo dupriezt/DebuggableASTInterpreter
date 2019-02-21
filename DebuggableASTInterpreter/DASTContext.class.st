@@ -139,9 +139,12 @@ DASTContext >> lookupContextDefiningLocalVariable: aByteSymbol [
 { #category : #'accessing - private' }
 DASTContext >> lookupSelector: aByteString [
 	| aClass |
+	
+	"ugly hack to handle the first block value with nil as receiver"
 	aClass := (self receiver isNil and: [ aByteString = #value ]) 
-		ifTrue: [ BlockClosure ] "ugly hack to handle the first block value with nil as receiver"
+		ifTrue: [ BlockClosure ] 
 		ifFalse: [ self receiver systemClass ].
+	
 	 ^aClass lookupSelector: aByteString.
 ]
 

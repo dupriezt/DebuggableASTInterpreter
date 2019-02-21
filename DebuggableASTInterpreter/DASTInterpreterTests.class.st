@@ -55,6 +55,24 @@ DASTInterpreterTests >> testBlockEvaluated [
 	
 ]
 
+{ #category : #'tests-variables-class-instance' }
+DASTInterpreterTests >> testClassInstanceVarScopeIsRespectedWhenInherited [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests5 initialize .  DASTInterpreterClassForTests4 initialize . DASTInterpreterClassForTests5 new . ^ {DASTInterpreterClassForTests5 count . DASTInterpreterClassForTests4 count }' ) 
+		  equals: { 1 . 0} 
+		
+
+]
+
+{ #category : #'tests-super' }
+DASTInterpreterTests >> testCustomInitializationUsingSuper [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests5 new class' ) 
+		  equals: DASTInterpreterClassForTests5
+		
+
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateArgumentOrder [ 
 	
