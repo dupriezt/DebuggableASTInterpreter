@@ -4,6 +4,9 @@ Class {
 	#instVars : [
 		'block'
 	],
+	#classVars : [
+		'classvar'
+	],
 	#category : #DebuggableASTInterpreter
 }
 

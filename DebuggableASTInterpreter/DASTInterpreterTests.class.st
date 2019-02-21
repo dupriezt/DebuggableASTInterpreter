@@ -177,7 +177,7 @@ DASTInterpreterTests >> testInterpretBlockDeclarationWithOuterContext [
 	anInterpreter evaluate.
 	value := anInterpreter stackTop.
 	self assert: value asText equals: [ 1 ] asText.
-	self assert: (value outerContext find: #x) equals: 3.
+	self assert: (value outerContext findVariable: #x) equals: 3.
 ]
 
 { #category : #'tests-blocks' }

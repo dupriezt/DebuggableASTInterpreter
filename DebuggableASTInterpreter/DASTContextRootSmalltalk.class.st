@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #accessing }
-DASTContextRootSmalltalk >> find: aByteSymbol [
+DASTContextRootSmalltalk >> findVariable: aByteSymbol [
 
 	^ Smalltalk globals at: aByteSymbol ifAbsent: [ 
 		self error: 'Variable ', aByteSymbol , ' not defined!'

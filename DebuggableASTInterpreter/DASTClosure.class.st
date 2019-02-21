@@ -73,6 +73,11 @@ DASTClosure >> outerContext [
 ]
 
 { #category : #accessing }
+DASTClosure >> primitive [
+	self subclassResponsibility 
+]
+
+{ #category : #accessing }
 DASTClosure >> selector [
 	self subclassResponsibility 
 ]

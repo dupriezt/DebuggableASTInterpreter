@@ -25,28 +25,53 @@ DASTContext >> at: aByteSymbol put: anObject [
 ]
 
 { #category : #'accessing - private' }
-DASTContext >> definesVariableNamed: aName [
-	"Return if the variable is locally defined as a temporary or as an argument"
+DASTContext >> definesLocalVariableNamed: aName [
+	"Return true if the context defines the local variable"
 	^ self variablesDict keys includes: aName
 ]
 
 { #category : #'API-lookup' }
-DASTContext >> find: aByteSymbol [
-	| value |
-	value := receiver isClass ifTrue: [ receiver bindingOf: aByteSymbol ].
-	value ifNotNil: [ ^ value ].
-	"Return the value of a variable.
-	In case this context redefines a variable defined by its parent context, this method will return the variable value for this context"
-	^ variablesDict at: aByteSymbol ifAbsent: [ 
-		parent 
-			ifNil: [ self error: 'Variable ', aByteSymbol , ' not defined!'  ] 
-			ifNotNil: [ :pc | pc find: aByteSymbol ]
-		 ]
+DASTContext >> findClassVariable: aName [
+	^ receiver isClass 
+		ifTrue: [ receiver bindingOf: aName ]
+		ifFalse: [ nil ]
 ]
 
 { #category : #'API-lookup' }
-DASTContext >> findInstVarNamed: aName [
-	^  self receiver instVarNamed: aName
+DASTContext >> findInstanceVariable: aName [
+
+	[^ self receiver instVarNamed: aName]
+		on: InstanceVariableNotFound do: [ ^nil ] 
+]
+
+{ #category : #'API-lookup' }
+DASTContext >> findLocalVariable: aName [
+
+	^ variablesDict 
+		at: aName 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #'API-lookup' }
+DASTContext >> findVariable: aByteSymbol [
+	|value|
+	"Return the value of a variable. If this context redefines a variable defined by its parent context, this method will return the variable value for this context"
+	
+	"class variables"
+	value := self findClassVariable: aByteSymbol.
+	value ifNotNil: [ ^ value ].
+	
+	"instance variables"
+	value := self findInstanceVariable: aByteSymbol.
+	value ifNotNil: [ ^ value ].
+	
+	"local variables"
+	value := self findLocalVariable: aByteSymbol.
+	value ifNotNil: [ ^ value ].
+	
+	^ parent 
+			ifNil: [ self error: 'Variable ', aByteSymbol , ' not defined!'  ] 
+			ifNotNil: [ :pc | pc findVariable: aByteSymbol ]
 ]
 
 { #category : #accessing }
@@ -102,12 +127,12 @@ DASTContext >> isRoot [
 ]
 
 { #category : #'accessing - private' }
-DASTContext >> lookupContextDefining: aByteSymbol [
+DASTContext >> lookupContextDefiningLocalVariable: aByteSymbol [
 	
-	(self definesVariableNamed: aByteSymbol) ifTrue: [ ^ self ].
+	(self definesLocalVariableNamed: aByteSymbol) ifTrue: [ ^ self ].
 	
 	^ self isBlockContext
-		ifTrue: [ closure outerContext lookupContextDefining: aByteSymbol ]
+		ifTrue: [ closure outerContext lookupContextDefiningLocalVariable: aByteSymbol ]
 		ifFalse: [ nil ]
 ]
 

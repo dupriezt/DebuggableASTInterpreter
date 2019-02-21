@@ -153,7 +153,7 @@ DASTInterpreter >> visit: aRBNode [
 { #category : #visiting }
 DASTInterpreter >> visitArgumentNode: aRBArgumentNode [ 
 
-	self stackPush: (currentContext find: aRBArgumentNode name)
+	self stackPush: (currentContext findVariable: aRBArgumentNode name)
 ]
 
 { #category : #visiting }
@@ -172,7 +172,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	value := self stackTop.
 	
 	"Temporary variables assignment"
-	(self currentContext lookupContextDefining: name)
+	(self currentContext lookupContextDefiningLocalVariable: name)
 		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
 	
 	"Instance variables assignment"
@@ -191,14 +191,14 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 { #category : #visiting }
 DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
 	 
-	self stackPush: (currentContext find: aRBGlobalNode name)
+	self stackPush: (currentContext findVariable: aRBGlobalNode name)
 	
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
 	
-	self stackPush: (self currentContext findInstVarNamed: aRBInstanceVariableNode name)
+	self stackPush: (self currentContext findInstanceVariable: aRBInstanceVariableNode name)
 ]
 
 { #category : #visiting }
@@ -302,5 +302,5 @@ DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 	name := aRBTemporaryNode name.
 	aRBTemporaryNode isDefinition 
 		ifTrue: [ currentContext at: name put: nil ]
-		ifFalse: [ self stackPush: (currentContext find: name)]
+		ifFalse: [ self stackPush: (currentContext findVariable: name)]
 ]

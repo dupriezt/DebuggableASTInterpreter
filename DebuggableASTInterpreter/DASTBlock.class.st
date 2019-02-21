@@ -22,6 +22,12 @@ DASTBlock >> isPrimitive [
 ]
 
 { #category : #accessing }
+DASTBlock >> primitive [ 
+	"A block always has code inside, and cannot have a primitive declaration "
+	self shouldNotImplement 
+]
+
+{ #category : #accessing }
 DASTBlock >> selector [ 
 	nodeAST sourceCode
 ]
