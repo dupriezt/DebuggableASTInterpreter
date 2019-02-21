@@ -362,6 +362,13 @@ DASTInterpreterTests >> testLookupGlobalVariable [
 		  equals: Point
 ]
 
+{ #category : #tests }
+DASTInterpreterTests >> testMessageCascade [
+
+	self assert: (self evaluateProgram: '2 raisedTo: 3; raisedTo: 4' ) 
+		  equals: 16
+]
+
 { #category : #'tests-methods' }
 DASTInterpreterTests >> testMethodMethodArgumentsAreIndependentFromOtherMethodsArguments [
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new testArg: ''foo'' ')

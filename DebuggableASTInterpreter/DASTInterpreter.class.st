@@ -189,6 +189,14 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 ]
 
 { #category : #visiting }
+DASTInterpreter >> visitCascadeNode: aRBCascadeNode [ 
+	| lastResult |
+	lastResult := self stackPop.
+	currentContext := currentContext senderContext.
+	self stackPush: lastResult. 
+]
+
+{ #category : #visiting }
 DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
 	 
 	self stackPush: (currentContext findVariable: aRBGlobalNode name)

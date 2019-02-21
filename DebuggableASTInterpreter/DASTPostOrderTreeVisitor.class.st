@@ -48,6 +48,12 @@ DASTPostOrderTreeVisitor >> visitBlockNode: aRBBlockNode [
 	stack push: aRBBlockNode 
 ]
 
+{ #category : #accessing }
+DASTPostOrderTreeVisitor >> visitCascadeNode: aRBCascadeNode [ 
+	stack push: aRBCascadeNode.
+	aRBCascadeNode children reverse do: [ :e | e acceptVisitor: self ]
+]
+
 { #category : #visiting }
 DASTPostOrderTreeVisitor >> visitGlobalNode: aRBGlobalNode [ 
 	stack push: aRBGlobalNode
