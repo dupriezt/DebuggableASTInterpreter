@@ -5,11 +5,7 @@ Class {
 	#name : #DASTInterpreter,
 	#superclass : #Object,
 	#instVars : [
-		'currentContext',
-		'debuggerService',
-		'exceptions',
-		'signalExceptions',
-		'suspended'
+		'currentContext'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -29,22 +25,12 @@ DASTInterpreter >> currentNode [
 	^ currentContext nodes top
 ]
 
-{ #category : #accessors }
-DASTInterpreter >> debuggerService: aDASTDebuggerService [
-	debuggerService := aDASTDebuggerService 
-]
-
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
 	[ currentContext nodes isEmpty ] whileFalse: [  
 		self visit: currentContext nodes pop .
 		 ].
 	^ self stackTop
-]
-
-{ #category : #accessors }
-DASTInterpreter >> exceptions [
-	^ exceptions ifNil: [ exceptions := OrderedCollection new ]
 ]
 
 { #category : #initialization }
@@ -70,16 +56,6 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 DASTInterpreter >> isTerminated [
 	self flag: 'ToDo: is this method necessary?'.
 	^ self currentContext nodes isEmpty and: [self currentContext parentContext isRoot].
-]
-
-{ #category : #flagging }
-DASTInterpreter >> signalExceptions [
-	^ signalExceptions ifNil: [ signalExceptions := true ]
-]
-
-{ #category : #flagging }
-DASTInterpreter >> signalExceptions: aBoolean [
-	signalExceptions := aBoolean
 ]
 
 { #category : #private }
@@ -196,6 +172,10 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	(self currentContext receiver systemClass allInstVarNames includes: name)
 		ifTrue: [ self currentContext receiver instVarNamed: name put: value . ^ self].
 
+	"ToDo: fix this step since it's updating the class in the system and not in the environment"
+	(self currentContext receiver systemClass classPool includesKey: name)
+		ifTrue: [ self currentContext receiver systemClass classPool at: name put: value . ^ self].
+		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'
 ]
 
@@ -215,7 +195,6 @@ DASTInterpreter >> visitCascadeNode: aRBCascadeNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
-	 
 	self stackPush: (currentContext findVariable: aRBGlobalNode name)
 	
 ]
