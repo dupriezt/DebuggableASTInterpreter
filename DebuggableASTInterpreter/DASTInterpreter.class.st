@@ -65,12 +65,7 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 	((201 to: 206) includes: anInteger) ifTrue: [ 
 		"primitive is 'value', the receiver is a DASTClosure object"
 		closure := anObject.
-		
-		anArray doWithIndex: 
-		  [ :arg :index | 
-				currentContext 
-					at: (closure argumentNames at: index)
-					 put: arg ].
+		currentContext setTemporalVariablesNamed: closure argumentNames values: anArray.
 		^self
 		 ].
 	currentContext := currentContext parentContext.
@@ -81,7 +76,7 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 			^self stackPush: anObject argumentCount. 
 		 ].
 		DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject 
-		 ].
+	].
 	 	
 	"apply primitive to object"
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
@@ -222,7 +217,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver  methodArgsNames method |
+	| arguments receiver method |
 	
 	" Resolve Arguments "
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.
@@ -240,17 +235,13 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	" Apply - invoke method "
 	(method isPrimitive) 
 	ifTrue: [ 
-		self solvePrimitive: method primitive receiver: receiver arguments: arguments.
+		[self solvePrimitive: method primitive receiver: receiver arguments: arguments]
+			on: DASTPrimitiveFailed
+			do: [:e | e signal].
 		]
 	ifFalse: [ 
-		methodArgsNames := method argumentNames.
-		arguments doWithIndex: 
-				[ :arg :index | 
-					currentContext 
-						at: (methodArgsNames at: index)
-						put: arg ].
+		currentContext setTemporalVariablesNamed: method argumentNames values: arguments.
 	 ]
-			
 ]
 
 { #category : #visiting }

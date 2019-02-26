@@ -229,6 +229,15 @@ DASTContext >> senderContext: aDASTContext [
 	senderContext := aDASTContext
 ]
 
+{ #category : #accessing }
+DASTContext >> setTemporalVariablesNamed: names values: values [
+	values doWithIndex: 
+		  [ :val :index | 
+				self 
+					at: (names at: index)
+					 put: val ].
+]
+
 { #category : #'accessing - private' }
 DASTContext >> stack [
 	^ stack
