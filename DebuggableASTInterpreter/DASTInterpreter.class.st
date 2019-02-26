@@ -58,12 +58,16 @@ DASTInterpreter >> isTerminated [
 	^ self currentContext nodes isEmpty and: [self currentContext parentContext isRoot].
 ]
 
+{ #category : #testing }
+DASTInterpreter >> primitiveResultIsError: anObject [
+	^ (anObject isKindOf: Array ) and: [anObject first = Context primitiveFailToken first ]
+]
+
 { #category : #private }
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
 	| primitiveResult |
-	
 	currentContext := currentContext parentContext.
-		 
+		
 	"primitives applied to blocks:"
 	(anObject isKindOf: DASTClosure) ifTrue: [ 
 		anInteger = 266 ifTrue: [ 
@@ -74,7 +78,7 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 	 	
 	"apply primitive to object"
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
-	((primitiveResult isKindOf: Array ) and: [primitiveResult first = Context primitiveFailToken first ])
+	(self primitiveResultIsError: primitiveResult)
 		ifTrue: [DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject ].
 	self stackPush: primitiveResult
 
