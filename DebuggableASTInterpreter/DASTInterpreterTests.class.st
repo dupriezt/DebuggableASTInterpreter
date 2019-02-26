@@ -443,6 +443,13 @@ DASTInterpreterTests >> testPrimitiveSubstract [
 		  equals: -1
 ]
 
+{ #category : #'tests-primitives' }
+DASTInterpreterTests >> testPrimitiveThatFails [
+
+	self should: [self evaluateProgram: 'DASTInterpreterClassForTests new methodPrimitive9999ThatDoesntExist']
+		  raise: DASTPrimitiveFailed 
+]
+
 { #category : #'tests-return' }
 DASTInterpreterTests >> testReturnExplicit [
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new testExplicitReturn')

@@ -80,13 +80,13 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 		anInteger = 266 ifTrue: [ 
 			^self stackPush: anObject argumentCount. 
 		 ].
-		self error: 'Fallo primitiva sobre closure ', anInteger asString.
+		DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject 
 		 ].
 	 	
 	"apply primitive to object"
 	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
 	((primitiveResult isKindOf: Array ) and: [primitiveResult first = Context primitiveFailToken first ])
-		ifTrue: [self error: 'Fallo primitiva ', anInteger asString ].
+		ifTrue: [DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject ].
 	self stackPush: primitiveResult
 
 ]

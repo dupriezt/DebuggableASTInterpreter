@@ -76,6 +76,13 @@ DASTInterpreterClassForTests >> methodEmpty [
 	
 ]
 
+{ #category : #tests }
+DASTInterpreterClassForTests >> methodPrimitive9999ThatDoesntExist [
+	<primitive: 9999>
+	^ true
+	
+]
+
 { #category : #'as yet unclassified' }
 DASTInterpreterClassForTests >> setVariableAndDefineBlock2 [
 	| t |
