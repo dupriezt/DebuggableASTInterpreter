@@ -4,6 +4,9 @@ Class {
 	#instVars : [
 		'x'
 	],
+	#classVars : [
+		'classVar'
+	],
 	#category : #DebuggableASTInterpreter
 }
 
@@ -18,7 +21,17 @@ DASTInterpreterClassForTests3 >> evaluateBlock: aBlock [
 ]
 
 { #category : #initialization }
+DASTInterpreterClassForTests3 >> getClassVariable [
+	^ classVar
+]
+
+{ #category : #initialization }
 DASTInterpreterClassForTests3 >> initialize [
 	super initialize.
 	x := 123
+]
+
+{ #category : #initialization }
+DASTInterpreterClassForTests3 >> setClassVariable [
+	classVar := 42
 ]

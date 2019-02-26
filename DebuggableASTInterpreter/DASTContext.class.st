@@ -13,7 +13,8 @@ Class {
 		'senderContext',
 		'parent',
 		'closure',
-		'messageNode'
+		'messageNode',
+		'environment'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -35,7 +36,7 @@ DASTContext >> definesLocalVariableNamed: aName [
 DASTContext >> findClassVariable: aName [
 	^ receiver isClass 
 		ifTrue: [ receiver bindingOf: aName ]
-		ifFalse: [ nil ]
+		ifFalse:[ (receiver systemClass bindingOf: aName) value ]
 ]
 
 { #category : #'API-lookup' }
