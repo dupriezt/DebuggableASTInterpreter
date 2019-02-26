@@ -98,7 +98,6 @@ DASTContext >> initialize [
 DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNode: aRBMessageNode [ 
 	
 	| parentContext compiledMethod theMethod visitor aClass aSelector |
-
 	parentContext := aReceiver isBlock 
 		ifTrue: [ aReceiver outerContext ]
 		ifFalse: [ aDASTContext ].
@@ -217,6 +216,12 @@ DASTContext >> receiver [
 { #category : #accessing }
 DASTContext >> receiver: anObject [
 	receiver := anObject
+]
+
+{ #category : #modifying }
+DASTContext >> removePragmaFromMethod [
+	self halt.
+	closure nodeAST removePragma: (closure nodeAST pragmas select: [ :p | p isPrimitive ]) first
 ]
 
 { #category : #accessing }

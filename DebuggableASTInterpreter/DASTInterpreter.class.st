@@ -66,7 +66,7 @@ DASTInterpreter >> primitiveResultIsError: anObject [
 { #category : #private }
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
 	| primitiveResult |
-	currentContext := currentContext parentContext.
+	"currentContext := currentContext parentContext."
 		
 	"primitives applied to blocks:"
 	(anObject isKindOf: DASTClosure) ifTrue: [ 
@@ -215,31 +215,35 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
-	| arguments receiver method |
+	| arguments receiver method newContext |
 	
 	" Resolve Arguments "
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.
 	receiver := self stackPop.
 	
 	"Current context initialization"
-	currentContext := 
+	newContext := 
 		DASTContext new 
 			initializeWithParent: self currentContext 
 			receiver: receiver 
 			messageNode: aRBMessageNode.
 	
 	"Lookup"
-	method := currentContext methodOrBlock.
+	method := newContext methodOrBlock.
 	" Apply - invoke method "
 	(method isPrimitive and: [method isMessageValue not ])  
 	ifTrue: [ 
 		[self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
-			do: [:e | e signal].
+			do: [ 
+					newContext := newContext removePragmaFromMethod;yourself .
+					currentContext := newContext.	
+					currentContext setTemporalVariablesNamed: method argumentNames values: arguments.]
 		]
-	ifFalse: [ 
+	ifFalse: [.
+		currentContext := newContext.	
 		currentContext setTemporalVariablesNamed: method argumentNames values: arguments.
-	 ]
+	]
 ]
 
 { #category : #visiting }
