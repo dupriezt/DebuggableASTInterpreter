@@ -120,7 +120,7 @@ DASTInterpreter >> stackTop [
 
 { #category : #evaluation }
 DASTInterpreter >> stepInto [
-	currentContext nodes isEmpty ifTrue: [ self error: 'The evaluation has terminated!' ].
+	currentContext nodes isEmpty ifTrue: [ DASTEvaluationTerminated  signal].
 	self visit: currentContext nodes pop .
 	^ self stackTop
 ]

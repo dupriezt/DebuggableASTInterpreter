@@ -13,6 +13,15 @@ DASTDebuggerInterpreterTests >> testFirstNodeToEvaluateInASum [
 ]
 
 { #category : #tests }
+DASTDebuggerInterpreterTests >> testStepAfterTheEndOfProgramExcecutionThrowsAnException [
+	interpreter initializeWithProgram: (RBParser parseExpression: '1').
+	self assert: interpreter stepOver equals: 1.
+	self should: [interpreter stepOver] raise: DASTEvaluationTerminated 
+	
+	
+]
+
+{ #category : #tests }
 DASTDebuggerInterpreterTests >> testStepInto [
 	interpreter initializeWithProgram: (RBParser parseExpression: '1+2').
 	self assert: interpreter stepInto equals: 1.
