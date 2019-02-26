@@ -16,6 +16,11 @@ DASTBlock >> isBlock [
 ]
 
 { #category : #accessing }
+DASTBlock >> isMessageValue [
+	^ false
+]
+
+{ #category : #accessing }
 DASTBlock >> isPrimitive [ 
 	"A block always has code inside, and cannot have a primitive declaration "
 	^ false

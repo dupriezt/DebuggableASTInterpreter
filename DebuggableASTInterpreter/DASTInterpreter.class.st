@@ -60,14 +60,8 @@ DASTInterpreter >> isTerminated [
 
 { #category : #private }
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
-	| primitiveResult closure |
+	| primitiveResult |
 	
-	((201 to: 206) includes: anInteger) ifTrue: [ 
-		"primitive is 'value', the receiver is a DASTClosure object"
-		closure := anObject.
-		currentContext setTemporalVariablesNamed: closure argumentNames values: anArray.
-		^self
-		 ].
 	currentContext := currentContext parentContext.
 		 
 	"primitives applied to blocks:"
@@ -233,7 +227,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	"Lookup"
 	method := currentContext methodOrBlock.
 	" Apply - invoke method "
-	(method isPrimitive) 
+	(method isPrimitive and: [method isMessageValue not ])  
 	ifTrue: [ 
 		[self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed

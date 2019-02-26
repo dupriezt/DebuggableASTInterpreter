@@ -56,6 +56,12 @@ DASTClosure >> isBlock [
 ]
 
 { #category : #testing }
+DASTClosure >> isMessageValue [
+	"returns true if self is the 'value' message sent to a block (or any of its variants)"
+	self subclassResponsibility 
+]
+
+{ #category : #testing }
 DASTClosure >> isPrimitive [
 	self subclassResponsibility 
 ]
