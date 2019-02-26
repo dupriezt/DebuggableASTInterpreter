@@ -113,12 +113,12 @@ DASTInterpreterTests >> testExceptionZeroDivide [
 	<expectedFailure>
 	| anInterpreter |
 	
-	
+	self skip.
+	"ToDo: redefine after defining exceptions"
 	
 	anInterpreter := DASTInterpreter new.
 	anInterpreter initializeWithProgram: (RBParser parseExpression: '1 / 0').
 	"prevent that the exceptions are signaled"
-	anInterpreter signalExceptions: false. 
 	anInterpreter evaluate.
 	self assert: anInterpreter exceptions isEmpty not.
 	self assert: anInterpreter exceptions last asString equals: 'ZeroDivide'.
@@ -130,6 +130,15 @@ DASTInterpreterTests >> testExceptionZeroDivide [
 DASTInterpreterTests >> testFalse [
 	self assert: (self evaluateProgram: 'false')
 		  equals: false
+]
+
+{ #category : #'tests-variables-class' }
+DASTInterpreterTests >> testGetClassVariableFromMethodInInstanceSide [
+	
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests3 new getClassVariable' ) 
+		  equals: 42
+		
+
 ]
 
 { #category : #'tests-blocks' }
