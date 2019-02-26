@@ -6,13 +6,9 @@ Class {
 
 { #category : #tests }
 DASTDebuggerInterpreterTests >> testFirstNodeToEvaluateInASum [
-	| ds ast |
-
-	ds := DASTDebuggerService new.
-	ast := (RBParser parseExpression: '^ 1 + 2').
-	ds initializeWithProgram: ast.
+	interpreter initializeWithProgram: (RBParser parseExpression: '1 + 1').
 	
-	self assert: ds currentNode equals: (RBParser parseExpression:'1')	
+	self assert: interpreter currentNode equals: (RBParser parseExpression:'1')	
 	
 ]
 
