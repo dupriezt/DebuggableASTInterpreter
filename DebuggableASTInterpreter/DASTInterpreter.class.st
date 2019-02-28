@@ -31,7 +31,7 @@ DASTInterpreter >> evaluate [
 		
 	[ currentContext nodes isEmpty ] whileFalse: [  
 		node:=currentContext nodes pop. 
-		self haltIf: (node isMessage and: [node selector = #findNextHandlerOrSignalingContext]).
+		"self haltIf: (node isMessage and: [node selector = #findNextHandlerOrSignalingContext])."
 		self visit: node .
 		 ].
 	^ self stackTop

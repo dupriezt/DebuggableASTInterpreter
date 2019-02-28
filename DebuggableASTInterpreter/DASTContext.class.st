@@ -70,6 +70,37 @@ DASTContext >> findLocalVariable: aName [
 		ifAbsent: [ nil ]
 ]
 
+{ #category : #'private-exceptions' }
+DASTContext >> findNextHandlerContext [
+	"Return the next handler marked context, returning nil if there is none.  Search starts with self and proceeds up to nil."
+
+	| context |
+	context := self findNextHandlerOrSignalingContext.
+	context isNil
+		ifTrue: [ ^ nil ].
+	context isHandlerContext
+		ifTrue: [ ^ context ].	"If it isn't a handler context, it must be a signaling context.
+	When we reach a signaling context we must skip over any handlers
+	that might be on the stack between the signaling context and the handler
+	context for that signal."
+	^ context exception privHandlerContext nextHandlerContext
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> findNextHandlerOrSignalingContext [
+	"Return the next handler/signaling marked context, answering nil if there is none. 
+	Search starts with self and proceeds up to nil."
+
+	"<primitive: 197>"
+	| context |
+	context := self.
+	[ 
+	context isHandlerOrSignalingContext
+		ifTrue: [ ^ context ].
+	(context := context sender) == nil ] whileFalse.
+	^ nil
+]
+
 { #category : #'API-lookup' }
 DASTContext >> findVariable: aByteSymbol [
 	|value|
@@ -154,6 +185,20 @@ DASTContext >> isEmpty [
 	^ variablesDict isEmpty.
 ]
 
+{ #category : #'private-exceptions' }
+DASTContext >> isHandlerContext [
+	"is this context for #on:do:?"
+	^self isHandlerOrSignalingContext and: [ self selector == #on:do: ]
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> isHandlerOrSignalingContext [
+	"Both BlockClosure>>on:do: (handler) and Context>>evaluateSignal: (signaling) 
+	are marked with primitive 199."
+	self flag: 'aqui se va a caer'.
+	^closure isBlock not and:  [closure primitive = 199]
+]
+
 { #category : #testing }
 DASTContext >> isRoot [ 
 	^false
@@ -191,6 +236,12 @@ DASTContext >> methodOrBlock [
 DASTContext >> methodOrBlock: aDASTClosure [
 
 	closure := aDASTClosure
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> nextHandlerContext [
+
+	^ self sender findNextHandlerContext
 ]
 
 { #category : #accessing }
@@ -250,6 +301,12 @@ DASTContext >> returnContext [
 	^self isBlockContext 
 		ifTrue: [ ^ parent returnContext ]
 		ifFalse: [ ^ sender  ]
+]
+
+{ #category : #accessing }
+DASTContext >> selector [
+
+	^closure selector ifNil: [closure defaultSelector].
 ]
 
 { #category : #accessing }
