@@ -47,7 +47,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 		parentContext: rootContext;
 		methodOrBlock: nodes last methodNode;
 		nodes: nodes;
-		senderContext: rootContext;
+		sender: rootContext;
 		yourself.
 	
 ]
@@ -182,7 +182,7 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 DASTInterpreter >> visitCascadeNode: aRBCascadeNode [ 
 	| lastResult |
 	lastResult := self stackPop.
-	currentContext := currentContext senderContext.
+	currentContext := currentContext sender.
 	self stackPush: lastResult. 
 ]
 
@@ -221,29 +221,29 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.
 	receiver := self stackPop.
 	
-	"Current context initialization"
+	" Current context initialization (implicit lookup)"
 	newContext := 
 		DASTContext new 
 			initializeWithParent: self currentContext 
 			receiver: receiver 
 			messageNode: aRBMessageNode.
 	
-	"Lookup"
+	" Lookup"
 	method := newContext methodOrBlock.
+	
 	" Apply - invoke method "
 	(method isPrimitive and: [method isMessageValue not ])  
 	ifTrue: [ 
-		[self solvePrimitive: method primitive receiver: receiver arguments: arguments]
+		[^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
-			do: [ 
-					newContext := newContext removePragmaFromMethod;yourself .
-					currentContext := newContext.	
-					currentContext setTemporalVariablesNamed: method argumentNames values: arguments.]
-		]
-	ifFalse: [.
-		currentContext := newContext.	
-		currentContext setTemporalVariablesNamed: method argumentNames values: arguments.
-	]
+			do: [
+				" Remove pragma node from method body to prevent infinit loop" 
+				newContext := newContext removePrimitiveFromMethod;yourself ]
+		].
+	" Set new context only if the method is not primitive or if the primitive excecution failed and the body of the method excecutes"
+	currentContext := newContext.	
+	currentContext setTemporalVariablesNamed: method argumentNames values: arguments.
+	
 ]
 
 { #category : #visiting }
@@ -261,8 +261,8 @@ DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	value := currentContext stack top.
 	senderContext := 
 		self currentContext isBlockContext 
-			ifTrue: [ currentContext parentContext senderContext]
-			ifFalse: [ currentContext senderContext ].
+			ifTrue: [ currentContext parentContext sender]
+			ifFalse: [ currentContext sender ].
 	
 	currentContext := senderContext.
 	self stackPush: value
@@ -282,7 +282,7 @@ DASTInterpreter >> visitSequenceNode: aRBSequenceNode [
 		ifTrue: [ self stackPop ]
 		ifFalse: [ self currentContext receiver ].
 	
-	currentContext := currentContext senderContext.
+	currentContext := currentContext sender.
 	self stackPush: lastResult. 
 	
 ]
@@ -299,4 +299,9 @@ DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 	aRBTemporaryNode isDefinition 
 		ifTrue: [ currentContext at: name put: nil ]
 		ifFalse: [ self stackPush: (currentContext findVariable: name)]
+]
+
+{ #category : #visiting }
+DASTInterpreter >> visitThisContextNode: aRBThisContextNode [ 
+	self stackPush: currentContext
 ]

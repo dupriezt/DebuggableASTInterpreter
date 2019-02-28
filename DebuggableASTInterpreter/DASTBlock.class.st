@@ -33,8 +33,9 @@ DASTBlock >> primitive [
 ]
 
 { #category : #accessing }
-DASTBlock >> selector [ 
-	nodeAST sourceCode
+DASTBlock >> selector [
+	 
+	^ 'value' "nodeAST sourceCode"
 ]
 
 { #category : #accessing }

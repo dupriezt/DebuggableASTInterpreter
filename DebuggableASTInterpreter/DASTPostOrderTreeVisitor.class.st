@@ -124,6 +124,11 @@ DASTPostOrderTreeVisitor >> visitTemporaryNode: aRBTemporaryNode [
 ]
 
 { #category : #visiting }
+DASTPostOrderTreeVisitor >> visitThisContextNode: aRBThisContextNode [ 
+	stack push: aRBThisContextNode
+]
+
+{ #category : #visiting }
 DASTPostOrderTreeVisitor >> visitVariableNode: aRBVariableNode [ 
 	
 	stack push: aRBVariableNode 

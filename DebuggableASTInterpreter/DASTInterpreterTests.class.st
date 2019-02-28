@@ -408,6 +408,13 @@ DASTInterpreterTests >> testMoreThan [
 		  equals: false
 ]
 
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0 ] on: ZeroDivide do: [ true ]') 
+		  equals: true
+	
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testParenthesisForOperationAndUnaryMessage [
 

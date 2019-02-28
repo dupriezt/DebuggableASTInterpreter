@@ -7,14 +7,12 @@ Class {
 	#instVars : [
 		'variablesDict',
 		'receiver',
-		'hasReturned',
 		'nodes',
 		'stack',
 		'senderContext',
 		'parent',
 		'closure',
-		'messageNode',
-		'environment'
+		'messageNode'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -24,6 +22,11 @@ DASTContext >> at: aByteSymbol put: anObject [
 	^self variablesDict at: aByteSymbol put: anObject.
 	
 	
+]
+
+{ #category : #'closure support' }
+DASTContext >> contextTag [
+	^ self
 ]
 
 { #category : #'accessing - private' }
@@ -37,6 +40,19 @@ DASTContext >> findClassVariable: aName [
 	^ receiver isClass 
 		ifTrue: [ receiver bindingOf: aName ]
 		ifFalse:[ (receiver systemClass bindingOf: aName) value ]
+]
+
+{ #category : #query }
+DASTContext >> findContextSuchThat: testBlock [
+	"Search self and my sender chain for first one that satisfies testBlock.  Return nil if none satisfy"
+
+	| context |
+	context := self.
+	[ context isNil ] whileFalse: [
+		(testBlock value: context) 
+			ifTrue: [ ^ context ].
+		context := context sender ].
+	^ nil
 ]
 
 { #category : #'API-lookup' }
@@ -89,7 +105,6 @@ DASTContext >> getClassForLookup [
 { #category : #accessing }
 DASTContext >> initialize [
 	super initialize.
-	hasReturned := false.
 	stack := Stack new.
 	variablesDict := Dictionary new
 ]
@@ -104,7 +119,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNod
 	
 	self	parentContext: parentContext;
 			receiver: aReceiver;			
-			senderContext: aDASTContext;
+			sender: aDASTContext;
 			messageNode: aRBMessageNode .
 	aSelector := aRBMessageNode selector.
 	
@@ -156,8 +171,10 @@ DASTContext >> lookupContextDefiningLocalVariable: aByteSymbol [
 
 { #category : #'API-lookup' }
 DASTContext >> lookupSelector: aByteString startInClass: aClass [ 
+	^(aClass lookupSelector: aByteString)
+		ifNil: [ "ToDo: implement does not understand" 
+					self error: 'The class ',aClass asString,' does not understand the message: ', aByteString asString ].
 	
-	^ aClass lookupSelector: aByteString.
 ]
 
 { #category : #accessing }
@@ -219,18 +236,18 @@ DASTContext >> receiver: anObject [
 ]
 
 { #category : #modifying }
-DASTContext >> removePragmaFromMethod [
-	self halt.
+DASTContext >> removePrimitiveFromMethod [
+	
 	closure nodeAST removePragma: (closure nodeAST pragmas select: [ :p | p isPrimitive ]) first
 ]
 
 { #category : #accessing }
-DASTContext >> senderContext [
+DASTContext >> sender [
 	^ senderContext
 ]
 
 { #category : #accessing }
-DASTContext >> senderContext: aDASTContext [
+DASTContext >> sender: aDASTContext [
 	senderContext := aDASTContext
 ]
 
