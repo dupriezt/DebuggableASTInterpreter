@@ -73,9 +73,7 @@ DASTClosure >> nodeAST [
 
 { #category : #accessing }
 DASTClosure >> outerContext [
-	^ outerContext isBlockContext 
-		ifTrue: [ outerContext methodOrBlock outerContext ]
-		ifFalse: [ outerContext ]
+	^ outerContext 
 ]
 
 { #category : #accessing }

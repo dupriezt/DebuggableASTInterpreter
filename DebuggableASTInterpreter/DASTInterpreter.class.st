@@ -27,8 +27,12 @@ DASTInterpreter >> currentNode [
 
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
+	|node|
+		
 	[ currentContext nodes isEmpty ] whileFalse: [  
-		self visit: currentContext nodes pop .
+		node:=currentContext nodes pop. 
+		self haltIf: (node isMessage and: [node selector = #findNextHandlerOrSignalingContext]).
+		self visit: node .
 		 ].
 	^ self stackTop
 ]
@@ -66,7 +70,6 @@ DASTInterpreter >> primitiveResultIsError: anObject [
 { #category : #private }
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
 	| primitiveResult |
-	"currentContext := currentContext parentContext."
 		
 	"primitives applied to blocks:"
 	(anObject isKindOf: DASTClosure) ifTrue: [ 
@@ -115,7 +118,7 @@ DASTInterpreter >> stackTop [
 DASTInterpreter >> stepInto [
 	currentContext nodes isEmpty ifTrue: [ DASTEvaluationTerminated  signal].
 	self visit: currentContext nodes pop .
-	^ self stackTop
+	^ self currentContext
 ]
 
 { #category : #evaluation }
@@ -127,7 +130,7 @@ DASTInterpreter >> stepOver [
 		self stepInto.
 	 ].
 
-	^ self stackTop
+	^ self currentContext
 ]
 
 { #category : #visiting }
@@ -237,10 +240,10 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 		[^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
 			do: [
-				" Remove pragma node from method body to prevent infinit loop" 
+				" Remove pragma node from method body to prevent infinit loop and continue with the excecution of the method body" 
 				newContext := newContext removePrimitiveFromMethod;yourself ]
 		].
-	" Set new context only if the method is not primitive or if the primitive excecution failed and the body of the method excecutes"
+	" Set new context "
 	currentContext := newContext.	
 	currentContext setTemporalVariablesNamed: method argumentNames values: arguments.
 	
@@ -257,12 +260,9 @@ DASTInterpreter >> visitMethodNode: aRBBlockNode [
 { #category : #visiting }
 DASTInterpreter >> visitReturnNode: aRBReturneNode [
 	| value senderContext |
-	"self currentContext setAsReturned."
+	
 	value := currentContext stack top.
-	senderContext := 
-		self currentContext isBlockContext 
-			ifTrue: [ currentContext parentContext sender]
-			ifFalse: [ currentContext sender ].
+	senderContext := currentContext returnContext. 
 	
 	currentContext := senderContext.
 	self stackPush: value

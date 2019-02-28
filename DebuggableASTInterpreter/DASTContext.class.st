@@ -242,6 +242,13 @@ DASTContext >> removePrimitiveFromMethod [
 ]
 
 { #category : #accessing }
+DASTContext >> returnContext [ 
+	^self isBlockContext 
+		ifTrue: [ ^ parent returnContext ]
+		ifFalse: [ ^ parent ]
+]
+
+{ #category : #accessing }
 DASTContext >> sender [
 	^ senderContext
 ]
