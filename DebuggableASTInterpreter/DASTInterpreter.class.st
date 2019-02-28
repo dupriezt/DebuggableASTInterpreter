@@ -48,7 +48,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
 	self flag: 'update next call'.
 	currentContext := DASTContext new
-		parentContext: rootContext;
+		parent: rootContext;
 		methodOrBlock: nodes last methodNode;
 		nodes: nodes;
 		sender: rootContext;
@@ -59,7 +59,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 { #category : #testing }
 DASTInterpreter >> isTerminated [
 	self flag: 'ToDo: is this method necessary?'.
-	^ self currentContext nodes isEmpty and: [self currentContext parentContext isRoot].
+	^ self currentContext nodes isEmpty and: [self currentContext parent isRoot].
 ]
 
 { #category : #testing }

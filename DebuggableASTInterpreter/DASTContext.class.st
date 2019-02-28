@@ -9,10 +9,10 @@ Class {
 		'receiver',
 		'nodes',
 		'stack',
-		'senderContext',
 		'parent',
 		'closure',
-		'messageNode'
+		'messageNode',
+		'sender'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -117,7 +117,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNod
 		ifTrue: [ aReceiver outerContext ]
 		ifFalse: [ aDASTContext ].
 	
-	self	parentContext: parentContext;
+	self	parent: parentContext;
 			receiver: aReceiver;			
 			sender: aDASTContext;
 			messageNode: aRBMessageNode .
@@ -204,12 +204,16 @@ DASTContext >> nodes: aStack [
 ]
 
 { #category : #accessing }
-DASTContext >> parentContext [
+DASTContext >> parent [
+	" This is the context in which this context was created. 
+	  This context is used for performing the lookup operations "
 	^ parent
 ]
 
 { #category : #accessing }
-DASTContext >> parentContext: aDASTContext [
+DASTContext >> parent: aDASTContext [
+	" This is the context in which this context was created. 
+	  This context is used for performing the lookup operations "
 	parent := aDASTContext
 ]
 
@@ -245,17 +249,17 @@ DASTContext >> removePrimitiveFromMethod [
 DASTContext >> returnContext [ 
 	^self isBlockContext 
 		ifTrue: [ ^ parent returnContext ]
-		ifFalse: [ ^ parent ]
+		ifFalse: [ ^ sender  ]
 ]
 
 { #category : #accessing }
 DASTContext >> sender [
-	^ senderContext
+	^ sender 
 ]
 
 { #category : #accessing }
 DASTContext >> sender: aDASTContext [
-	senderContext := aDASTContext
+	sender := aDASTContext
 ]
 
 { #category : #accessing }
