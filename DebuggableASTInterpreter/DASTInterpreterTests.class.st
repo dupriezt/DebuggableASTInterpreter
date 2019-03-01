@@ -116,24 +116,6 @@ DASTInterpreterTests >> testEvaluateSubstraction [
 		  equals: -2
 ]
 
-{ #category : #'tests-exceptions' }
-DASTInterpreterTests >> testExceptionZeroDivide [
-	<expectedFailure>
-	| anInterpreter |
-	
-	self skip.
-	"ToDo: redefine after defining exceptions"
-	
-	"anInterpreter := DASTInterpreter new.
-	anInterpreter initializeWithProgram: (RBParser parseExpression: '1 / 0')."
-	"prevent that the exceptions are signaled"
-	"anInterpreter evaluate.
-	self assert: anInterpreter exceptions isEmpty not.
-	self assert: anInterpreter exceptions last asString equals: 'ZeroDivide'.
-	"
-
-]
-
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testFalse [
 	self assert: (self evaluateProgram: 'false')
@@ -418,6 +400,7 @@ DASTInterpreterTests >> testMoreThan [
 
 { #category : #'tests-exceptions' }
 DASTInterpreterTests >> testOnDoExceptionCatch [
+	self skip.
 	self assert: (self evaluateProgram: '[ 1/0 ] on: ZeroDivide do: [ true ]') 
 		  equals: true
 	
