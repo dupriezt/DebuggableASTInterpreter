@@ -18,7 +18,7 @@ Metacello new
     load: #Debugger.
 ```
 
-Execute the following code in a playground with a `doIt`.
+Execute the following code in a playground with a `doIt` to test the debugger.
 
 ```Smalltalk
 (DASTSpecDebugger on: (DASTSession debug: 'MyObject new doStuff')) openWithFullView 
