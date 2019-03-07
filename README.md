@@ -6,7 +6,7 @@ An AST interpreter that accepts stepping operations
 ```Smalltalk
 Metacello new
     baseline: 'DebuggableASTInterpreter';
-    repository: 'github://StevenCostiou/DebuggableASTInterpreter:ExceptionsDev';
+    repository: 'github://carolahp/DebuggableASTInterpreter:ExceptionsDev';
     load.
 ```
 
@@ -14,7 +14,7 @@ Metacello new
 ```Smalltalk
 Metacello new
     baseline: 'DebuggableASTInterpreter';
-    repository: 'github://StevenCostiou/DebuggableASTInterpreter:ExceptionsDev';
+    repository: 'github://carolahp/DebuggableASTInterpreter:ExceptionsDev';
     load: #Debugger.
 ```
 
@@ -29,7 +29,7 @@ Execute the following code in a playground with a `doIt` to test the debugger.
 ```Smalltalk
 Metacello new
     baseline: 'DebuggableASTInterpreter';
-    repository: 'github://StevenCostiou/DebuggableASTInterpreter:ExceptionsDev';
+    repository: 'github://carolahp/DebuggableASTInterpreter:ExceptionsDev';
     load: #Overlay.
 ```
 # NextSteps
