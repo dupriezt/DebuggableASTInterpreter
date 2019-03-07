@@ -13,7 +13,7 @@ BaselineOfDebuggableASTInterpreter >> baseline: spec [
 		do: [
 			"Dependencies"
 			spec
-				baseline: 'Spec-Debugger'
+				baseline: 'SpecDebugger'
 				with: [ spec repository: 'github://dupriezt/Spec-Debugger' ].
 			spec
 				baseline: 'Ghost'
