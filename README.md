@@ -18,6 +18,13 @@ Metacello new
     load: #Debugger.
 ```
 
+Execute the following code in a playground with a `doIt`.
+
+```Smalltalk
+(DASTSpecDebugger on: (DASTSession debug: 'MyObject new doStuff')) openWithFullView 
+```
+
+
 ## Install the overlays experiments for debugging in isolation (Experimental!)
 ```Smalltalk
 Metacello new
