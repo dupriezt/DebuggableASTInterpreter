@@ -67,6 +67,16 @@ DASTInterpreter >> primitiveResultIsError: anObject [
 	^ (anObject isKindOf: Array ) and: [anObject first = Context primitiveFailToken first ]
 ]
 
+{ #category : #visiting }
+DASTInterpreter >> readInstanceVariableNamed: name [
+	^ self currentContext findInstanceVariable: name
+]
+
+{ #category : #accessing }
+DASTInterpreter >> receiver [
+	^self currentContext receiver
+]
+
 { #category : #private }
 DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
 	| primitiveResult |
@@ -166,7 +176,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	
 	"Instance variables assignment"
 	(self currentContext receiver systemClass allInstVarNames includes: name)
-		ifTrue: [ self currentContext receiver instVarNamed: name put: value . ^ self].
+		ifTrue: [ self write: value toInstVarNamed: name. ^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
 	(self currentContext receiver systemClass classPool includesKey: name)
@@ -196,9 +206,9 @@ DASTInterpreter >> visitGlobalNode: aRBGlobalNode [
 ]
 
 { #category : #visiting }
-DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [ 
-	
-	self stackPush: (self currentContext findInstanceVariable: aRBInstanceVariableNode name)
+DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [
+	self
+		stackPush: (self readInstanceVariableNamed: aRBInstanceVariableNode name)
 ]
 
 { #category : #visiting }
@@ -304,4 +314,10 @@ DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 { #category : #visiting }
 DASTInterpreter >> visitThisContextNode: aRBThisContextNode [ 
 	self stackPush: currentContext
+]
+
+{ #category : #visiting }
+DASTInterpreter >> write: value toInstVarNamed: name [
+
+	self currentContext receiver instVarNamed: name put: value
 ]
