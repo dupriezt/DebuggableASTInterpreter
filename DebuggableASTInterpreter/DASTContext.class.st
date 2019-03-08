@@ -12,13 +12,16 @@ Class {
 		'parent',
 		'closure',
 		'messageNode',
-		'sender'
+		'sender',
+		'tempVarIndex',
+		'tempVarsNamesIndexes'
 	],
 	#category : #DebuggableASTInterpreter
 }
 
 { #category : #'API-store' }
 DASTContext >> at: aByteSymbol put: anObject [
+	self setIndexForTempVarNamed: aByteSymbol.
 	^self variablesDict at: aByteSymbol put: anObject.
 	
 	
@@ -133,11 +136,13 @@ DASTContext >> getClassForLookup [
 			ifFalse: [aClass]) .
 ]
 
-{ #category : #accessing }
+{ #category : #initialization }
 DASTContext >> initialize [
 	super initialize.
 	stack := Stack new.
-	variablesDict := Dictionary new
+	variablesDict := Dictionary new.
+	tempVarsNamesIndexes := Dictionary new.
+	tempVarIndex := 0
 ]
 
 { #category : #initialization }
@@ -317,6 +322,13 @@ DASTContext >> sender [
 { #category : #accessing }
 DASTContext >> sender: aDASTContext [
 	sender := aDASTContext
+]
+
+{ #category : #'API-store' }
+DASTContext >> setIndexForTempVarNamed: tempVarName [
+	tempVarsNamesIndexes
+		at: tempVarName
+		ifAbsentPut: [ tempVarIndex := tempVarIndex + 1 ]
 ]
 
 { #category : #accessing }
