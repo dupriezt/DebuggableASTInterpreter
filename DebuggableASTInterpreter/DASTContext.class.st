@@ -12,7 +12,8 @@ Class {
 		'parent',
 		'closure',
 		'messageNode',
-		'sender'
+		'sender',
+		'tempNames'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -39,7 +40,7 @@ DASTContext >> definesLocalVariableNamed: aName [
 DASTContext >> findClassVariable: aName [
 	^ receiver isClass 
 		ifTrue: [ receiver bindingOf: aName ]
-		ifFalse:[ (receiver systemClass bindingOf: aName) value ]
+		ifFalse:[ receiver systemClass bindingOf: aName ]
 ]
 
 { #category : #query }
@@ -57,8 +58,7 @@ DASTContext >> findContextSuchThat: testBlock [
 
 { #category : #'API-lookup' }
 DASTContext >> findInstanceVariable: aName [
-
-	[^ self receiver instVarNamed: aName]
+	[^ aName -> (self receiver instVarNamed: aName) ]
 		on: InstanceVariableNotFound do: [ ^nil ] 
 ]
 
@@ -66,7 +66,7 @@ DASTContext >> findInstanceVariable: aName [
 DASTContext >> findLocalVariable: aName [
 
 	^ variablesDict 
-		at: aName 
+		associationAt: aName 
 		ifAbsent: [ nil ]
 ]
 
@@ -103,20 +103,20 @@ DASTContext >> findNextHandlerOrSignalingContext [
 
 { #category : #'API-lookup' }
 DASTContext >> findVariable: aByteSymbol [
-	|value|
+	|association|
 	"Return the value of a variable. If this context redefines a variable defined by its parent context, this method will return the variable value for this context"
 	
 	"class variables"
-	value := self findClassVariable: aByteSymbol.
-	value ifNotNil: [ ^ value ].
+	association := self findClassVariable: aByteSymbol.
+	association ifNotNil: [ ^ association value ].
 	
 	"instance variables"
-	value := self findInstanceVariable: aByteSymbol.
-	value ifNotNil: [ ^ value ].
+	association := self findInstanceVariable: aByteSymbol.
+	association ifNotNil: [ ^ association value ].
 	
 	"local variables"
-	value := self findLocalVariable: aByteSymbol.
-	value ifNotNil: [ ^ value ].
+	association := self findLocalVariable: aByteSymbol.
+	association ifNotNil: [ ^ association value ].
 	
 	^ parent 
 			ifNil: [ self error: 'Variable ', aByteSymbol , ' not defined!'  ] 

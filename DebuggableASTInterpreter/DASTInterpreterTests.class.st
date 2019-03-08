@@ -534,6 +534,13 @@ DASTInterpreterTests >> testVarsLocalScopeLookupIsDoneInExceutionTime [
 		
 ]
 
+{ #category : #'tests-self' }
+DASTInterpreterTests >> testYourSelfTwice [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests yourself yourself')
+		  equals: DASTInterpreterClassForTests 
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testYourself [
 

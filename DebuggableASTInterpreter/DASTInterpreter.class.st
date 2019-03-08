@@ -69,7 +69,7 @@ DASTInterpreter >> primitiveResultIsError: anObject [
 
 { #category : #visiting }
 DASTInterpreter >> readInstanceVariableNamed: name [
-	^ self currentContext findInstanceVariable: name
+	^ (self currentContext findInstanceVariable: name) value
 ]
 
 { #category : #accessing }
