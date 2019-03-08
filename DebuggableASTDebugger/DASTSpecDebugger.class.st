@@ -33,7 +33,12 @@ DASTSpecDebugger >> initializeWidgets [
 	code := self newCode.
 	receiverInspector := self instantiate: InspectorNavigator.
 	contextInspector := self instantiate: DASTEyeContextInspector.
-	self code acceptBlock: [ :text :notifyer |  ].
+	self code
+		acceptBlock: [ :text :notifyer | 
+			self
+				recompileMethodTo: text string
+				inContext: self stack selectedItem
+				notifying: notifyer ].
 	self code whenBuiltDo: [ :ann | ann widget font: self codeFont ]
 ]
 
