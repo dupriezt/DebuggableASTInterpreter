@@ -47,6 +47,16 @@ DASTSession >> isContextPostMortem: selectedContext [
 	^false
 ]
 
+{ #category : #initialization }
+DASTSession >> recompileMethodTo: text inContext: aContext notifying: aNotifyer [
+	"Oh no... this must be implemented to handle method changes in the debugger.
+	See the same method in class DebugSession.
+	Have fun."
+
+	self flag: #TODO.
+	self halt
+]
+
 { #category : #'as yet unclassified' }
 DASTSession >> restart: aDASTContext [
 	aDASTContext initialize.
