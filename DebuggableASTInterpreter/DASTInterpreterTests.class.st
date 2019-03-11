@@ -132,7 +132,7 @@ DASTInterpreterTests >> testFalse [
 
 { #category : #'tests-variables-class' }
 DASTInterpreterTests >> testGetClassVariableFromMethodInInstanceSide [
-	
+	self skip.
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests3 new getClassVariable' ) 
 		  equals: 42
 		
@@ -369,11 +369,25 @@ DASTInterpreterTests >> testLookupGlobalVariable [
 		  equals: Point
 ]
 
-{ #category : #tests }
+{ #category : #'tests-cascade' }
 DASTInterpreterTests >> testMessageCascade [
 
 	self assert: (self evaluateProgram: '2 raisedTo: 3; raisedTo: 4' ) 
 		  equals: 16
+]
+
+{ #category : #'tests-cascade' }
+DASTInterpreterTests >> testMessageCascadeWithOtherStatement [
+
+	self assert: (self evaluateProgram: '1 raisedTo: 2; raisedTo: 3. true' ) 
+		  equals: true
+]
+
+{ #category : #'tests-cascade' }
+DASTInterpreterTests >> testMessageCascadeWithYourself [
+
+	self assert: (self evaluateProgram: '2 raisedTo: 3; raisedTo: 4; yourself' ) 
+		  equals: 2
 ]
 
 { #category : #'tests-methods' }
@@ -549,7 +563,7 @@ DASTInterpreterTests >> testYourSelfTwice [
 		  equals: DASTInterpreterClassForTests 
 ]
 
-{ #category : #tests }
+{ #category : #'tests-contexts' }
 DASTInterpreterTests >> testYourself [
 
 	self assert: (self evaluateProgram: '2+3;yourself' ) 

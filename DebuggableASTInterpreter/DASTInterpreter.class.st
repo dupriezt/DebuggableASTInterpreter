@@ -193,10 +193,7 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitCascadeNode: aRBCascadeNode [ 
-	| lastResult |
-	lastResult := self stackPop.
-	currentContext := currentContext sender.
-	self stackPush: lastResult. 
+	self flag: 'I do nothing'.
 ]
 
 { #category : #visiting }
