@@ -81,7 +81,9 @@ DASTPostOrderTreeVisitor >> visitMessageNode: aRBMessageNode [
 
 	stack push: aRBMessageNode.
 	aRBMessageNode arguments reverse do: [ :e | e acceptVisitor: self ].
-	aRBMessageNode receiver acceptVisitor: self.
+	(aRBMessageNode isCascaded not or: [aRBMessageNode isFirstCascaded]) ifTrue: [ aRBMessageNode receiver acceptVisitor: self ].
+	
+	
 	
 
 ]

@@ -81,6 +81,14 @@ DASTInterpreterTests >> testCustomInitializationUsingSuper [
 
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testEmptyBlock [
+
+	self assert: (self evaluateProgram: '[ ] value' ) 
+		  equals: nil
+	
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateArgumentOrder [ 
 	
@@ -532,6 +540,13 @@ DASTInterpreterTests >> testVarsLocalScopeLookupIsDoneInExceutionTime [
 	self assert: (self evaluateProgram:  '|block t| t := 42 . block := [ t ] .	t := 69 . ^ DASTInterpreterClassForTests new evaluateBlock: block') 
 		  equals: 69
 		
+]
+
+{ #category : #'tests-self' }
+DASTInterpreterTests >> testYourSelfTwice [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests yourself yourself')
+		  equals: DASTInterpreterClassForTests 
 ]
 
 { #category : #tests }
