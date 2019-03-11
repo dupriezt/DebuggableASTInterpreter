@@ -81,6 +81,14 @@ DASTInterpreterTests >> testCustomInitializationUsingSuper [
 
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testEmptyBlock [
+
+	self assert: (self evaluateProgram: '[ ] value' ) 
+		  equals: nil
+	
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateArgumentOrder [ 
 	

@@ -7,6 +7,7 @@ Class {
 { #category : #accessing }
 DASTBlock >> initializeWith: aRBNode outerContext: aDASTContext [
 	self assert: aRBNode isBlock.
+	(aRBNode body statements isEmpty) ifTrue: [ aRBNode body statements add: (RBLiteralValueNode value: nil) ].
 	super initializeWith:  aRBNode outerContext: aDASTContext 
 ]
 

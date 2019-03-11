@@ -64,7 +64,7 @@ DASTInterpreter >> isTerminated [
 
 { #category : #testing }
 DASTInterpreter >> primitiveResultIsError: anObject [
-	^ (anObject isKindOf: Array ) and: [anObject first = Context primitiveFailToken first ]
+	^ (anObject isKindOf: Array ) and: [(anObject at: 1 ifAbsent: nil) = Context primitiveFailToken first ]
 ]
 
 { #category : #visiting }
@@ -231,7 +231,8 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	| arguments receiver method newContext |
 	
 	" Resolve Arguments "
-	arguments := (self stackPop: aRBMessageNode numArgs) reverse.
+	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
+	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
 	
 	" Current context initialization (implicit lookup)"
@@ -247,14 +248,16 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	" Apply - invoke method "
 	(method isPrimitive and: [method isMessageValue not ])  
 	ifTrue: [ 
-		[^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
+		[(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
+		^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
 			do: [
 				" Remove pragma node from method body to prevent infinit loop and continue with the excecution of the method body" 
 				newContext := newContext removePrimitiveFromMethod;yourself ]
 		].
 	" Set new context "
-	currentContext := newContext.	
+	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
+	currentContext := newContext.
 	currentContext setTemporalVariablesNamed: method argumentNames values: arguments.
 	
 ]
