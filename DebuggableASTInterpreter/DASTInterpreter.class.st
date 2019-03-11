@@ -243,17 +243,16 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	method := newContext methodOrBlock.
 	
 	" Apply - invoke method "
+	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
 	(method isPrimitive and: [method isMessageValue not ])  
 	ifTrue: [ 
-		[(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
-		^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
+		[^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
 			do: [
 				" Remove pragma node from method body to prevent infinit loop and continue with the excecution of the method body" 
 				newContext := newContext removePrimitiveFromMethod;yourself ]
 		].
 	" Set new context "
-	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
 	currentContext := newContext.
 	currentContext setTemporalVariablesNamed: method argumentNames values: arguments.
 	

@@ -89,6 +89,24 @@ DASTInterpreterTests >> testEmptyBlock [
 	
 ]
 
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testEmptyMethod [
+	self assert: ((self evaluateProgram: 'DASTInterpreterClassForTests5 new m5') class) 
+		  equals: DASTInterpreterClassForTests5
+]
+
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testEmptyMethodIndirectCall [
+	self assert: ((self evaluateProgram: 'DASTInterpreterClassForTests5 new m6') class) 
+		  equals: DASTInterpreterClassForTests5
+]
+
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testEmptyMethodValueLink [
+	self assert: ((self evaluateProgram: 'ValueLink new') class) 
+		  equals: ValueLink
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateArgumentOrder [ 
 	

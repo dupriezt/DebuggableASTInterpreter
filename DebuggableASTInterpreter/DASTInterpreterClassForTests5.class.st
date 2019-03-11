@@ -42,3 +42,13 @@ DASTInterpreterClassForTests5 >> m3 [
 DASTInterpreterClassForTests5 >> m4 [
 	^ 44
 ]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests5 >> m5 [
+	<primitive: 666>
+]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests5 >> m6 [
+	^ self m5
+]
