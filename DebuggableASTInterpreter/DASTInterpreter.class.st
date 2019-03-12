@@ -246,7 +246,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
 	(method isPrimitive and: [method isMessageValue not ])  
 	ifTrue: [ 
-		[^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
+		[ ^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
 			do: [
 				" Remove pragma node from method body to prevent infinit loop and continue with the excecution of the method body" 

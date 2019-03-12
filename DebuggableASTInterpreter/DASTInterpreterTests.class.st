@@ -258,6 +258,13 @@ DASTInterpreterTests >> testInterpretBlockEvaluationWithoutArgumentsAndWithoutOu
 		  equals:1
 ]
 
+{ #category : #'tests-reflective-interpreter' }
+DASTInterpreterTests >> testInterpretItselfAddition [
+
+	self assert: (self evaluateProgram: 'DASTInterpreter new initializeWithProgram: (RBParser parseExpression: ''1 + 5''); evaluate')
+		  equals: 6
+]
+
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testInterpretSendingMessageDifferentFromValueToBlock [
 	

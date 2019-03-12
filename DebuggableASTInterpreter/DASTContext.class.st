@@ -138,7 +138,7 @@ DASTContext >> getClassForLookup [
 { #category : #initialization }
 DASTContext >> initialize [
 	super initialize.
-	stack := Stack new.
+	stack := DASTStack new.
 	variablesDict := Dictionary new.
 	tempVarsNamesIndexes := Dictionary new.
 	tempVarIndex := 0
