@@ -148,7 +148,7 @@ DASTContext >> initialize [
 DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNode: aRBMessageNode [ 
 	
 	| parentContext compiledMethod theMethod visitor aClass aSelector |
-	parentContext := aReceiver isBlock 
+	parentContext := (aReceiver isKindOf: DASTBlock) 
 		ifTrue: [ aReceiver outerContext ]
 		ifFalse: [ aDASTContext ].
 	
@@ -164,7 +164,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNod
 	
 	compiledMethod := self lookupSelector: aSelector startInClass: aClass.
 
-	theMethod := (aReceiver isBlock and: [ compiledMethod isKindOfValue ])
+	theMethod := ((aReceiver isKindOf: DASTBlock) and: [ compiledMethod isKindOfValue ])
 		ifTrue: [ aReceiver ]
 		ifFalse: [ DASTMethod new initializeWith: compiledMethod ast outerContext: aDASTContext ].
 		
@@ -180,7 +180,7 @@ DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNod
 { #category : #testing }
 DASTContext >> isBlockContext [
 
-	^ closure isBlock
+	^ closure isKindOf: DASTBlock 
 ]
 
 { #category : #testing }
@@ -200,7 +200,7 @@ DASTContext >> isHandlerOrSignalingContext [
 	"Both BlockClosure>>on:do: (handler) and Context>>evaluateSignal: (signaling) 
 	are marked with primitive 199."
 	self flag: 'aqui se va a caer'.
-	^closure isBlock not and:  [closure primitive = 199]
+	^(closure isKindOf: DASTBlock ) not and:  [closure primitive = 199]
 ]
 
 { #category : #testing }
