@@ -90,8 +90,3 @@ DASTClosure >> selector [
 DASTClosure >> sourceCode [
 	^ sourceCode
 ]
-
-{ #category : #accessing }
-DASTClosure >> systemClass [
-	self subclassResponsibility 
-]

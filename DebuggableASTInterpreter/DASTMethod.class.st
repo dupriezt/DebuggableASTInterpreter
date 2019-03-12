@@ -35,8 +35,3 @@ DASTMethod >> primitive [
 DASTMethod >> selector [
 	^ nodeAST selector
 ]
-
-{ #category : #accessing }
-DASTMethod >> systemClass [ 
-	^ CompiledMethod
-]
