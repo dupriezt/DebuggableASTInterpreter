@@ -270,10 +270,7 @@ DASTContext >> printOn: aStream [
 
 { #category : #accessing }
 DASTContext >> receiver [
-	
-	^ self isBlockContext
-		ifTrue: [ closure outerContext receiver ]
-		ifFalse: [ receiver ]
+	^ receiver
 ]
 
 { #category : #accessing }

@@ -31,3 +31,8 @@ DASTBlockValueContext >> initializeContext [
 DASTBlockValueContext >> isBlockContext [
 	^ true
 ]
+
+{ #category : #initialization }
+DASTBlockValueContext >> receiver [
+	^ closure outerContext receiver
+]
