@@ -1,5 +1,6 @@
 "
-I store variables and its values. I also contain a reference to my parent context. My method find: looks for a variable in myself and up in my predecessor contexts
+I store variables and its values. I also contain a reference to my parent and sender contexts. 
+My method find: looks for a variable in myself and up in my parent contexts chain.
 "
 Class {
 	#name : #DASTContext,
@@ -16,8 +17,31 @@ Class {
 		'tempVarIndex',
 		'tempVarsNamesIndexes'
 	],
+	#classVars : [
+		'valueToBlockMessages'
+	],
 	#category : #DebuggableASTInterpreter
 }
+
+{ #category : #'instance creation' }
+DASTContext class >> newWithSender: aDASTContext receiver: aReceiver messageNode: aRBMessageNode [ 
+	| context |
+	context := ((aReceiver isKindOf: DASTBlock) 
+					and: [ " Check if the message is one of the variants of value. This is very ugly and must be changed when implementing environments "
+						self valueToBlockMessages keys includes: aRBMessageNode selector ])
+		ifTrue: [ DASTBlockValueContext new ]
+		ifFalse: [ DASTMethodContext new ].
+	context sender: aDASTContext;
+		receiver: aReceiver;
+		messageNode: aRBMessageNode.
+	^ context initializeContext
+]
+
+{ #category : #'instance creation' }
+DASTContext class >> valueToBlockMessages [
+	^ valueToBlockMessages 
+		ifNil: [ valueToBlockMessages := (BlockClosure methodDict select: [ :e | (201 to: 206) includes: e primitive ]) collect: [ :e | e selector ] ]
+]
 
 { #category : #'API-store' }
 DASTContext >> at: aByteSymbol put: anObject [
@@ -127,12 +151,10 @@ DASTContext >> findVariable: aByteSymbol [
 
 { #category : #'accessing - private' }
 DASTContext >> getClassForLookup [
-	| aClass |
-	
-	aClass := self receiver systemClass.
-	 ^ aClass := (messageNode isSuperSend 
+
+	 ^ messageNode isSuperSend 
 			ifTrue: [messageNode methodNode methodClass superclass] 
-			ifFalse: [aClass]) .
+			ifFalse: [self receiver systemClass]
 ]
 
 { #category : #initialization }
@@ -144,43 +166,10 @@ DASTContext >> initialize [
 	tempVarIndex := 0
 ]
 
-{ #category : #initialization }
-DASTContext >> initializeWithParent: aDASTContext receiver: aReceiver messageNode: aRBMessageNode [ 
-	
-	| parentContext compiledMethod theMethod visitor aClass aSelector |
-	parentContext := (aReceiver isKindOf: DASTBlock) 
-		ifTrue: [ aReceiver outerContext ]
-		ifFalse: [ aDASTContext ].
-	
-	self	parent: parentContext;
-			receiver: aReceiver;			
-			sender: aDASTContext;
-			messageNode: aRBMessageNode .
-	aSelector := aRBMessageNode selector.
-	
-	aClass := (self receiver isNil and: [ aSelector = #value ]) 
-		ifTrue: [ BlockClosure ]
-		ifFalse: [ self getClassForLookup ].
-	
-	compiledMethod := self lookupSelector: aSelector startInClass: aClass.
-
-	theMethod := ((aReceiver isKindOf: DASTBlock) and: [ compiledMethod isKindOfValue ])
-		ifTrue: [ aReceiver ]
-		ifFalse: [ DASTMethod new initializeWith: compiledMethod ast outerContext: aDASTContext ].
-		
-	visitor := DASTPostOrderTreeVisitor new.
-	(theMethod doSemanticAnalysis body) acceptVisitor: visitor.
-	nodes := visitor stack.
-	
-	self 	methodOrBlock: theMethod;
-			nodes: nodes.
-	
-]
-
 { #category : #testing }
 DASTContext >> isBlockContext [
 
-	^ closure isKindOf: DASTBlock 
+	self subclassResponsibility 
 ]
 
 { #category : #testing }
@@ -260,15 +249,13 @@ DASTContext >> nodes: aStack [
 
 { #category : #accessing }
 DASTContext >> parent [
-	" This is the context in which this context was created. 
-	  This context is used for performing the lookup operations "
+	" This context is used for performing the lookup operations "
 	^ parent
 ]
 
 { #category : #accessing }
 DASTContext >> parent: aDASTContext [
-	" This is the context in which this context was created. 
-	  This context is used for performing the lookup operations "
+	" This context is used for performing the lookup operations "
 	parent := aDASTContext
 ]
 

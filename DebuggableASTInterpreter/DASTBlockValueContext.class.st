@@ -1,0 +1,33 @@
+"
+I am a context created to evaluate the body of a block
+"
+Class {
+	#name : #DASTBlockValueContext,
+	#superclass : #DASTContext,
+	#category : #DebuggableASTInterpreter
+}
+
+{ #category : #initialization }
+DASTBlockValueContext >> initializeContext [
+	
+	| visitor |
+	" My receiver is the DASTBlock that received the message value (or any of its variants)"
+	self	parent: receiver outerContext.
+	"
+	aClass := (self receiver isNil and: [ aSelector = #value ]) 
+		ifTrue: [ BlockClosure ]
+		ifFalse: [ self getClassForLookup ].
+	"
+	visitor := DASTPostOrderTreeVisitor new.
+	(receiver doSemanticAnalysis body) acceptVisitor: visitor.
+	nodes := visitor stack.
+	
+	self 	methodOrBlock: receiver;
+			nodes: nodes.
+	
+]
+
+{ #category : #initialization }
+DASTBlockValueContext >> isBlockContext [
+	^ true
+]
