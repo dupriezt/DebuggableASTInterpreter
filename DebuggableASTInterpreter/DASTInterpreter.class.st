@@ -5,7 +5,8 @@ Class {
 	#name : #DASTInterpreter,
 	#superclass : #Object,
 	#instVars : [
-		'currentContext'
+		'currentContext',
+		'exception'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -48,7 +49,8 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	rootContext := DASTContextRootSmalltalk new. 
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
 	self flag: 'update next call'.
-	currentContext := DASTContext new
+	" Set the first method (noMethod) context evaluation. The receiver is nil "
+	currentContext := DASTMethodContext new
 		parent: rootContext;
 		methodOrBlock: nodes last methodNode;
 		nodes: nodes;
@@ -227,7 +229,6 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
 	| arguments receiver method newContext |
-	
 	" Resolve Arguments "
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
@@ -235,8 +236,8 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	" Current context initialization (implicit lookup)"
 	newContext := 
-		DASTContext new 
-			initializeWithParent: self currentContext 
+		DASTContext
+			newWithSender: self currentContext 
 			receiver: receiver 
 			messageNode: aRBMessageNode.
 	
@@ -313,7 +314,7 @@ DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitThisContextNode: aRBThisContextNode [ 
-	self stackPush: currentContext
+	self stackPush: thisContext "currentContext"
 ]
 
 { #category : #visiting }

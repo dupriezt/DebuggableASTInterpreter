@@ -12,14 +12,14 @@ DASTContextTests >> testContextInitialization [
 	context := DASTInterpreter new.
 ]
 
-{ #category : #tests }
+{ #category : #stack }
 DASTContextTests >> testStackPopEmpty [
 	| stack |
 	stack := DASTStack new.
 	self should: [ stack pop ] raise: Exception
 ]
 
-{ #category : #tests }
+{ #category : #stack }
 DASTContextTests >> testStackPushPop [
 	| stack |
 	stack := DASTStack new
@@ -30,7 +30,7 @@ DASTContextTests >> testStackPushPop [
 	self assert: stack pop equals: 3.
 ]
 
-{ #category : #tests }
+{ #category : #stack }
 DASTContextTests >> testStackPushTop [
 	| stack |
 	stack := DASTStack new
@@ -43,7 +43,7 @@ DASTContextTests >> testStackPushTop [
 	
 ]
 
-{ #category : #tests }
+{ #category : #stack }
 DASTContextTests >> testStackPushValueLink [
 	| stack |
 	stack := DASTStack new
