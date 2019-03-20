@@ -33,6 +33,12 @@ DASTBlockValueContext >> isBlockContext [
 ]
 
 { #category : #initialization }
+DASTBlockValueContext >> printOn: aStream [
+	aStream nextPutAll: closure printString , ' in '.
+			closure outerContext printOn: aStream
+]
+
+{ #category : #initialization }
 DASTBlockValueContext >> receiver [
 	^ closure outerContext receiver
 ]

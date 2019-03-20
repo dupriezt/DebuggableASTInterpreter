@@ -27,6 +27,11 @@ DASTMethod >> isPrimitive [
 ]
 
 { #category : #accessing }
+DASTMethod >> methodClass [
+	^ nodeAST methodClass
+]
+
+{ #category : #accessing }
 DASTMethod >> primitive [ 
 	^ nodeAST primitive
 ]

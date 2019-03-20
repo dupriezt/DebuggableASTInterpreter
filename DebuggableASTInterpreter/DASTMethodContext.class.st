@@ -39,3 +39,26 @@ DASTMethodContext >> initializeContext [
 DASTMethodContext >> isBlockContext [ 
 	^ false
 ]
+
+{ #category : #initialization }
+DASTMethodContext >> printOn: aStream [
+	| selector class mclass  |
+	self haltOnce.
+			closure == nil
+				ifTrue: [ ^  aStream nextPutAll: 'DAST Context: this should happen' ].
+			class := receiver class.
+			mclass := closure methodClass.
+			selector := closure selector ifNil: [ closure defaultSelector ].
+			aStream nextPutAll: class name.
+			mclass == class
+				ifFalse:
+					[ aStream nextPut: $(.
+					aStream nextPutAll: mclass name.
+					aStream nextPut: $) ].
+			aStream nextPutAll: '>>'.
+			aStream nextPutAll: selector.
+			selector = #doesNotUnderstand:
+				ifTrue:
+					[ aStream space.
+					(self variablesDict values at: 1) selector printOn: aStream ]
+]
