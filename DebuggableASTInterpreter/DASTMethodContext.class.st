@@ -43,7 +43,6 @@ DASTMethodContext >> isBlockContext [
 { #category : #initialization }
 DASTMethodContext >> printOn: aStream [
 	| selector class mclass  |
-	self haltOnce.
 			closure == nil
 				ifTrue: [ ^  aStream nextPutAll: 'DAST Context: this should happen' ].
 			class := receiver class.
