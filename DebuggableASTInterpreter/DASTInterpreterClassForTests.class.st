@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DASTInterpreterClassForTests >> blockAsParameter: aBlock [
+	^ aBlock value: 3
+]
+
+{ #category : #'as yet unclassified' }
 DASTInterpreterClassForTests >> evaluateBlock: aBlock [
 	|t| 
 	t := nil.
@@ -39,6 +44,11 @@ DASTInterpreterClassForTests >> getBlockThatReturns32 [
 { #category : #'as yet unclassified' }
 DASTInterpreterClassForTests >> getBlockThatReturns32EvaluatedInThisContext [
 	^ [ ^ 32 ] value
+]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests >> getBlockWithParameter [
+	^ [ :e | e ] value: 123
 ]
 
 { #category : #'as yet unclassified' }

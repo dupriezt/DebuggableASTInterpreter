@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #initialization }
+DASTBlockValueContext >> contextTag [
+	^ closure outerContext
+]
+
+{ #category : #initialization }
 DASTBlockValueContext >> initializeContext [
 	
 	| visitor |

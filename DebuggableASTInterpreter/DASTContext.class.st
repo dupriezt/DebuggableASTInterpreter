@@ -221,6 +221,11 @@ DASTContext >> messageNode: aRBMessageNode [
 ]
 
 { #category : #accessing }
+DASTContext >> method [
+	^ self methodOrBlock 
+]
+
+{ #category : #accessing }
 DASTContext >> methodOrBlock [
 	^ closure
 ]
@@ -229,6 +234,11 @@ DASTContext >> methodOrBlock [
 DASTContext >> methodOrBlock: aDASTClosure [
 
 	closure := aDASTClosure
+]
+
+{ #category : #initialization }
+DASTContext >> namedTempAt: anIndex [
+	^ self variablesDict at: (self tempNames at: anIndex) 
 ]
 
 { #category : #'private-exceptions' }
@@ -335,6 +345,11 @@ DASTContext >> stack [
 { #category : #'accessing - private' }
 DASTContext >> stack: anObject [
 	stack := anObject
+]
+
+{ #category : #'accessing - private' }
+DASTContext >> tempNames [
+	^ self variablesDict keys
 ]
 
 { #category : #'accessing - private' }

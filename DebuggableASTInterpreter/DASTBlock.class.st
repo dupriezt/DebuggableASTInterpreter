@@ -28,6 +28,11 @@ DASTBlock >> isPrimitive [
 ]
 
 { #category : #accessing }
+DASTBlock >> methodClass [
+	^ nodeAST methodNode methodClass
+]
+
+{ #category : #accessing }
 DASTBlock >> primitive [ 
 	"A block always has code inside, and cannot have a primitive declaration "
 	self shouldNotImplement 
@@ -42,4 +47,15 @@ DASTBlock >> selector [
 { #category : #accessing }
 DASTBlock >> systemClass [ 
 	^ BlockClosure
+]
+
+{ #category : #accessing }
+DASTBlock >> value: anArg [
+	| block |
+	block := Smalltalk compiler
+		source: self sourceCode;
+		context: self outerContext;
+		receiver: self outerContext receiver;
+		evaluate.
+	^ block value: anArg
 ]

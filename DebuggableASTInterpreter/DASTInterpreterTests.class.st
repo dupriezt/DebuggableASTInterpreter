@@ -63,6 +63,14 @@ DASTInterpreterTests >> testBlockLocalVariableAccessedFromAnidatedBlock [
 	
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockWithParameter [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new getBlockWithParameter' ) 
+		  equals: 123
+	
+]
+
 { #category : #'tests-variables-class-instance' }
 DASTInterpreterTests >> testClassInstanceVarScopeIsRespectedWhenInherited [
 

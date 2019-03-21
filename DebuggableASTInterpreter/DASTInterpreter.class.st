@@ -89,6 +89,10 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 		anInteger = 266 ifTrue: [ 
 			^self stackPush: anObject argumentCount. 
 		 ].
+		anInteger = 202 ifTrue: [ 
+			primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
+			^ self stackPush: primitiveResult
+		].
 		DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject 
 	].
 	 	
@@ -139,10 +143,9 @@ DASTInterpreter >> stepOver [
 	| initialContext |
 	initialContext := currentContext.
 	self stepInto.
-	[ currentContext ~= initialContext] whileTrue: [ 
-		self stepInto.
-	 ].
-
+	[ currentContext ~= initialContext
+		"and: [ currentContext ~= initialContext sender ]" ]
+		whileTrue: [ self stepInto ].
 	^ self currentContext
 ]
 
