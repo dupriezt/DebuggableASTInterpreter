@@ -188,8 +188,7 @@ DASTContext >> isHandlerContext [
 DASTContext >> isHandlerOrSignalingContext [
 	"Both BlockClosure>>on:do: (handler) and Context>>evaluateSignal: (signaling) 
 	are marked with primitive 199."
-	self flag: 'aqui se va a caer'.
-	^(closure isKindOf: DASTBlock ) not and:  [closure primitive = 199]
+	^(self isBlockContext) and:  [closure primitive = 199]
 ]
 
 { #category : #testing }
