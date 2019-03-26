@@ -120,6 +120,11 @@ DASTInterpreterClassForTests >> setVariableAndDefineBlock4 [
 	^ self evaluateBlock: block
 ]
 
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests >> signalException [
+	^  1 / 0
+]
+
 { #category : #tests }
 DASTInterpreterClassForTests >> testArg: arg [
 	block := [ arg ].

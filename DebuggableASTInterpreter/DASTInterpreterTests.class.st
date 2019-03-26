@@ -454,9 +454,47 @@ DASTInterpreterTests >> testMoreThan [
 ]
 
 { #category : #'tests-exceptions' }
-DASTInterpreterTests >> testOnDoExceptionCatch [
+DASTInterpreterTests >> testOnDoChainExceptiongCatch [
 	self skip.
+	self assert: (self evaluateProgram: '[ 1/0 ] on: ParseException , ZeroDivide do: [ 1 ]') 
+		  equals: 1	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoExceptionCatch [
 	self assert: (self evaluateProgram: '[ 1/0 ] on: ZeroDivide do: [ true ]') 
+		  equals: true
+	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoFromBlocExceptiongCatch [
+	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoFromMethodExceptiongCatch [
+	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoGeneralExceptiongCatch [
+	self assert: (self evaluateProgram: '[ 1/0 ] on: Exception do: [ 1 ]') 
+		  equals: 1	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoInSequenceExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]. 3') 
+		  equals: 3
+	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoSequenceInBlockExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]') 
 		  equals: true
 	
 ]

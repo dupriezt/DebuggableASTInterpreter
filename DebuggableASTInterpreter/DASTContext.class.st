@@ -264,7 +264,7 @@ DASTContext >> isHandlerContext [
 DASTContext >> isHandlerOrSignalingContext [
 	"Both BlockClosure>>on:do: (handler) and Context>>evaluateSignal: (signaling) 
 	are marked with primitive 199."
-	^(self isBlockContext) not and:  [closure primitive = 199]
+	^((self isBlockContext) or: [ self isRoot ]) not and:  [closure primitive = 199]
 ]
 
 { #category : #testing }
