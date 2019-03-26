@@ -62,6 +62,42 @@ DASTContext >> definesLocalVariableNamed: aName [
 	^ self variablesDict keys includes: aName
 ]
 
+{ #category : #'private-exceptions' }
+DASTContext >> evaluateSignal: exception [
+	"The following primitive is just a marker used to find the evaluation context. 
+	See MethodContext>>#isHandlerOrSignalingContext. "
+	<primitive: 199>
+	| value |
+	exception privHandlerContext: self contextTag.
+	value := self exceptionHandlerBlock cull: exception.	
+	"return from self if not otherwise directed in handle block"
+	self return: value
+]
+
+{ #category : #'accessing - private' }
+DASTContext >> exception [
+	"handlercontext only. access temporaries from BlockClosure>>#on:do:"
+	self flag: 'Access from temps'.
+	^self tempAt: 1
+
+]
+
+{ #category : #'accessing - private' }
+DASTContext >> exceptionClass [
+	"handlercontext only. access temporaries from BlockClosure>>#on:do:"
+	self flag: 'Access from temps'.
+	^self tempAt: 1
+
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> exceptionHandlerBlock [
+	"handlercontext only. access temporaries from BlockClosure>>#on:do:"
+	self flag: 'Access from temps'.
+	^self tempAt: 2
+
+]
+
 { #category : #'API-lookup' }
 DASTContext >> findClassVariable: aName [
 	^ receiver isClass 
@@ -127,6 +163,22 @@ DASTContext >> findNextHandlerOrSignalingContext [
 	^ nil
 ]
 
+{ #category : #'private-exceptions' }
+DASTContext >> findNextUnwindContextUpTo: aContext [
+	"Return the next unwind marked above the receiver, returning nil if there is none.  Search proceeds up to but not including aContext."
+
+	| context |
+	<primitive: 195>
+	context := self.
+	[
+		(context := context sender) == nil
+		or: [ context == aContext ]
+	] whileFalse: [
+		context isUnwindContext
+			ifTrue: [ ^context ]].
+	^nil
+]
+
 { #category : #'API-lookup' }
 DASTContext >> findVariable: aByteSymbol [
 	|association|
@@ -155,6 +207,30 @@ DASTContext >> getClassForLookup [
 	 ^ messageNode isSuperSend 
 			ifTrue: [messageNode methodNode methodClass superclass] 
 			ifFalse: [self receiver systemClass]
+]
+
+{ #category : #accessing }
+DASTContext >> handleSignal: exception [
+	"Sent to handler (on:do:) contexts only.  If my exception class (first arg) handles exception then execute my handle block (second arg), otherwise forward this message to the next handler context.  If none left, execute exception's defaultAction (see nil>>handleSignal:)."
+	(self exceptionClass handles: exception)
+		ifFalse: [ ^ self nextHandlerContext handleSignal: exception ].
+	^ self evaluateSignal: exception
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> hasSender: context [ 
+	"Answer whether the receiver is strictly above context on the stack."
+
+	| senderContext |
+	self == context 
+		ifTrue: [^false].
+	senderContext := sender.
+	[senderContext == nil]
+		whileFalse: [
+			senderContext == context
+				ifTrue: [^true].
+			senderContext := senderContext sender].
+	^false
 ]
 
 { #category : #initialization }
@@ -188,12 +264,17 @@ DASTContext >> isHandlerContext [
 DASTContext >> isHandlerOrSignalingContext [
 	"Both BlockClosure>>on:do: (handler) and Context>>evaluateSignal: (signaling) 
 	are marked with primitive 199."
-	^(self isBlockContext) and:  [closure primitive = 199]
+	^(self isBlockContext) not and:  [closure primitive = 199]
 ]
 
 { #category : #testing }
 DASTContext >> isRoot [ 
 	^false
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> isUnwindContext [
+	^ self subclassResponsibility 
 ]
 
 { #category : #'accessing - private' }
@@ -297,6 +378,38 @@ DASTContext >> removePrimitiveFromMethod [
 	closure nodeAST removePragma: (closure nodeAST pragmas select: [ :p | p isPrimitive ]) first
 ]
 
+{ #category : #'private-exceptions' }
+DASTContext >> resume: value [
+	self resume: value through: (thisContext findNextUnwindContextUpTo: self)
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> resume: value through: firstUnwindContext [
+	"Unwind thisContext to self and resume with value as result of last send.
+	 Execute any unwind blocks while unwinding.
+	 ASSUMES self is a sender of thisContext."
+
+	| context unwindBlock |
+"	self isDead 
+		ifTrue: [ self cannotReturn: value to: self ]."
+	context := firstUnwindContext.
+	[ context isNil ] whileFalse: [	
+		context unwindComplete ifNil:[
+			"context unwindComplete: true."
+			"unwindBlock := context unwindBlock."
+			thisContext terminateTo: context.
+			"unwindBlock value"].
+		context := context findNextUnwindContextUpTo: self].
+	thisContext terminateTo: self.
+	^value
+
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> return: value [
+	sender resume: value
+]
+
 { #category : #accessing }
 DASTContext >> returnContext [ 
 	^self isBlockContext 
@@ -347,8 +460,43 @@ DASTContext >> stack: anObject [
 ]
 
 { #category : #'accessing - private' }
+DASTContext >> tempAt: anIndex [
+	^ self variablesDict at: (self variablesDict keys at: anIndex)
+]
+
+{ #category : #'accessing - private' }
 DASTContext >> tempNames [
 	^ self variablesDict keys
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> terminate [
+	"Make myself unresumable."
+	nodes removeAll.
+	sender := nil.
+
+]
+
+{ #category : #'private-exceptions' }
+DASTContext >> terminateTo: previousContext [
+	"Terminate all the Contexts between me and previousContext, if previousContext is on my Context stack. Make previousContext my sender."
+
+	| currentContext sendingContext |
+	<primitive: 196>
+	(self hasSender: previousContext) ifTrue: [
+		currentContext := sender.
+		[currentContext == previousContext] whileFalse: [
+			sendingContext := currentContext sender.
+			currentContext terminate.
+			currentContext := sendingContext ]].
+	sender := previousContext
+]
+
+{ #category : #accessing }
+DASTContext >> unwindComplete [
+	"unwindContext only. access temporaries from BlockClosure>>#ensure: and BlockClosure>>#ifCurtailed:"
+	self flag: 'Access temps'.
+	^self tempAt: 2
 ]
 
 { #category : #'accessing - private' }

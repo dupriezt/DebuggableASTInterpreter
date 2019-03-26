@@ -22,6 +22,11 @@ DASTMethod >> isMessageValue [
 ]
 
 { #category : #accessing }
+DASTMethod >> isOnDo [
+	^ nodeAST primitive = 199
+]
+
+{ #category : #accessing }
 DASTMethod >> isPrimitive [ 
 	^ nodeAST isPrimitive
 ]

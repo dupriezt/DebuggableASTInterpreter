@@ -249,7 +249,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	" Apply - invoke method "
 	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
-	(method isPrimitive and: [method isMessageValue not ])  
+	(method isPrimitive and: [method isMessageValue not and: [method isOnDo not]] )  
 	ifTrue: [ 
 		[ ^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed

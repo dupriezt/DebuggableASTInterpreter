@@ -61,6 +61,11 @@ DASTClosure >> isMessageValue [
 	self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+DASTClosure >> isOnDo [
+	^ false
+]
+
 { #category : #testing }
 DASTClosure >> isPrimitive [
 	self subclassResponsibility 

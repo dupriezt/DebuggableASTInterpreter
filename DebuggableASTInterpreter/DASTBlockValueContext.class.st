@@ -38,6 +38,12 @@ DASTBlockValueContext >> isBlockContext [
 ]
 
 { #category : #initialization }
+DASTBlockValueContext >> isUnwindContext [
+	"is this context for  method that is marked?"
+	^ false
+]
+
+{ #category : #initialization }
 DASTBlockValueContext >> printOn: aStream [
 	aStream nextPutAll: closure printString , ' in '.
 			closure outerContext printOn: aStream

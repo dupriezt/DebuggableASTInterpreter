@@ -35,7 +35,7 @@ DASTBlock >> methodClass [
 { #category : #accessing }
 DASTBlock >> primitive [ 
 	"A block always has code inside, and cannot have a primitive declaration "
-	self shouldNotImplement 
+	^ 0
 ]
 
 { #category : #accessing }

@@ -25,3 +25,9 @@ DASTContextRootSmalltalk >> isBlockContext [
 DASTContextRootSmalltalk >> isRoot [ 
 	^true
 ]
+
+{ #category : #accessing }
+DASTContextRootSmalltalk >> isUnwindContext [
+	"is this context for  method that is marked?"
+	^ self shouldNotImplement 
+]
