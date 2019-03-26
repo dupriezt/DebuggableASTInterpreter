@@ -61,8 +61,8 @@ DASTSession >> recompileMethodTo: text inContext: aContext notifying: aNotifyer 
 DASTSession >> restart: aDASTContext [
 	aDASTContext initialize.
 	aDASTContext
-		initializeWithParent: aDASTContext parent
-		receiver: aDASTContext receiver
+		sender: aDASTContext parent;
+		receiver: aDASTContext receiver;
 		messageNode: aDASTContext messageNode.
 	interpreter currentContext: aDASTContext.
 	self triggerEvent: #restart

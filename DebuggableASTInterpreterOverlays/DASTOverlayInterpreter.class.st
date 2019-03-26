@@ -8,7 +8,7 @@ Class {
 	#instVars : [
 		'objectStateOverlay'
 	],
-	#category : #DebuggableASTInterpreterOverlays
+	#category : #'DebuggableASTInterpreterOverlays-Interpreter - version'
 }
 
 { #category : #accessing }
@@ -18,21 +18,24 @@ DASTOverlayInterpreter >> objectStateOverlay [
 ]
 
 { #category : #visiting }
-DASTOverlayInterpreter >> readInstanceVariableNamed: name [
-	| objectOverlay |
-	objectOverlay := self objectStateOverlay
+DASTOverlayInterpreter >> overlayFor: anObject [
+	^ self objectStateOverlay
 		at: self receiver
-		ifAbsent: [ ^ super readInstanceVariableNamed: name ].
-	^ objectOverlay
-		at: name
+		ifAbsentPut: [ ObjectOverlay on: self receiver ]
+]
+
+{ #category : #visiting }
+DASTOverlayInterpreter >> readInstanceVariableNamed: name [
+	^ (self overlayFor: self receiver)
+		readInstanceVariableNamed: name
 		ifAbsent: [ ^ super readInstanceVariableNamed: name ]
 ]
 
 { #category : #visiting }
 DASTOverlayInterpreter >> write: value toInstVarNamed: name [
-	| objectOverlay |
-	objectOverlay := self objectStateOverlay
-		at: self receiver
-		ifAbsentPut: [ Dictionary new ].
-	objectOverlay at: name put: value
+	(self overlayFor: self receiver)
+		write: value
+		toInstVarNamed: name
+		fromNode: self currentNode parent
+		inContext: self currentContext
 ]
