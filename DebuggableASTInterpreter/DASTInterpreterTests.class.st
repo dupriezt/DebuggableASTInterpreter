@@ -55,6 +55,22 @@ DASTInterpreterTests >> testBlockEvaluated [
 	
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockLocalVariableAccessedFromAnidatedBlock [
+
+	self assert: (self evaluateProgram: '[:x | [ x ] value ] value: true' ) 
+		  equals: true
+	
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockWithParameter [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new getBlockWithParameter' ) 
+		  equals: 123
+	
+]
+
 { #category : #'tests-variables-class-instance' }
 DASTInterpreterTests >> testClassInstanceVarScopeIsRespectedWhenInherited [
 
@@ -71,6 +87,32 @@ DASTInterpreterTests >> testCustomInitializationUsingSuper [
 		  equals: DASTInterpreterClassForTests5
 		
 
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testEmptyBlock [
+
+	self assert: (self evaluateProgram: '[ ] value' ) 
+		  equals: nil
+	
+]
+
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testEmptyMethod [
+	self assert: ((self evaluateProgram: 'DASTInterpreterClassForTests5 new m5') class) 
+		  equals: DASTInterpreterClassForTests5
+]
+
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testEmptyMethodIndirectCall [
+	self assert: ((self evaluateProgram: 'DASTInterpreterClassForTests5 new m6') class) 
+		  equals: DASTInterpreterClassForTests5
+]
+
+{ #category : #'tests-methods' }
+DASTInterpreterTests >> testEmptyMethodValueLink [
+	self assert: ((self evaluateProgram: 'ValueLink new') class) 
+		  equals: ValueLink
 ]
 
 { #category : #tests }
@@ -108,24 +150,6 @@ DASTInterpreterTests >> testEvaluateSubstraction [
 		  equals: -2
 ]
 
-{ #category : #'tests-exceptions' }
-DASTInterpreterTests >> testExceptionZeroDivide [
-	<expectedFailure>
-	| anInterpreter |
-	
-	self skip.
-	"ToDo: redefine after defining exceptions"
-	
-	anInterpreter := DASTInterpreter new.
-	anInterpreter initializeWithProgram: (RBParser parseExpression: '1 / 0').
-	"prevent that the exceptions are signaled"
-	anInterpreter evaluate.
-	self assert: anInterpreter exceptions isEmpty not.
-	self assert: anInterpreter exceptions last asString equals: 'ZeroDivide'.
-	
-
-]
-
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testFalse [
 	self assert: (self evaluateProgram: 'false')
@@ -134,7 +158,7 @@ DASTInterpreterTests >> testFalse [
 
 { #category : #'tests-variables-class' }
 DASTInterpreterTests >> testGetClassVariableFromMethodInInstanceSide [
-	
+	self skip.
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests3 new getClassVariable' ) 
 		  equals: 42
 		
@@ -240,6 +264,13 @@ DASTInterpreterTests >> testInterpretBlockEvaluationWithoutArgumentsAndWithoutOu
 
 	self assert: (self evaluateProgram: '^ [ 1 ] value')
 		  equals:1
+]
+
+{ #category : #'tests-reflective-interpreter' }
+DASTInterpreterTests >> testInterpretItselfAddition [
+
+	self assert: (self evaluateProgram: 'DASTInterpreter new initializeWithProgram: (RBParser parseExpression: ''1 + 5''); evaluate')
+		  equals: 6
 ]
 
 { #category : #'tests-blocks' }
@@ -371,11 +402,25 @@ DASTInterpreterTests >> testLookupGlobalVariable [
 		  equals: Point
 ]
 
-{ #category : #tests }
+{ #category : #'tests-cascade' }
 DASTInterpreterTests >> testMessageCascade [
 
 	self assert: (self evaluateProgram: '2 raisedTo: 3; raisedTo: 4' ) 
 		  equals: 16
+]
+
+{ #category : #'tests-cascade' }
+DASTInterpreterTests >> testMessageCascadeWithOtherStatement [
+
+	self assert: (self evaluateProgram: '1 raisedTo: 2; raisedTo: 3. true' ) 
+		  equals: true
+]
+
+{ #category : #'tests-cascade' }
+DASTInterpreterTests >> testMessageCascadeWithYourself [
+
+	self assert: (self evaluateProgram: '2 raisedTo: 3; raisedTo: 4; yourself' ) 
+		  equals: 2
 ]
 
 { #category : #'tests-methods' }
@@ -406,6 +451,52 @@ DASTInterpreterTests >> testMoreThan [
 
 	self assert: (self evaluateProgram: '1>2')
 		  equals: false
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoChainExceptiongCatch [
+	self skip.
+	self assert: (self evaluateProgram: '[ 1/0 ] on: ParseException , ZeroDivide do: [ 1 ]') 
+		  equals: 1	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0 ] on: ZeroDivide do: [ true ]') 
+		  equals: true
+	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoFromBlocExceptiongCatch [
+	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoFromMethodExceptiongCatch [
+	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoGeneralExceptiongCatch [
+	self assert: (self evaluateProgram: '[ 1/0 ] on: Exception do: [ 1 ]') 
+		  equals: 1	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoInSequenceExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]. 3') 
+		  equals: 3
+	
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testOnDoSequenceInBlockExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]') 
+		  equals: true
+	
 ]
 
 { #category : #tests }
@@ -536,7 +627,14 @@ DASTInterpreterTests >> testVarsLocalScopeLookupIsDoneInExceutionTime [
 		
 ]
 
-{ #category : #tests }
+{ #category : #'tests-self' }
+DASTInterpreterTests >> testYourSelfTwice [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests yourself yourself')
+		  equals: DASTInterpreterClassForTests 
+]
+
+{ #category : #'tests-contexts' }
 DASTInterpreterTests >> testYourself [
 
 	self assert: (self evaluateProgram: '2+3;yourself' ) 

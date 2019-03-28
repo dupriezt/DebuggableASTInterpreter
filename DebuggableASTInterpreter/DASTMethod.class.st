@@ -22,8 +22,18 @@ DASTMethod >> isMessageValue [
 ]
 
 { #category : #accessing }
+DASTMethod >> isOnDo [
+	^ nodeAST primitive = 199
+]
+
+{ #category : #accessing }
 DASTMethod >> isPrimitive [ 
 	^ nodeAST isPrimitive
+]
+
+{ #category : #accessing }
+DASTMethod >> methodClass [
+	^ nodeAST methodClass
 ]
 
 { #category : #accessing }
@@ -34,9 +44,4 @@ DASTMethod >> primitive [
 { #category : #accessing }
 DASTMethod >> selector [
 	^ nodeAST selector
-]
-
-{ #category : #accessing }
-DASTMethod >> systemClass [ 
-	^ CompiledMethod
 ]

@@ -1,3 +1,7 @@
+"
+I'm the first context, the one who accesses global variables. 
+I must be refactored when contexts start to use DASTEnvironments
+"
 Class {
 	#name : #DASTContextRootSmalltalk,
 	#superclass : #DASTContext,
@@ -13,6 +17,17 @@ DASTContextRootSmalltalk >> findVariable: aByteSymbol [
 ]
 
 { #category : #accessing }
+DASTContextRootSmalltalk >> isBlockContext [
+	^false
+]
+
+{ #category : #accessing }
 DASTContextRootSmalltalk >> isRoot [ 
 	^true
+]
+
+{ #category : #accessing }
+DASTContextRootSmalltalk >> isUnwindContext [
+	"is this context for  method that is marked?"
+	^ self shouldNotImplement 
 ]

@@ -81,7 +81,9 @@ DASTPostOrderTreeVisitor >> visitMessageNode: aRBMessageNode [
 
 	stack push: aRBMessageNode.
 	aRBMessageNode arguments reverse do: [ :e | e acceptVisitor: self ].
-	aRBMessageNode receiver acceptVisitor: self.
+	(aRBMessageNode isCascaded not or: [aRBMessageNode isFirstCascaded]) ifTrue: [ aRBMessageNode receiver acceptVisitor: self ].
+	
+	
 	
 
 ]
@@ -121,6 +123,11 @@ DASTPostOrderTreeVisitor >> visitSuperNode: aRBSuperNode [
 { #category : #'as yet unclassified' }
 DASTPostOrderTreeVisitor >> visitTemporaryNode: aRBTemporaryNode [ 
 	stack push: aRBTemporaryNode
+]
+
+{ #category : #visiting }
+DASTPostOrderTreeVisitor >> visitThisContextNode: aRBThisContextNode [ 
+	stack push: aRBThisContextNode
 ]
 
 { #category : #visiting }

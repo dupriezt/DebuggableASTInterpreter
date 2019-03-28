@@ -7,6 +7,7 @@ Class {
 { #category : #accessing }
 DASTBlock >> initializeWith: aRBNode outerContext: aDASTContext [
 	self assert: aRBNode isBlock.
+	(aRBNode body statements isEmpty) ifTrue: [ aRBNode body addNode: (RBLiteralValueNode value: nil) ].
 	super initializeWith:  aRBNode outerContext: aDASTContext 
 ]
 
@@ -27,17 +28,34 @@ DASTBlock >> isPrimitive [
 ]
 
 { #category : #accessing }
-DASTBlock >> primitive [ 
-	"A block always has code inside, and cannot have a primitive declaration "
-	self shouldNotImplement 
+DASTBlock >> methodClass [
+	^ nodeAST methodNode methodClass
 ]
 
 { #category : #accessing }
-DASTBlock >> selector [ 
-	nodeAST sourceCode
+DASTBlock >> primitive [ 
+	"A block always has code inside, and cannot have a primitive declaration "
+	^ 0
+]
+
+{ #category : #accessing }
+DASTBlock >> selector [
+	 
+	^ 'value' "nodeAST sourceCode"
 ]
 
 { #category : #accessing }
 DASTBlock >> systemClass [ 
 	^ BlockClosure
+]
+
+{ #category : #accessing }
+DASTBlock >> value: anArg [
+	| block |
+	block := Smalltalk compiler
+		source: self sourceCode;
+		context: self outerContext;
+		receiver: self outerContext receiver;
+		evaluate.
+	^ block value: anArg
 ]

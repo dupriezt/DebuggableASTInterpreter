@@ -61,6 +61,11 @@ DASTClosure >> isMessageValue [
 	self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+DASTClosure >> isOnDo [
+	^ false
+]
+
 { #category : #testing }
 DASTClosure >> isPrimitive [
 	self subclassResponsibility 
@@ -73,9 +78,7 @@ DASTClosure >> nodeAST [
 
 { #category : #accessing }
 DASTClosure >> outerContext [
-	^ outerContext isBlockContext 
-		ifTrue: [ outerContext methodOrBlock outerContext ]
-		ifFalse: [ outerContext ]
+	^ outerContext 
 ]
 
 { #category : #accessing }
@@ -91,9 +94,4 @@ DASTClosure >> selector [
 { #category : #accessing }
 DASTClosure >> sourceCode [
 	^ sourceCode
-]
-
-{ #category : #accessing }
-DASTClosure >> systemClass [
-	self subclassResponsibility 
 ]
