@@ -4,6 +4,18 @@ Class {
 	#category : #DebuggableASTInterpreter
 }
 
+{ #category : #'accessing method dictionary' }
+DASTBlock class >> lookupSelector: selector [
+	" Hack for accessing method definition of BlockClosure while not inheriting from it"
+	| method |
+	method := super lookupSelector: selector.
+	method ifNotNil: [ ^ method ].
+	
+	^ BlockClosure lookupSelector: selector
+	
+	
+]
+
 { #category : #accessing }
 DASTBlock >> initializeWith: aRBNode outerContext: aDASTContext [
 	self assert: aRBNode isBlock.
