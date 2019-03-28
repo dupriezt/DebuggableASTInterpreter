@@ -2,7 +2,7 @@ Extension { #name : #DASTSession }
 
 { #category : #'*DebuggableASTInterpreterOverlays' }
 DASTSession class >> debugWithOverlays: sourceCode [
-	^self new debug: sourceCode
+	^self new debugWithOverlays: sourceCode
 ]
 
 { #category : #'*DebuggableASTInterpreterOverlays' }

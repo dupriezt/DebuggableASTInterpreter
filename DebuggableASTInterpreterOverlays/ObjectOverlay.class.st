@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'overlayedObject',
 		'overlayHistory',
-		'overlayState'
+		'overlayState',
+		'overlayProgramCounter'
 	],
 	#category : #'DebuggableASTInterpreterOverlays-Interpreter - version'
 }
@@ -29,6 +30,16 @@ ObjectOverlay >> overlayHistory [
 ]
 
 { #category : #accessing }
+ObjectOverlay >> overlayProgramCounter [
+	^ overlayProgramCounter
+]
+
+{ #category : #accessing }
+ObjectOverlay >> overlayProgramCounter: anObject [
+	overlayProgramCounter := anObject
+]
+
+{ #category : #accessing }
 ObjectOverlay >> overlayedObject [
 	^ overlayedObject
 ]
@@ -50,6 +61,19 @@ ObjectOverlay >> readInstanceVariableNamed: name ifAbsent: aBlock [
 
 { #category : #writing }
 ObjectOverlay >> write: value toInstVarNamed: name fromNode: aNode inContext: aDastContext [
+	|instVarOverlay|
+	instVarOverlay := InstanceVariableOverlay new.
+	instVarOverlay varName: name.
+	instVarOverlay overlayValue: value.
+	instVarOverlay node: aNode.
+	instVarOverlay dastContext: (DASTContext new copyFrom: aDastContext).
+	overlayState at: name put: value.
+	overlayHistory add: instVarOverlay 
+	
+]
+
+{ #category : #writing }
+ObjectOverlay >> write: value toInstVarNamed: name fromNode: aNode inContext: aDastContext overlayIndex: anObject [
 	|instVarOverlay|
 	instVarOverlay := InstanceVariableOverlay new.
 	instVarOverlay varName: name.

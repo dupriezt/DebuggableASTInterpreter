@@ -32,6 +32,7 @@ DASTSpecDebugger >> initializeWidgets [
 	toolbar := self instantiate: SpecDebuggerDynamicToolbar.
 	code := self newCode.
 	receiverInspector := self instantiate: InspectorNavigator.
+	
 	contextInspector := self instantiate: DASTEyeContextInspector.
 	self code
 		acceptBlock: [ :text :notifyer | 
@@ -40,6 +41,12 @@ DASTSpecDebugger >> initializeWidgets [
 				inContext: self stack selectedItem
 				notifying: notifyer ].
 	self code whenBuiltDo: [ :ann | ann widget font: self codeFont ]
+]
+
+{ #category : #accessing }
+DASTSpecDebugger >> session: aSession [
+	super session: aSession.
+	"receiverInspector interpreter: aSession interpreter."
 ]
 
 { #category : #accessing }
@@ -86,7 +93,8 @@ DASTSpecDebugger >> updateReceiverInspectorFromContext: aContext [
 	oldSelection := receiverInspector inspector ifNotNil: [ :inspector | inspector list selectedItem ].
 
 	receiver := aContext ifNotNil: [ aContext receiver ]. 
-	receiverInspector inspect: receiver.	
+	receiverInspector inspect: receiver.
+"	receiverInspector model: (StInspectorModel on:  receiver).	"
 		
 	newSelectionIndex := 1.
 	oldSelection ifNotNil: 

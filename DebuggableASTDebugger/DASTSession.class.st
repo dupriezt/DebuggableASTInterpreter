@@ -37,6 +37,11 @@ DASTSession >> debug: sourceCode [
 ]
 
 { #category : #'accessing context' }
+DASTSession >> interpreter [
+	^interpreter
+]
+
+{ #category : #'accessing context' }
 DASTSession >> interruptedContext [
 	^interpreter currentContext
 ]

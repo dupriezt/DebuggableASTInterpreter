@@ -6,15 +6,28 @@ Class {
 	#name : #DASTOverlayInterpreter,
 	#superclass : #DASTInterpreter,
 	#instVars : [
-		'objectStateOverlay'
+		'objectStateOverlay',
+		'overlayCounter',
+		'overlaysForPC'
 	],
 	#category : #'DebuggableASTInterpreterOverlays-Interpreter - version'
 }
 
 { #category : #accessing }
+DASTOverlayInterpreter >> nextOverlayCounter [
+	overlayCounter := self overlayCounter + 1.
+	^ overlayCounter
+]
+
+{ #category : #accessing }
 DASTOverlayInterpreter >> objectStateOverlay [
 	^ objectStateOverlay
 		ifNil: [ objectStateOverlay := IdentityDictionary new ]
+]
+
+{ #category : #accessing }
+DASTOverlayInterpreter >> overlayCounter [
+	^overlayCounter ifNil:[overlayCounter := 0]
 ]
 
 { #category : #visiting }
@@ -25,6 +38,11 @@ DASTOverlayInterpreter >> overlayFor: anObject [
 ]
 
 { #category : #visiting }
+DASTOverlayInterpreter >> overlaysForPC [
+	^ overlaysForPC ifNil: [ overlaysForPC := Dictionary new ]
+]
+
+{ #category : #visiting }
 DASTOverlayInterpreter >> readInstanceVariableNamed: name [
 	^ (self overlayFor: self receiver)
 		readInstanceVariableNamed: name
@@ -32,10 +50,26 @@ DASTOverlayInterpreter >> readInstanceVariableNamed: name [
 ]
 
 { #category : #visiting }
+DASTOverlayInterpreter >> readInstanceVariableNamed: name for: object [
+	^ (self overlayFor: object)
+		readInstanceVariableNamed: name
+		ifAbsent: [ ^ super readInstanceVariableNamed: name ]
+]
+
+{ #category : #visiting }
+DASTOverlayInterpreter >> registerOverlayForCurrentPC: overlay [
+	self overlaysForPC at: self overlayCounter put: overlay
+]
+
+{ #category : #visiting }
 DASTOverlayInterpreter >> write: value toInstVarNamed: name [
-	(self overlayFor: self receiver)
+	| overlay |
+	overlay := self overlayFor: self receiver.
+	overlay
 		write: value
 		toInstVarNamed: name
 		fromNode: self currentNode parent
-		inContext: self currentContext
+		inContext: self currentContext.
+	overlay overlayProgramCounter: self nextOverlayCounter.
+	self registerOverlayForCurrentPC: overlay
 ]
