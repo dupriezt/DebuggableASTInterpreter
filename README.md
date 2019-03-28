@@ -6,11 +6,13 @@ An AST interpreter that accepts stepping operations
 ```Smalltalk
 Metacello new
     baseline: 'DebuggableASTInterpreter';
-    repository: 'github://carolahp/DebuggableASTInterpreter:ExceptionsDev';
+    repository: 'github://carolahp/DebuggableASTInterpreter';
     load.
 ```
 
 ## Install the debugger
+That is not yet synchronized with the master branch.
+
 ```Smalltalk
 Metacello new
     baseline: 'DebuggableASTInterpreter';
@@ -26,6 +28,7 @@ Execute the following code in a playground with a `doIt` to test the debugger.
 
 
 ## Install the overlays experiments for debugging in isolation (Experimental!)
+That is not yet synchronized with the master branch.
 ```Smalltalk
 Metacello new
     baseline: 'DebuggableASTInterpreter';
