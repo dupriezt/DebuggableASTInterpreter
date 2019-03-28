@@ -560,6 +560,14 @@ DASTInterpreterTests >> testSelf [
 		  equals: DASTInterpreterClassForTests 
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testSendMessageToBlock [
+
+	self assert: (self evaluateProgram: '[:a :b :c | true ] argumentNames' ) 
+		  equals: #(a b c)
+	
+]
+
 { #category : #'tests-variables-class' }
 DASTInterpreterTests >> testSetAndGetClassVariableFromMethodInInstanceSide [
 	self skip.

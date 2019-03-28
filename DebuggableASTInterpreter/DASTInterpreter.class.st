@@ -181,12 +181,12 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
 	
 	"Instance variables assignment"
-	(self currentContext receiver systemClass allInstVarNames includes: name)
+	(self currentContext receiver class allInstVarNames includes: name)
 		ifTrue: [ self write: value toInstVarNamed: name. ^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
-	(self currentContext receiver systemClass classPool includesKey: name)
-		ifTrue: [ self currentContext receiver systemClass classPool at: name put: value . ^ self].
+	(self currentContext receiver class classPool includesKey: name)
+		ifTrue: [ self currentContext receiver class classPool at: name put: value . ^ self].
 		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'
 ]

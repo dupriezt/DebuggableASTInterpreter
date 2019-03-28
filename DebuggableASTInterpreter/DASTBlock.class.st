@@ -45,11 +45,6 @@ DASTBlock >> selector [
 ]
 
 { #category : #accessing }
-DASTBlock >> systemClass [ 
-	^ BlockClosure
-]
-
-{ #category : #accessing }
 DASTBlock >> value: anArg [
 	| block |
 	block := Smalltalk compiler
