@@ -89,6 +89,12 @@ DASTInterpreterTests >> testCustomInitializationUsingSuper [
 
 ]
 
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testDecreaseProgramCounter [
+	interpreter decreasePC.
+	self assert: interpreter programCounter equals: -1
+]
+
 { #category : #'tests-blocks' }
 DASTInterpreterTests >> testEmptyBlock [
 
@@ -150,6 +156,53 @@ DASTInterpreterTests >> testEvaluateSubstraction [
 		  equals: -2
 ]
 
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAfterExecution [
+	| nodesStackBackup contextBackup |
+	self initializeProgram: 'Point x: 1 y: 2'.
+	contextBackup := interpreter currentContext.
+	nodesStackBackup := contextBackup nodes asArray.
+	interpreter evaluate.
+	self flag: 'That cannot work, as the execution for the #x:y: method "inserts" the body of the method node in the nodes stack'.
+	self
+		assert: interpreter currentContext executedNodes asArray reversed
+		equals: nodesStackBackup
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAfterStepInto [
+	| nodesStackBackup contextBackup |
+	self initializeProgram: '^Point x: 1 y: 2'.
+	contextBackup := interpreter currentContext.
+	nodesStackBackup := contextBackup nodes copy.
+	interpreter stepInto.
+	self
+		assert: interpreter currentContext executedNodes
+		equals: (DASTStack new push: (RBGlobalNode named: #Point); yourself)
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAfterStepOver [
+	| expectedStack |
+	self initializeProgram: '^Point x: 1 y: 2'.
+	expectedStack := DASTStack new.
+	expectedStack push: (RBGlobalNode named: #Point).
+	expectedStack push: (RBLiteralValueNode value: 1).
+	expectedStack push: (RBLiteralValueNode value: 2).
+	interpreter stepOver.
+	interpreter stepOver.
+	interpreter stepOver.
+	self
+		assert: interpreter currentContext executedNodes
+		equals: expectedStack
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAtExecutionStart [
+	self initializeProgram: 'Point x: 1 y: 2'.
+	self assert: interpreter currentContext executedNodes isEmpty
+]
+
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testFalse [
 	self assert: (self evaluateProgram: 'false')
@@ -177,6 +230,40 @@ DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
 
 	self assert: (self evaluateProgram: '1<2 ifTrue: [3]' ) 
 		  equals: 3
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounter [
+	interpreter increasePC.
+	self assert: interpreter programCounter equals: 1
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounterWhenSteppingIntoAMessage [
+	self initializeProgram: '5 squared'.
+	interpreter stepOver.
+	interpreter stepInto.
+	self assert: interpreter programCounter equals: 2
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounterWhenSteppingIntoANode [
+	self initializeProgram: '4 + 2'.
+	interpreter stepInto.
+	self assert: interpreter programCounter equals: 1
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounterWhenSteppingOverANode [
+	self initializeProgram:  '1 asNumber'.
+	interpreter stepOver.
+	interpreter stepOver.
+	self assert: interpreter programCounter equals: 4
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testInitialProgramCounter [
+	self assert: interpreter programCounter equals: 0
 ]
 
 { #category : #'tests-variables-instance' }

@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'currentContext',
-		'exception'
+		'exception',
+		'programCounter'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -27,6 +28,11 @@ DASTInterpreter >> currentNode [
 ]
 
 { #category : #evaluation }
+DASTInterpreter >> decreasePC [
+	programCounter := self programCounter - 1
+]
+
+{ #category : #evaluation }
 DASTInterpreter >> evaluate [
 	|node|
 		
@@ -39,9 +45,15 @@ DASTInterpreter >> evaluate [
 	^ self stackTop
 ]
 
+{ #category : #evaluation }
+DASTInterpreter >> increasePC [
+	programCounter := self programCounter + 1
+]
+
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
 	| visitor nodes rootContext |
+	programCounter := 0.
 	visitor := DASTPostOrderTreeVisitor new.
 	
 	(aRBNode doSemanticAnalysis body addReturn; yourself) acceptVisitor: visitor.
@@ -68,6 +80,11 @@ DASTInterpreter >> isTerminated [
 { #category : #testing }
 DASTInterpreter >> primitiveResultIsError: anObject [
 	^ (anObject isKindOf: Array ) and: [(anObject at: 1 ifAbsent: nil) = Context primitiveFailToken first ]
+]
+
+{ #category : #accessing }
+DASTInterpreter >> programCounter [
+	^ programCounter ifNil:[programCounter := 0]
 ]
 
 { #category : #visiting }
@@ -133,8 +150,12 @@ DASTInterpreter >> stackTop [
 
 { #category : #evaluation }
 DASTInterpreter >> stepInto [
-	currentContext nodes isEmpty ifTrue: [ DASTEvaluationTerminated  signal].
-	self visit: currentContext nodes pop .
+	| node |
+	currentContext nodes isEmpty
+		ifTrue: [ DASTEvaluationTerminated signal ].
+	self visit: (node := currentContext nodes pop).
+	self increasePC.
+	currentContext executedNodes push: node.
 	^ self currentContext
 ]
 

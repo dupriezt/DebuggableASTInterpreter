@@ -9,7 +9,8 @@ Class {
 
 { #category : #tests }
 DASTContextTests >> testContextInitialization [
-	context := DASTInterpreter new.
+	context := DASTContext new.
+	self assert: context executedNodes isEmpty
 ]
 
 { #category : #stack }

@@ -9,8 +9,13 @@ Class {
 
 { #category : #running }
 DASTAbstractInterpreterTests >> evaluateProgram: aString [
-	interpreter initializeWithProgram: (RBParser parseExpression: aString).
+	self initializeProgram: aString.
 	^ interpreter evaluate
+]
+
+{ #category : #running }
+DASTAbstractInterpreterTests >> initializeProgram: aString [
+	interpreter initializeWithProgram: (RBParser parseExpression: aString).
 ]
 
 { #category : #running }

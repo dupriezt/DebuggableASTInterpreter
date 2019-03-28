@@ -53,13 +53,14 @@ DASTRingEnvironmentTests class >> packagesKernel [
 
 { #category : #running }
 DASTRingEnvironmentTests >> setUp [
-	| path packages |
+"	| path packages |
 	path := './src'.
 	packages := self class packagesKernel.
-	aDASTRingEnvironment := DASTRingEnvironment new initializeWithRepositoryLocatedIn: path withPackages: packages
+	aDASTRingEnvironment := DASTRingEnvironment new initializeWithRepositoryLocatedIn: path withPackages: packages"
 ]
 
 { #category : #running }
 DASTRingEnvironmentTests >> testEnvironmentInitialization [
+	self skip.
 	self assert: aDASTRingEnvironment isNotNil 
 ]

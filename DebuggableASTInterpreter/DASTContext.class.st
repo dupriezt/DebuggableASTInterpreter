@@ -9,6 +9,7 @@ Class {
 		'variablesDict',
 		'receiver',
 		'nodes',
+		'executedNodes',
 		'stack',
 		'parent',
 		'closure',
@@ -96,6 +97,11 @@ DASTContext >> exceptionHandlerBlock [
 	self flag: 'Access from temps'.
 	^self tempAt: 2
 
+]
+
+{ #category : #accessing }
+DASTContext >> executedNodes [
+	^executedNodes ifNil:[executedNodes := DASTStack new]
 ]
 
 { #category : #'API-lookup' }
@@ -329,7 +335,7 @@ DASTContext >> nextHandlerContext [
 
 { #category : #accessing }
 DASTContext >> nodes [ 
-	^nodes ifNil: [ nodes := Stack new ]
+	^nodes ifNil: [ nodes := DASTStack new ]
 ]
 
 { #category : #accessing }
