@@ -70,7 +70,7 @@ DASTInterpreter >> primitiveResultIsError: anObject [
 	^ (anObject isKindOf: Array ) and: [(anObject at: 1 ifAbsent: nil) = Context primitiveFailToken first ]
 ]
 
-{ #category : #visiting }
+{ #category : #accessing }
 DASTInterpreter >> readInstanceVariableNamed: name [
 	^ (self currentContext findInstanceVariable: name) value
 ]
@@ -248,13 +248,14 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	method := newContext methodOrBlock.
 	
 	" Apply - invoke method "
-	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
+	(aRBMessageNode isCascaded and: [aRBMessageNode isLastCascaded not]) ifTrue: [ self stackPush: receiver ]. 
 	(method isPrimitive and: [method isMessageValue not and: [method isOnDo not]] )  
 	ifTrue: [ 
 		[ ^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
 			do: [
-				" Remove pragma node from method body to prevent infinit loop and continue with the excecution of the method body" 
+				" Remove pragma node from method body to prevent infinite loop 
+				  and continue with the excecution of the method body" 
 				newContext := newContext removePrimitiveFromMethod;yourself ]
 		].
 	" Set new context "
@@ -320,7 +321,7 @@ DASTInterpreter >> visitThisContextNode: aRBThisContextNode [
 	self stackPush: currentContext
 ]
 
-{ #category : #visiting }
+{ #category : #accessing }
 DASTInterpreter >> write: value toInstVarNamed: name [
 
 	self currentContext receiver instVarNamed: name put: value

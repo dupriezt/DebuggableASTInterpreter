@@ -43,6 +43,20 @@ DASTContext class >> valueToBlockMessages [
 		ifNil: [ valueToBlockMessages := (BlockClosure methodDict select: [ :e | (201 to: 206) includes: e primitive ]) collect: [ :e | e selector ] ]
 ]
 
+{ #category : #accessing }
+DASTContext >> allSenders [
+	
+	| currentContext sendersStack |
+	currentContext := self.
+	sendersStack := OrderedCollection new.
+	sendersStack add: currentContext.
+	
+	[currentContext notNil] whileTrue: [ 
+		currentContext := currentContext sender.
+		sendersStack add: currentContext ].
+	^ sendersStack
+]
+
 { #category : #'API-store' }
 DASTContext >> at: aByteSymbol put: anObject [
 	self setIndexForTempVarNamed: aByteSymbol.

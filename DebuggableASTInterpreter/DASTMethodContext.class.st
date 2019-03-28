@@ -14,10 +14,7 @@ DASTMethodContext >> initializeContext [
 	
 	self	parent: sender.
 	aSelector := messageNode selector.
-	
-	aClass := (self receiver isNil and: [ aSelector = #value ]) 
-		ifTrue: [ self halt. BlockClosure ]
-		ifFalse: [ self getClassForLookup ].
+	aClass := self getClassForLookup .
 	
 	compiledMethod := self lookupSelector: aSelector startInClass: aClass.
 	theMethod := DASTMethod new initializeWith: compiledMethod ast outerContext: sender.
@@ -46,7 +43,7 @@ DASTMethodContext >> isUnwindContext [
 DASTMethodContext >> printOn: aStream [
 	| selector class mclass  |
 			closure == nil
-				ifTrue: [ ^  aStream nextPutAll: 'DAST Context: this should happen' ].
+				ifTrue: [ ^  aStream nextPutAll: 'DAST Method Context (the closure is nil)' ].
 			class := receiver class.
 			mclass := closure methodClass.
 			selector := closure selector ifNil: [ closure defaultSelector ].

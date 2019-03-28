@@ -61,5 +61,6 @@ DASTRingEnvironmentTests >> setUp [
 
 { #category : #running }
 DASTRingEnvironmentTests >> testEnvironmentInitialization [
+	self skip.
 	self assert: aDASTRingEnvironment isNotNil 
 ]
