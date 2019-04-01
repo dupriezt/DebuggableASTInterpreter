@@ -108,7 +108,7 @@ DASTContext >> executedNodes [
 DASTContext >> findClassVariable: aName [
 	^ receiver isClass 
 		ifTrue: [ receiver bindingOf: aName ]
-		ifFalse:[ receiver systemClass bindingOf: aName ]
+		ifFalse:[ receiver class bindingOf: aName ]
 ]
 
 { #category : #query }
@@ -212,7 +212,7 @@ DASTContext >> getClassForLookup [
 
 	 ^ messageNode isSuperSend 
 			ifTrue: [messageNode methodNode methodClass superclass] 
-			ifFalse: [self receiver systemClass]
+			ifFalse: [self receiver class]
 ]
 
 { #category : #accessing }
