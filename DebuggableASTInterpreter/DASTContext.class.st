@@ -221,6 +221,16 @@ DASTContext >> getClassForLookup [
 			ifFalse: [self receiver class]
 ]
 
+{ #category : #'gt-extension' }
+DASTContext >> gtInspectorSendersIn: composite [
+	<gtInspectorPresentationOrder: 0>
+	^composite tree
+		rootsExpanded;
+		title: 'Senders';
+		display: [ {self} ];
+		children: [ :each | each senders ]
+]
+
 { #category : #accessing }
 DASTContext >> handleSignal: exception [
 	"Sent to handler (on:do:) contexts only.  If my exception class (first arg) handles exception then execute my handle block (second arg), otherwise forward this message to the next handler context.  If none left, execute exception's defaultAction (see nil>>handleSignal:)."
@@ -448,6 +458,18 @@ DASTContext >> sender [
 { #category : #accessing }
 DASTContext >> sender: aDASTContext [
 	sender := aDASTContext
+]
+
+{ #category : #accessing }
+DASTContext >> senders [
+	| context result |
+	context := self sender.
+	result := OrderedCollection new.
+	[ context isNil ] whileFalse: [ 
+		result add: context.
+		context := context sender
+		 ].
+	^ result
 ]
 
 { #category : #'API-store' }
