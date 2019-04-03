@@ -156,6 +156,18 @@ DASTInterpreterTests >> testEvaluateSubstraction [
 		  equals: -2
 ]
 
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testExceptionSignal [
+	self assert: (self evaluateProgram: 'ZeroDivide signal') 
+		  equals: false
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testExceptionSignalInSequence [
+	self deny: (self evaluateProgram: 'ZeroDivide signal. 2') 
+		  equals: 2
+]
+
 { #category : #'tests-contexts' }
 DASTInterpreterTests >> testExecutedNodesAfterExecution [
 	| nodesStackBackup contextBackup |

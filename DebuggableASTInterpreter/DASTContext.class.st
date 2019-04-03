@@ -16,7 +16,8 @@ Class {
 		'messageNode',
 		'sender',
 		'tempVarIndex',
-		'tempVarsNamesIndexes'
+		'tempVarsNamesIndexes',
+		'unhandledException'
 	],
 	#classVars : [
 		'valueToBlockMessages'
@@ -50,6 +51,11 @@ DASTContext >> at: aByteSymbol put: anObject [
 	^self variablesDict at: aByteSymbol put: anObject.
 	
 	
+]
+
+{ #category : #testing }
+DASTContext >> canExecute [
+	^ self nodes isNotEmpty and: [ self unhandledException isNil ]
 ]
 
 { #category : #'closure support' }
@@ -295,9 +301,14 @@ DASTContext >> lookupContextDefiningLocalVariable: aByteSymbol [
 
 { #category : #'API-lookup' }
 DASTContext >> lookupSelector: aByteString startInClass: aClass [ 
-	^(aClass lookupSelector: aByteString)
+	| lclass |
+	lclass := 
+		(aClass == UnhandledError) 
+			ifTrue: [ DASTErrorNonInteractive ]
+			ifFalse: [ aClass ].
+	^( lclass lookupSelector: aByteString)
 		ifNil: [ "ToDo: implement does not understand" 
-					self error: 'The class ',aClass asString,' does not understand the message: ', aByteString asString ].
+					self error: 'The class ',lclass asString,' does not understand the message: ', aByteString asString ].
 	
 ]
 
@@ -496,6 +507,16 @@ DASTContext >> terminateTo: previousContext [
 			currentContext terminate.
 			currentContext := sendingContext ]].
 	sender := previousContext
+]
+
+{ #category : #accessing }
+DASTContext >> unhandledException [
+	^ unhandledException
+]
+
+{ #category : #accessing }
+DASTContext >> unhandledException: anObject [
+	unhandledException := anObject
 ]
 
 { #category : #accessing }

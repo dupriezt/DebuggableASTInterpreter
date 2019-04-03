@@ -36,7 +36,7 @@ DASTInterpreter >> decreasePC [
 DASTInterpreter >> evaluate [
 	|node|
 		
-	[ currentContext nodes isEmpty ] whileFalse: [  
+	[ currentContext canExecute ] whileTrue: [  
 		"node:=currentContext nodes pop. 
 		self visit: node ."
 		node := currentContext nodes top.
@@ -151,8 +151,8 @@ DASTInterpreter >> stackTop [
 { #category : #evaluation }
 DASTInterpreter >> stepInto [
 	| node |
-	currentContext nodes isEmpty
-		ifTrue: [ DASTEvaluationTerminated signal ].
+	currentContext canExecute
+		ifFalse: [ DASTEvaluationTerminated signal ].
 	self visit: (node := currentContext nodes pop).
 	self increasePC.
 	currentContext executedNodes push: node.
