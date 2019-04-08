@@ -538,7 +538,7 @@ DASTContext >> unhandledException [
 
 { #category : #accessing }
 DASTContext >> unhandledException: anObject [
-	unhandledException := anObject
+	^ unhandledException := anObject
 ]
 
 { #category : #accessing }

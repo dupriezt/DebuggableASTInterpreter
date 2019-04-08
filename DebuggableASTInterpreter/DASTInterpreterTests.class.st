@@ -158,8 +158,9 @@ DASTInterpreterTests >> testEvaluateSubstraction [
 
 { #category : #'tests-exceptions' }
 DASTInterpreterTests >> testExceptionSignal [
-	self assert: (self evaluateProgram: 'ZeroDivide signal') 
-		  equals: false
+	self evaluateProgram: 'ZeroDivide signal'.
+	self assert: interpreter stackTop class
+		  equals: ZeroDivide 
 ]
 
 { #category : #'tests-exceptions' }
@@ -691,6 +692,15 @@ DASTInterpreterTests >> testSuperTheReceiverRemains1 [
 
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests4 new m1' ) 
 		  equals: 42
+		
+
+]
+
+{ #category : #'tests-transcript' }
+DASTInterpreterTests >> testTranscript [
+	self skip.
+	self assert: (self evaluateProgram: 'Transcript show: #a' ) 
+		  equals: 1
 		
 
 ]
