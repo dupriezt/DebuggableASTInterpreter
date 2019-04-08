@@ -556,7 +556,7 @@ DASTInterpreterTests >> testMoreThan [
 { #category : #'tests-exceptions' }
 DASTInterpreterTests >> testOnDoChainExceptiongCatch [
 	self skip.
-	self assert: (self evaluateProgram: '[ 1/0 ] on: ParseException , ZeroDivide do: [ 1 ]') 
+	self assert: (self evaluateProgram: '[ 1/0 ] on: SyntaxErrorNotification, ZeroDivide do: [ 1 ]') 
 		  equals: 1	
 ]
 
