@@ -15,6 +15,11 @@ DASTMethod >> isBlock [
 	^ false
 ]
 
+{ #category : #accessing }
+DASTMethod >> isEnsure [
+	^ nodeAST primitive = 198
+]
+
 { #category : #testing }
 DASTMethod >> isMessageValue [
 	^ self isPrimitive 

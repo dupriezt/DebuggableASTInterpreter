@@ -55,6 +55,11 @@ DASTClosure >> isBlock [
 	self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+DASTClosure >> isEnsure [
+	^ false
+]
+
 { #category : #testing }
 DASTClosure >> isMessageValue [
 	"returns true if self is the 'value' message sent to a block (or any of its variants)"
