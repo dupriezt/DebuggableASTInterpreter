@@ -1,7 +1,7 @@
 Class {
 	#name : #DASTBlock,
 	#superclass : #DASTClosure,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Closures'
 }
 
 { #category : #'accessing method dictionary' }

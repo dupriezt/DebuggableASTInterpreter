@@ -1,5 +1,5 @@
 Class {
 	#name : #DASTEvaluationTerminated,
 	#superclass : #Error,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Exceptions'
 }

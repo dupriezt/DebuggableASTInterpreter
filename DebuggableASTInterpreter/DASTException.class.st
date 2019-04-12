@@ -8,5 +8,5 @@ Class {
 	#instVars : [
 		'messageText'
 	],
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Exceptions'
 }

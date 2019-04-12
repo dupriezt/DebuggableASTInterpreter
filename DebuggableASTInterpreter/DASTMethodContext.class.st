@@ -4,7 +4,7 @@ I am a context created to evaluate the body of a method
 Class {
 	#name : #DASTMethodContext,
 	#superclass : #DASTContext,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Contexts'
 }
 
 { #category : #initialization }

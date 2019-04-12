@@ -21,7 +21,7 @@ Class {
 	#classVars : [
 		'valueToBlockMessages'
 	],
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Contexts'
 }
 
 { #category : #'instance creation' }

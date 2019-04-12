@@ -9,7 +9,7 @@ Class {
 		'exception',
 		'programCounter'
 	],
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }
 
 { #category : #'as yet unclassified' }

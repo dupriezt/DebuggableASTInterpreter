@@ -1,7 +1,7 @@
 Class {
 	#name : #DASTStack,
 	#superclass : #OrderedCollection,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Auxiliars'
 }
 
 { #category : #adding }
