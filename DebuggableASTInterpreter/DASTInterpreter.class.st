@@ -12,7 +12,7 @@ Class {
 	#category : #'DebuggableASTInterpreter-Core'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 DASTInterpreter >> context [
 	self shouldBeImplemented.
 ]

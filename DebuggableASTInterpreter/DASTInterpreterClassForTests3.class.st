@@ -7,7 +7,7 @@ Class {
 	#classVars : [
 		'classVar'
 	],
-	#category : #'DebuggableASTInterpreter-Tests'
+	#category : #'DebuggableASTInterpreter-TestsClasses'
 }
 
 { #category : #initialization }
