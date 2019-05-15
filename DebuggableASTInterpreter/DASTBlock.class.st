@@ -1,6 +1,9 @@
 Class {
 	#name : #DASTBlock,
 	#superclass : #DASTClosure,
+	#instVars : [
+		'outerContext'
+	],
 	#category : #DebuggableASTInterpreter
 }
 
@@ -34,10 +37,10 @@ DASTBlock >> ensure: aBlock [
 ]
 
 { #category : #accessing }
-DASTBlock >> initializeWith: aRBNode outerContext: aDASTContext [
+DASTBlock >> initializeWith: aRBNode [
 	self assert: aRBNode isBlock.
 	(aRBNode body statements isEmpty) ifTrue: [ aRBNode body addNode: (RBLiteralValueNode value: nil) ].
-	super initializeWith:  aRBNode outerContext: aDASTContext 
+	super initializeWith:  aRBNode
 ]
 
 { #category : #accessing }
@@ -59,6 +62,16 @@ DASTBlock >> isPrimitive [
 { #category : #accessing }
 DASTBlock >> methodClass [
 	^ nodeAST methodNode methodClass
+]
+
+{ #category : #accessing }
+DASTBlock >> outerContext [
+	^ outerContext 
+]
+
+{ #category : #accessing }
+DASTBlock >> outerContext: aDASTContext [
+	outerContext := aDASTContext
 ]
 
 { #category : #accessing }

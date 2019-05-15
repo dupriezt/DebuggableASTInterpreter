@@ -5,7 +5,6 @@ Class {
 	#name : #DASTClosure,
 	#superclass : #Object,
 	#instVars : [
-		'outerContext',
 		'sourceCode',
 		'nodeAST',
 		'numArgs'
@@ -41,10 +40,9 @@ DASTClosure >> doSemanticAnalysis [
 ]
 
 { #category : #initialization }
-DASTClosure >> initializeWith: aRBNode outerContext: aDASTContext [
+DASTClosure >> initializeWith: aRBNode [ 
 	
 	sourceCode := aRBNode sourceCode.
-	outerContext := aDASTContext.
 	nodeAST := aRBNode.
 	numArgs := nodeAST arguments size
 	
@@ -79,11 +77,6 @@ DASTClosure >> isPrimitive [
 { #category : #accessing }
 DASTClosure >> nodeAST [
 	^ nodeAST
-]
-
-{ #category : #accessing }
-DASTClosure >> outerContext [
-	^ outerContext 
 ]
 
 { #category : #accessing }

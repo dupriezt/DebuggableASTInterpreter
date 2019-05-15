@@ -215,7 +215,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	
-	self stackPush: (DASTBlock new initializeWith: aRBBlockNode outerContext: currentContext)
+	self stackPush: (DASTBlock new initializeWith: aRBBlockNode; outerContext: currentContext)
 ]
 
 { #category : #visiting }

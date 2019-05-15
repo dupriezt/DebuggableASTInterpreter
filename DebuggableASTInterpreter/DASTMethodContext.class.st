@@ -20,7 +20,7 @@ DASTMethodContext >> initializeContext [
 		ifFalse: [ self getClassForLookup ].
 	
 	compiledMethod := self lookupSelector: aSelector startInClass: aClass.
-	theMethod := DASTMethod new initializeWith: compiledMethod ast outerContext: sender.
+	theMethod := DASTMethod new initializeWith: compiledMethod ast.
 	
 	visitor := DASTPostOrderTreeVisitor new.
 	(theMethod doSemanticAnalysis body) acceptVisitor: visitor.
