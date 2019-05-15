@@ -23,7 +23,7 @@ DASTMethodContext >> initializeContext [
 	theMethod := DASTMethod new initializeWith: compiledMethod ast.
 	
 	visitor := DASTPostOrderTreeVisitor new.
-	(theMethod doSemanticAnalysis body) acceptVisitor: visitor.
+	theMethod body acceptVisitor: visitor.
 	nodes := visitor stack.
 	
 	self 	methodOrBlock: theMethod;

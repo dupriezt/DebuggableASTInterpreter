@@ -56,7 +56,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	programCounter := 0.
 	visitor := DASTPostOrderTreeVisitor new.
 	
-	(aRBNode doSemanticAnalysis body addReturn; yourself) acceptVisitor: visitor.
+	(aRBNode methodNode body addReturn; yourself) acceptVisitor: visitor.
 	nodes := visitor stack.
 	rootContext := DASTContextRootSmalltalk new. 
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
@@ -339,6 +339,14 @@ DASTInterpreter >> visitTemporaryNode: aRBTemporaryNode [
 { #category : #visiting }
 DASTInterpreter >> visitThisContextNode: aRBThisContextNode [ 
 	self stackPush: currentContext
+]
+
+{ #category : #visiting }
+DASTInterpreter >> visitVariableNode: aRBVariableNode [ 
+
+	aRBVariableNode isDefinition
+		ifTrue: [ currentContext at: aRBVariableNode name put: nil ].
+	self stackPush: (currentContext findVariable: aRBVariableNode name)
 ]
 
 { #category : #visiting }
