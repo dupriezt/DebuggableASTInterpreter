@@ -566,6 +566,14 @@ DASTInterpreterTests >> testMoreThan [
 		  equals: false
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testNonLocalReturn [
+
+	self assert: (self evaluateProgram: '(DASTInterpreterClassForTests new getBlockThatReturns32) value' ) 
+		  equals: false
+	
+]
+
 { #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoChainExceptiongCatch [
 	self skip.
