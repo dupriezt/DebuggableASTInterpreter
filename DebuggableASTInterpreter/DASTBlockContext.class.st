@@ -24,7 +24,7 @@ DASTBlockContext >> initializeContext [
 		ifFalse: [ self getClassForLookup ].
 	"
 	visitor := DASTPostOrderTreeVisitor new.
-	(receiver doSemanticAnalysis body) acceptVisitor: visitor.
+	receiver body acceptVisitor: visitor.
 	nodes := visitor stack.
 	
 	self 	methodOrBlock: receiver;
