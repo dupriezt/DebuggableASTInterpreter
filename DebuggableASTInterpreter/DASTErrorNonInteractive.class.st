@@ -5,7 +5,7 @@ Class {
 		'messageText',
 		'exception'
 	],
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }
 
 { #category : #accessing }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'stack'
 	],
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }
 
 { #category : #visiting }

@@ -1,5 +1,5 @@
 Class {
 	#name : #DASTSystemEnvironment,
 	#superclass : #DASTEnvironment,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }

@@ -1,7 +1,7 @@
 Class {
 	#name : #DASTInterpreterClassForTests4,
 	#superclass : #DASTInterpreterClassForTests5,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Tests'
 }
 
 { #category : #'as yet unclassified' }

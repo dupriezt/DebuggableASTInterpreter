@@ -1,5 +1,5 @@
 Class {
 	#name : #DASTInterpreterSyntaxTests,
 	#superclass : #TestCase,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Tests'
 }

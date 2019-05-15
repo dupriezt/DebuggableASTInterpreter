@@ -9,7 +9,7 @@ Class {
 		'cachedPackagesNames',
 		'cachedPath'
 	],
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }
 
 { #category : #initialization }

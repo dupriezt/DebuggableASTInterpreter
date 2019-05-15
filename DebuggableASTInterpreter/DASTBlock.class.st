@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'outerContext'
 	],
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }
 
 { #category : #'accessing method dictionary' }

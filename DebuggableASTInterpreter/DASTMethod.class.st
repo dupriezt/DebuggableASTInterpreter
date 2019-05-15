@@ -1,7 +1,7 @@
 Class {
 	#name : #DASTMethod,
 	#superclass : #DASTClosure,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }
 
 { #category : #accessing }

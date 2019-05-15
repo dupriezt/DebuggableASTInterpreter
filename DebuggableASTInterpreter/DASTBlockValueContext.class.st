@@ -4,7 +4,7 @@ I am a context created to evaluate the body of a block
 Class {
 	#name : #DASTBlockValueContext,
 	#superclass : #DASTContext,
-	#category : #DebuggableASTInterpreter
+	#category : #'DebuggableASTInterpreter-Core'
 }
 
 { #category : #initialization }
@@ -41,6 +41,11 @@ DASTBlockValueContext >> isBlockContext [
 DASTBlockValueContext >> isUnwindContext [
 	"is this context for  method that is marked?"
 	^ false
+]
+
+{ #category : #initialization }
+DASTBlockValueContext >> method [
+	^ closure outerContext method
 ]
 
 { #category : #initialization }
