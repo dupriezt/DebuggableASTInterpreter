@@ -64,7 +64,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 	" Set the first method (noMethod) context evaluation. The receiver is nil "
 	currentContext := DASTMethodContext new
 		parent: rootContext;
-		methodOrBlock: nodes last methodNode;
+		methodOrBlock: (DASTMethod new initializeWith: nodes last methodNode);
 		nodes: nodes;
 		sender: rootContext;
 		yourself.
