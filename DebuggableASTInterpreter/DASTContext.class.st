@@ -52,6 +52,11 @@ DASTContext >> at: aByteSymbol put: anObject [
 	
 ]
 
+{ #category : #testing }
+DASTContext >> canExecute [
+	^ self nodes isNotEmpty and: [ self unhandledException isNil ]
+]
+
 { #category : #'closure support' }
 DASTContext >> contextTag [
 	^ self
@@ -215,6 +220,16 @@ DASTContext >> getClassForLookup [
 			ifFalse: [self receiver class]
 ]
 
+{ #category : #'gt-extension' }
+DASTContext >> gtInspectorSendersIn: composite [
+	<gtInspectorPresentationOrder: 0>
+	^composite tree
+		rootsExpanded;
+		title: 'Senders';
+		display: [ {self} ];
+		children: [ :each | each senders ]
+]
+
 { #category : #accessing }
 DASTContext >> handleSignal: exception [
 	"Sent to handler (on:do:) contexts only.  If my exception class (first arg) handles exception then execute my handle block (second arg), otherwise forward this message to the next handler context.  If none left, execute exception's defaultAction (see nil>>handleSignal:)."
@@ -295,9 +310,14 @@ DASTContext >> lookupContextDefiningLocalVariable: aByteSymbol [
 
 { #category : #'API-lookup' }
 DASTContext >> lookupSelector: aByteString startInClass: aClass [ 
-	^(aClass lookupSelector: aByteString)
+	| lclass |
+	lclass := 
+		(aClass == UnhandledError) 
+			ifTrue: [ DASTErrorNonInteractive ]
+			ifFalse: [ aClass ].
+	^( lclass lookupSelector: aByteString)
 		ifNil: [ "ToDo: implement does not understand" 
-					self error: 'The class ',aClass asString,' does not understand the message: ', aByteString asString ].
+					self error: 'The class ',lclass asString,' does not understand the message: ', aByteString asString ].
 	
 ]
 
@@ -439,6 +459,18 @@ DASTContext >> sender: aDASTContext [
 	sender := aDASTContext
 ]
 
+{ #category : #accessing }
+DASTContext >> senders [
+	| context result |
+	context := self sender.
+	result := OrderedCollection new.
+	[ context isNil ] whileFalse: [ 
+		result add: context.
+		context := context sender
+		 ].
+	^ result
+]
+
 { #category : #'API-store' }
 DASTContext >> setIndexForTempVarNamed: tempVarName [
 	tempVarsNamesIndexes
@@ -496,6 +528,16 @@ DASTContext >> terminateTo: previousContext [
 			currentContext terminate.
 			currentContext := sendingContext ]].
 	sender := previousContext
+]
+
+{ #category : #accessing }
+DASTContext >> unhandledException [
+	^ unhandledException
+]
+
+{ #category : #accessing }
+DASTContext >> unhandledException: anObject [
+	^ unhandledException := anObject
 ]
 
 { #category : #accessing }

@@ -5,14 +5,19 @@ Class {
 }
 
 { #category : #accessing }
-DASTMethod >> initializeWith: aRBNode outerContext: aDASTContext [
+DASTMethod >> initializeWith: aRBNode [ 
 	self assert: aRBNode isBlock not.
-	super initializeWith:  aRBNode outerContext: aDASTContext 
+	super initializeWith:  aRBNode 
 ]
 
 { #category : #accessing }
 DASTMethod >> isBlock [ 
 	^ false
+]
+
+{ #category : #accessing }
+DASTMethod >> isEnsure [
+	^ nodeAST primitive = 198
 ]
 
 { #category : #testing }

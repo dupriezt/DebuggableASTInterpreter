@@ -44,6 +44,11 @@ DASTBlockValueContext >> isUnwindContext [
 ]
 
 { #category : #initialization }
+DASTBlockValueContext >> method [
+	^ closure outerContext method
+]
+
+{ #category : #initialization }
 DASTBlockValueContext >> printOn: aStream [
 	aStream nextPutAll: closure printString , ' in '.
 			closure outerContext printOn: aStream

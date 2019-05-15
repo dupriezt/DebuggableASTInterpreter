@@ -121,6 +121,12 @@ DASTInterpreterTests >> testEmptyMethodValueLink [
 		  equals: ValueLink
 ]
 
+{ #category : #'tests-exceptions-ensure' }
+DASTInterpreterTests >> testEnsure [
+	self assert: (self evaluateProgram: '[1] ensure: [2]')
+		  equals: 1 
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testEvaluateArgumentOrder [ 
 	
@@ -154,6 +160,26 @@ DASTInterpreterTests >> testEvaluateSubstraction [
 	
 	self assert: (self evaluateProgram: '1 - 3' ) 
 		  equals: -2
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testExceptionSignal [
+	self evaluateProgram: 'ZeroDivide signal'.
+	self assert: interpreter stackTop class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testExceptionSignalInDoBlock [
+	self evaluateProgram: '[ ZeroDivide signal ] on: ZeroDivide do: [ Error signal ]'.
+	self assert: interpreter stackTop class
+		  equals: Error 
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testExceptionSignalInSequence [
+	self deny: (self evaluateProgram: 'ZeroDivide signal. 2') 
+		  equals: 2
 ]
 
 { #category : #'tests-contexts' }
@@ -540,46 +566,46 @@ DASTInterpreterTests >> testMoreThan [
 		  equals: false
 ]
 
-{ #category : #'tests-exceptions' }
+{ #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoChainExceptiongCatch [
 	self skip.
-	self assert: (self evaluateProgram: '[ 1/0 ] on: ParseException , ZeroDivide do: [ 1 ]') 
+	self assert: (self evaluateProgram: '[ 1/0 ] on: SyntaxErrorNotification, ZeroDivide do: [ 1 ]') 
 		  equals: 1	
 ]
 
-{ #category : #'tests-exceptions' }
+{ #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoExceptionCatch [
 	self assert: (self evaluateProgram: '[ 1/0 ] on: ZeroDivide do: [ true ]') 
 		  equals: true
 	
 ]
 
-{ #category : #'tests-exceptions' }
+{ #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoFromBlocExceptiongCatch [
 	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
 		  equals: ZeroDivide 
 ]
 
-{ #category : #'tests-exceptions' }
+{ #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoFromMethodExceptiongCatch [
 	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
 		  equals: ZeroDivide 
 ]
 
-{ #category : #'tests-exceptions' }
+{ #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoGeneralExceptiongCatch [
 	self assert: (self evaluateProgram: '[ 1/0 ] on: Exception do: [ 1 ]') 
 		  equals: 1	
 ]
 
-{ #category : #'tests-exceptions' }
+{ #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoInSequenceExceptionCatch [
 	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]. 3') 
 		  equals: 3
 	
 ]
 
-{ #category : #'tests-exceptions' }
+{ #category : #'tests-exceptions-ondo' }
 DASTInterpreterTests >> testOnDoSequenceInBlockExceptionCatch [
 	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]') 
 		  equals: true
@@ -679,6 +705,15 @@ DASTInterpreterTests >> testSuperTheReceiverRemains1 [
 
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests4 new m1' ) 
 		  equals: 42
+		
+
+]
+
+{ #category : #'tests-transcript' }
+DASTInterpreterTests >> testTranscript [
+	self skip.
+	self assert: (self evaluateProgram: 'Transcript show: #a' ) 
+		  equals: 1
 		
 
 ]
