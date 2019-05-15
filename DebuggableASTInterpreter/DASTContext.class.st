@@ -31,7 +31,7 @@ DASTContext class >> newWithSender: aDASTContext receiver: aReceiver messageNode
 	context := ((aReceiver isKindOf: DASTBlock) 
 					and: [ " Check if the message is one of the variants of value. This is very ugly and must be changed when implementing environments "
 						self valueToBlockMessages keys includes: aRBMessageNode selector ])
-		ifTrue: [ DASTBlockValueContext new ]
+		ifTrue: [ DASTBlockContext new ]
 		ifFalse: [ DASTMethodContext new ].
 	context sender: aDASTContext;
 		receiver: aReceiver;

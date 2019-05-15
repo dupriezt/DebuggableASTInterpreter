@@ -2,18 +2,18 @@
 I am a context created to evaluate the body of a block
 "
 Class {
-	#name : #DASTBlockValueContext,
+	#name : #DASTBlockContext,
 	#superclass : #DASTContext,
 	#category : #'DebuggableASTInterpreter-Contexts'
 }
 
 { #category : #initialization }
-DASTBlockValueContext >> contextTag [
+DASTBlockContext >> contextTag [
 	^ closure outerContext
 ]
 
 { #category : #initialization }
-DASTBlockValueContext >> initializeContext [
+DASTBlockContext >> initializeContext [
 	
 	| visitor |
 	" My receiver is the DASTBlock that received the message value (or any of its variants)"
@@ -33,28 +33,28 @@ DASTBlockValueContext >> initializeContext [
 ]
 
 { #category : #initialization }
-DASTBlockValueContext >> isBlockContext [
+DASTBlockContext >> isBlockContext [
 	^ true
 ]
 
 { #category : #initialization }
-DASTBlockValueContext >> isUnwindContext [
+DASTBlockContext >> isUnwindContext [
 	"is this context for  method that is marked?"
 	^ false
 ]
 
 { #category : #initialization }
-DASTBlockValueContext >> method [
+DASTBlockContext >> method [
 	^ closure outerContext method
 ]
 
 { #category : #initialization }
-DASTBlockValueContext >> printOn: aStream [
+DASTBlockContext >> printOn: aStream [
 	aStream nextPutAll: closure printString , ' in '.
 			closure outerContext printOn: aStream
 ]
 
 { #category : #initialization }
-DASTBlockValueContext >> receiver [
+DASTBlockContext >> receiver [
 	^ closure outerContext receiver
 ]
