@@ -16,7 +16,8 @@ Class {
 		'messageNode',
 		'sender',
 		'tempVarIndex',
-		'tempVarsNamesIndexes'
+		'tempVarsNamesIndexes',
+		'unhandledException'
 	],
 	#classVars : [
 		'valueToBlockMessages'
