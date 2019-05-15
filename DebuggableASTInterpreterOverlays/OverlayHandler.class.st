@@ -10,7 +10,7 @@ Class {
 		'objectOverlay',
 		'overlayDictionary'
 	],
-	#category : #DebuggableASTInterpreterOverlays
+	#category : #'DebuggableASTInterpreterOverlays-Proxies - version'
 }
 
 { #category : #'handle - methods' }

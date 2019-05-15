@@ -6,7 +6,7 @@ Class {
 		'overlayHandler',
 		'pointOverlay'
 	],
-	#category : #DebuggableASTInterpreterOverlays
+	#category : #'DebuggableASTInterpreterOverlays-Tests'
 }
 
 { #category : #running }

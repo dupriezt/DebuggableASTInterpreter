@@ -41,10 +41,9 @@ DASTClosure >> doSemanticAnalysis [
 ]
 
 { #category : #initialization }
-DASTClosure >> initializeWith: aRBNode outerContext: aDASTContext [
+DASTClosure >> initializeWith: aRBNode [ 
 	
 	sourceCode := aRBNode sourceCode.
-	outerContext := aDASTContext.
 	nodeAST := aRBNode.
 	numArgs := nodeAST arguments size
 	
@@ -53,6 +52,11 @@ DASTClosure >> initializeWith: aRBNode outerContext: aDASTContext [
 { #category : #accessing }
 DASTClosure >> isBlock [ 
 	self subclassResponsibility 
+]
+
+{ #category : #accessing }
+DASTClosure >> isEnsure [
+	^ false
 ]
 
 { #category : #testing }
@@ -74,11 +78,6 @@ DASTClosure >> isPrimitive [
 { #category : #accessing }
 DASTClosure >> nodeAST [
 	^ nodeAST
-]
-
-{ #category : #accessing }
-DASTClosure >> outerContext [
-	^ outerContext 
 ]
 
 { #category : #accessing }
