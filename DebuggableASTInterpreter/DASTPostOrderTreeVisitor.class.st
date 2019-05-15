@@ -11,7 +11,7 @@ Class {
 DASTPostOrderTreeVisitor >> initialize [ 
 
 	super initialize.
-	stack := Stack new
+	stack := DASTStack new
 ]
 
 { #category : #accessing }

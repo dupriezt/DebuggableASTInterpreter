@@ -5,6 +5,11 @@ Class {
 }
 
 { #category : #adding }
+DASTStack >> asArray [ 
+	^ super asArray reversed
+]
+
+{ #category : #adding }
 DASTStack >> pop [
 	^ self removeLast 
 ]

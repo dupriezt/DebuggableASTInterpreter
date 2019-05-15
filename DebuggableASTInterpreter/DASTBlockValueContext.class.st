@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #initialization }
+DASTBlockValueContext >> contextTag [
+	^ closure outerContext
+]
+
+{ #category : #initialization }
 DASTBlockValueContext >> initializeContext [
 	
 	| visitor |
@@ -30,6 +35,12 @@ DASTBlockValueContext >> initializeContext [
 { #category : #initialization }
 DASTBlockValueContext >> isBlockContext [
 	^ true
+]
+
+{ #category : #initialization }
+DASTBlockValueContext >> isUnwindContext [
+	"is this context for  method that is marked?"
+	^ false
 ]
 
 { #category : #initialization }

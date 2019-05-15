@@ -63,6 +63,14 @@ DASTInterpreterTests >> testBlockLocalVariableAccessedFromAnidatedBlock [
 	
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testBlockWithParameter [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests new getBlockWithParameter' ) 
+		  equals: 123
+	
+]
+
 { #category : #'tests-variables-class-instance' }
 DASTInterpreterTests >> testClassInstanceVarScopeIsRespectedWhenInherited [
 
@@ -79,6 +87,12 @@ DASTInterpreterTests >> testCustomInitializationUsingSuper [
 		  equals: DASTInterpreterClassForTests5
 		
 
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testDecreaseProgramCounter [
+	interpreter decreasePC.
+	self assert: interpreter programCounter equals: -1
 ]
 
 { #category : #'tests-blocks' }
@@ -105,6 +119,12 @@ DASTInterpreterTests >> testEmptyMethodIndirectCall [
 DASTInterpreterTests >> testEmptyMethodValueLink [
 	self assert: ((self evaluateProgram: 'ValueLink new') class) 
 		  equals: ValueLink
+]
+
+{ #category : #'tests-exceptions-ensure' }
+DASTInterpreterTests >> testEnsure [
+	self assert: (self evaluateProgram: '[1] ensure: [2]')
+		  equals: 1 
 ]
 
 { #category : #tests }
@@ -142,6 +162,73 @@ DASTInterpreterTests >> testEvaluateSubstraction [
 		  equals: -2
 ]
 
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testExceptionSignal [
+	self evaluateProgram: 'ZeroDivide signal'.
+	self assert: interpreter stackTop class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testExceptionSignalInDoBlock [
+	self evaluateProgram: '[ ZeroDivide signal ] on: ZeroDivide do: [ Error signal ]'.
+	self assert: interpreter stackTop class
+		  equals: Error 
+]
+
+{ #category : #'tests-exceptions' }
+DASTInterpreterTests >> testExceptionSignalInSequence [
+	self deny: (self evaluateProgram: 'ZeroDivide signal. 2') 
+		  equals: 2
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAfterExecution [
+	| nodesStackBackup contextBackup |
+	self initializeProgram: 'Point x: 1 y: 2'.
+	contextBackup := interpreter currentContext.
+	nodesStackBackup := contextBackup nodes asArray.
+	interpreter evaluate.
+	self flag: 'That cannot work, as the execution for the #x:y: method "inserts" the body of the method node in the nodes stack'.
+	self
+		assert: interpreter currentContext executedNodes asArray reversed
+		equals: nodesStackBackup
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAfterStepInto [
+	| nodesStackBackup contextBackup |
+	self initializeProgram: '^Point x: 1 y: 2'.
+	contextBackup := interpreter currentContext.
+	nodesStackBackup := contextBackup nodes copy.
+	interpreter stepInto.
+	self
+		assert: interpreter currentContext executedNodes
+		equals: (DASTStack new push: (RBGlobalNode named: #Point); yourself)
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAfterStepOver [
+	| expectedStack |
+	self initializeProgram: '^Point x: 1 y: 2'.
+	expectedStack := DASTStack new.
+	expectedStack push: (RBGlobalNode named: #Point).
+	expectedStack push: (RBLiteralValueNode value: 1).
+	expectedStack push: (RBLiteralValueNode value: 2).
+	interpreter stepOver.
+	interpreter stepOver.
+	interpreter stepOver.
+	self
+		assert: interpreter currentContext executedNodes
+		equals: expectedStack
+]
+
+{ #category : #'tests-contexts' }
+DASTInterpreterTests >> testExecutedNodesAtExecutionStart [
+	self initializeProgram: 'Point x: 1 y: 2'.
+	self assert: interpreter currentContext executedNodes isEmpty
+]
+
 { #category : #'tests-primitives' }
 DASTInterpreterTests >> testFalse [
 	self assert: (self evaluateProgram: 'false')
@@ -169,6 +256,40 @@ DASTInterpreterTests >> testIfTrueWithEvaluationAsReceiver [
 
 	self assert: (self evaluateProgram: '1<2 ifTrue: [3]' ) 
 		  equals: 3
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounter [
+	interpreter increasePC.
+	self assert: interpreter programCounter equals: 1
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounterWhenSteppingIntoAMessage [
+	self initializeProgram: '5 squared'.
+	interpreter stepOver.
+	interpreter stepInto.
+	self assert: interpreter programCounter equals: 2
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounterWhenSteppingIntoANode [
+	self initializeProgram: '4 + 2'.
+	interpreter stepInto.
+	self assert: interpreter programCounter equals: 1
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testIncreaseProgramCounterWhenSteppingOverANode [
+	self initializeProgram:  '1 asNumber'.
+	interpreter stepOver.
+	interpreter stepOver.
+	self assert: interpreter programCounter equals: 4
+]
+
+{ #category : #'tests-program counter' }
+DASTInterpreterTests >> testInitialProgramCounter [
+	self assert: interpreter programCounter equals: 0
 ]
 
 { #category : #'tests-variables-instance' }
@@ -445,10 +566,48 @@ DASTInterpreterTests >> testMoreThan [
 		  equals: false
 ]
 
-{ #category : #'tests-exceptions' }
-DASTInterpreterTests >> testOnDoExceptionCatch [
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testOnDoChainExceptiongCatch [
 	self skip.
+	self assert: (self evaluateProgram: '[ 1/0 ] on: SyntaxErrorNotification, ZeroDivide do: [ 1 ]') 
+		  equals: 1	
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testOnDoExceptionCatch [
 	self assert: (self evaluateProgram: '[ 1/0 ] on: ZeroDivide do: [ true ]') 
+		  equals: true
+	
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testOnDoFromBlocExceptiongCatch [
+	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testOnDoFromMethodExceptiongCatch [
+	self assert: (self evaluateProgram: '[ [ZeroDivide signal] on: Exception do: [ :e | e signal ] ] on: Exception do: [ :e | e ]') class
+		  equals: ZeroDivide 
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testOnDoGeneralExceptiongCatch [
+	self assert: (self evaluateProgram: '[ 1/0 ] on: Exception do: [ 1 ]') 
+		  equals: 1	
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testOnDoInSequenceExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]. 3') 
+		  equals: 3
+	
+]
+
+{ #category : #'tests-exceptions-ondo' }
+DASTInterpreterTests >> testOnDoSequenceInBlockExceptionCatch [
+	self assert: (self evaluateProgram: '[ 1/0. 2 ] on: ZeroDivide do: [ true ]') 
 		  equals: true
 	
 ]
@@ -514,6 +673,14 @@ DASTInterpreterTests >> testSelf [
 		  equals: DASTInterpreterClassForTests 
 ]
 
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testSendMessageToBlock [
+
+	self assert: (self evaluateProgram: '[:a :b :c | true ] argumentNames' ) 
+		  equals: #(a b c)
+	
+]
+
 { #category : #'tests-variables-class' }
 DASTInterpreterTests >> testSetAndGetClassVariableFromMethodInInstanceSide [
 	self skip.
@@ -538,6 +705,15 @@ DASTInterpreterTests >> testSuperTheReceiverRemains1 [
 
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests4 new m1' ) 
 		  equals: 42
+		
+
+]
+
+{ #category : #'tests-transcript' }
+DASTInterpreterTests >> testTranscript [
+	self skip.
+	self assert: (self evaluateProgram: 'Transcript show: #a' ) 
+		  equals: 1
 		
 
 ]

@@ -16,15 +16,11 @@ DASTMethodContext >> initializeContext [
 	aSelector := messageNode selector.
 	
 	aClass := (self receiver isNil and: [ aSelector = #value ]) 
-		ifTrue: [ BlockClosure ]
-		ifFalse: [ 
-			(self receiver isKindOf: DASTBlock) 
-				ifTrue: [ BlockClosure ]
-				ifFalse: [ self getClassForLookup ]].
+		ifTrue: [ self halt. BlockClosure ]
+		ifFalse: [ self getClassForLookup ].
 	
 	compiledMethod := self lookupSelector: aSelector startInClass: aClass.
-
-	theMethod := DASTMethod new initializeWith: compiledMethod ast outerContext: sender.
+	theMethod := DASTMethod new initializeWith: compiledMethod ast.
 	
 	visitor := DASTPostOrderTreeVisitor new.
 	(theMethod doSemanticAnalysis body) acceptVisitor: visitor.
@@ -38,6 +34,12 @@ DASTMethodContext >> initializeContext [
 { #category : #initialization }
 DASTMethodContext >> isBlockContext [ 
 	^ false
+]
+
+{ #category : #initialization }
+DASTMethodContext >> isUnwindContext [
+	"is this context for  method that is marked?"
+	^ closure primitive = 198
 ]
 
 { #category : #initialization }

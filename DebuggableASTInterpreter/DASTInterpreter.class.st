@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'currentContext',
-		'exception'
+		'exception',
+		'programCounter'
 	],
 	#category : #DebuggableASTInterpreter
 }
@@ -27,10 +28,15 @@ DASTInterpreter >> currentNode [
 ]
 
 { #category : #evaluation }
+DASTInterpreter >> decreasePC [
+	programCounter := self programCounter - 1
+]
+
+{ #category : #evaluation }
 DASTInterpreter >> evaluate [
 	|node|
 		
-	[ currentContext nodes isEmpty ] whileFalse: [  
+	[ currentContext canExecute ] whileTrue: [  
 		"node:=currentContext nodes pop. 
 		self visit: node ."
 		node := currentContext nodes top.
@@ -39,9 +45,15 @@ DASTInterpreter >> evaluate [
 	^ self stackTop
 ]
 
+{ #category : #evaluation }
+DASTInterpreter >> increasePC [
+	programCounter := self programCounter + 1
+]
+
 { #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
 	| visitor nodes rootContext |
+	programCounter := 0.
 	visitor := DASTPostOrderTreeVisitor new.
 	
 	(aRBNode doSemanticAnalysis body addReturn; yourself) acceptVisitor: visitor.
@@ -70,6 +82,11 @@ DASTInterpreter >> primitiveResultIsError: anObject [
 	^ (anObject isKindOf: Array ) and: [(anObject at: 1 ifAbsent: nil) = Context primitiveFailToken first ]
 ]
 
+{ #category : #accessing }
+DASTInterpreter >> programCounter [
+	^ programCounter ifNil:[programCounter := 0]
+]
+
 { #category : #visiting }
 DASTInterpreter >> readInstanceVariableNamed: name [
 	^ (self currentContext findInstanceVariable: name) value
@@ -89,6 +106,10 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 		anInteger = 266 ifTrue: [ 
 			^self stackPush: anObject argumentCount. 
 		 ].
+		anInteger = 202 ifTrue: [ 
+			primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
+			^ self stackPush: primitiveResult
+		].
 		DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject 
 	].
 	 	
@@ -129,8 +150,12 @@ DASTInterpreter >> stackTop [
 
 { #category : #evaluation }
 DASTInterpreter >> stepInto [
-	currentContext nodes isEmpty ifTrue: [ DASTEvaluationTerminated  signal].
-	self visit: currentContext nodes pop .
+	| node |
+	currentContext canExecute
+		ifFalse: [ DASTEvaluationTerminated signal ].
+	self visit: (node := currentContext nodes pop).
+	self increasePC.
+	currentContext executedNodes push: node.
 	^ self currentContext
 ]
 
@@ -139,10 +164,9 @@ DASTInterpreter >> stepOver [
 	| initialContext |
 	initialContext := currentContext.
 	self stepInto.
-	[ currentContext ~= initialContext] whileTrue: [ 
-		self stepInto.
-	 ].
-
+	[ currentContext ~= initialContext
+		"and: [ currentContext ~= initialContext sender ]" ]
+		whileTrue: [ self stepInto ].
 	^ self currentContext
 ]
 
@@ -178,12 +202,12 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
 	
 	"Instance variables assignment"
-	(self currentContext receiver systemClass allInstVarNames includes: name)
+	(self currentContext receiver class allInstVarNames includes: name)
 		ifTrue: [ self write: value toInstVarNamed: name. ^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
-	(self currentContext receiver systemClass classPool includesKey: name)
-		ifTrue: [ self currentContext receiver systemClass classPool at: name put: value . ^ self].
+	(self currentContext receiver class classPool includesKey: name)
+		ifTrue: [ self currentContext receiver class classPool at: name put: value . ^ self].
 		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'
 ]
@@ -191,7 +215,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	
-	self stackPush: (DASTBlock new initializeWith: aRBBlockNode outerContext: currentContext)
+	self stackPush: (DASTBlock new initializeWith: aRBBlockNode; outerContext: currentContext)
 ]
 
 { #category : #visiting }
@@ -246,7 +270,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	" Apply - invoke method "
 	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
-	(method isPrimitive and: [method isMessageValue not ])  
+	(method isPrimitive and: [method isMessageValue not and: [method isOnDo not]] )  
 	ifTrue: [ 
 		[ ^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
