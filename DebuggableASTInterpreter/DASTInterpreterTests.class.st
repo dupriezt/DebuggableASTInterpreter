@@ -11,6 +11,22 @@ DASTInterpreterTests >> testAddTwoNumbers [
 		  equals: 3
 ]
 
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testArgumentVarUsedToSetLocalVar [
+	
+	self assert: (self evaluateProgram:  'DASTInterpreterClassForTests new assignateArgumentToLocalVar: 4') 
+		  equals: 4
+		
+]
+
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testArgumentVarUsedToSetLocalVarInsideBlock [
+	
+	self assert: (self evaluateProgram:  'DASTInterpreterClassForTests new assignateArgumentToLocalVarInsideBlock: 4') 
+		  equals: 4
+		
+]
+
 { #category : #tests }
 DASTInterpreterTests >> testArray [
 
@@ -249,6 +265,13 @@ DASTInterpreterTests >> testIfTrue [
 
 	self assert: (self evaluateProgram: 'true ifTrue: [3]' ) 
 		  equals: 3
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testIfTrueThatWritesLocalVar [
+
+	self assert: (self evaluateProgram: '|x| x := 1 . true ifTrue: [x:=2] . x' ) 
+		  equals: 2
 ]
 
 { #category : #'tests-blocks' }
