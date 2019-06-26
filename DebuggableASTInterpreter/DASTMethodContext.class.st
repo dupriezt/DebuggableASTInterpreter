@@ -63,3 +63,8 @@ DASTMethodContext >> printOn: aStream [
 					[ aStream space.
 					(self variablesDict values at: 1) selector printOn: aStream ]
 ]
+
+{ #category : #accessing }
+DASTMethodContext >> temps: aCollection [ 
+	aCollection do: [ :assoc | self at: assoc key put: assoc value ]
+]

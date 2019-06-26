@@ -17,7 +17,8 @@ Class {
 		'sender',
 		'tempVarIndex',
 		'tempVarsNamesIndexes',
-		'unhandledException'
+		'unhandledException',
+		'evaluator'
 	],
 	#classVars : [
 		'valueToBlockMessages'
@@ -27,6 +28,11 @@ Class {
 
 { #category : #'instance creation' }
 DASTContext class >> newWithSender: aDASTContext receiver: aReceiver messageNode: aRBMessageNode [ 
+	self shouldNotImplement 
+]
+
+{ #category : #instantiation }
+DASTContext class >> newWithSender: aDASTContext receiver: aReceiver messageNode: aRBMessageNode evaluator: aDASTEvaluator [ 
 	| context |
 	context := ((aReceiver isKindOf: DASTBlock) 
 					and: [ " Check if the message is one of the variants of value. This is very ugly and must be changed when implementing environments "
@@ -35,7 +41,8 @@ DASTContext class >> newWithSender: aDASTContext receiver: aReceiver messageNode
 		ifFalse: [ DASTMethodContext new ].
 	context sender: aDASTContext;
 		receiver: aReceiver;
-		messageNode: aRBMessageNode.
+		messageNode: aRBMessageNode;
+		evaluator: aDASTEvaluator.
 	^ context initializeContext
 ]
 
@@ -79,6 +86,16 @@ DASTContext >> evaluateSignal: exception [
 	value := self exceptionHandlerBlock cull: exception.	
 	"return from self if not otherwise directed in handle block"
 	self return: value
+]
+
+{ #category : #accessing }
+DASTContext >> evaluator [
+	^ evaluator
+]
+
+{ #category : #'as yet unclassified' }
+DASTContext >> evaluator: aDASTEvaluator [ 
+	evaluator := aDASTEvaluator.
 ]
 
 { #category : #'accessing - private' }
@@ -132,13 +149,14 @@ DASTContext >> findContextSuchThat: testBlock [
 
 { #category : #'API-lookup' }
 DASTContext >> findInstanceVariable: aName [
+	self haltIf: [ aName = 'array' ].
 	[^ aName -> (self receiver instVarNamed: aName) ]
 		on: InstanceVariableNotFound do: [ ^nil ] 
 ]
 
 { #category : #'API-lookup' }
 DASTContext >> findLocalVariable: aName [
-
+	self haltIf: [ aName = 'n' ].
 	^ variablesDict 
 		associationAt: aName 
 		ifAbsent: [ nil ]
@@ -218,7 +236,7 @@ DASTContext >> getClassForLookup [
 
 	 ^ messageNode isSuperSend 
 			ifTrue: [messageNode methodNode methodClass superclass] 
-			ifFalse: [self receiver class]
+			ifFalse: [self evaluator classOf: receiver]
 ]
 
 { #category : #'gt-extension' }
@@ -483,6 +501,7 @@ DASTContext >> setIndexForTempVarNamed: tempVarName [
 DASTContext >> setTemporalVariablesNamed: names values: values [
 	values doWithIndex: 
 		  [ :val :index | 
+				self haltIf: [ (names at: index) = 'n' ].
 				self 
 					at: (names at: index)
 					 put: val ].

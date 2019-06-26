@@ -27,6 +27,12 @@ DASTMethod >> isMessageValue [
 ]
 
 { #category : #accessing }
+DASTMethod >> isNamedPrimitive [
+	^ self primitive isString
+	
+]
+
+{ #category : #accessing }
 DASTMethod >> isOnDo [
 	^ nodeAST primitive = 199
 ]
@@ -38,7 +44,10 @@ DASTMethod >> isPrimitive [
 
 { #category : #accessing }
 DASTMethod >> methodClass [
-	^ nodeAST methodClass
+
+	^ (nodeAST compilationContext) 
+		ifNil: [ UndefinedObject ] 
+		ifNotNil: [ nodeAST methodClass ]
 ]
 
 { #category : #accessing }

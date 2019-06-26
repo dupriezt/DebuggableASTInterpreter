@@ -7,10 +7,18 @@ Class {
 	#instVars : [
 		'currentContext',
 		'exception',
-		'programCounter'
+		'programCounter',
+		'anEvaluator',
+		'evaluator',
+		'astCache'
 	],
 	#category : #'DebuggableASTInterpreter-Core'
 }
+
+{ #category : #accessor }
+DASTInterpreter >> astCache: aCollection [ 
+	astCache := aCollection
+]
 
 { #category : #accessing }
 DASTInterpreter >> context [
@@ -35,7 +43,7 @@ DASTInterpreter >> decreasePC [
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
 	|node|
-		
+	
 	[ currentContext canExecute ] whileTrue: [  
 		"node:=currentContext nodes pop. 
 		self visit: node ."
@@ -46,19 +54,49 @@ DASTInterpreter >> evaluate [
 ]
 
 { #category : #evaluation }
+DASTInterpreter >> evaluateAST: aRBNode [ 
+	^ self evaluateAST: aRBNode withTemps: #() 
+]
+
+{ #category : #evaluating }
+DASTInterpreter >> evaluateAST: aRBNode withTemps: aCollection [ 
+
+	self initializeWithProgram: aRBNode withTemps: aCollection.
+	^ self evaluate.
+]
+
+{ #category : #accessing }
+DASTInterpreter >> evaluator [
+	^ evaluator
+]
+
+{ #category : #evaluation }
 DASTInterpreter >> increasePC [
 	programCounter := self programCounter + 1
 ]
 
 { #category : #initialization }
+DASTInterpreter >> initializeWithEvaluator: anEPASTEvaluator [ 
+	evaluator := anEPASTEvaluator
+]
+
+{ #category : #initialization }
 DASTInterpreter >> initializeWithProgram: aRBNode [
+	^self initializeWithProgram: aRBNode withTemps: #()
+	
+]
+
+{ #category : #evaluating }
+DASTInterpreter >> initializeWithProgram: aRBNode withTemps: aCollection [
 	| visitor nodes rootContext |
 	programCounter := 0.
 	visitor := DASTPostOrderTreeVisitor new.
 	
 	(aRBNode methodNode body addReturn; yourself) acceptVisitor: visitor.
 	nodes := visitor stack.
-	rootContext := DASTContextRootSmalltalk new. 
+	rootContext := DASTContextRootSmalltalk new 
+		evaluator: self evaluator;
+		yourself.
 	"ugly method necessary because we are putting the root expression of the AST inside a return and sending it the message value"
 	self flag: 'update next call'.
 	" Set the first method (noMethod) context evaluation. The receiver is nil "
@@ -67,6 +105,8 @@ DASTInterpreter >> initializeWithProgram: aRBNode [
 		methodOrBlock: (DASTMethod new initializeWith: nodes last methodNode);
 		nodes: nodes;
 		sender: rootContext;
+		temps: aCollection;
+		evaluator: self evaluator;
 		yourself.
 	
 ]
@@ -98,15 +138,17 @@ DASTInterpreter >> receiver [
 ]
 
 { #category : #private }
-DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArray [
-	| primitiveResult |
-		
+DASTInterpreter >> solvePrimitive: aMethod receiver: anObject arguments: anArray [
+	| primitiveResult anInteger |
+	anInteger := aMethod primitive.
+	
 	"primitives applied to blocks:"
 	(anObject isKindOf: DASTClosure) ifTrue: [ 
 		anInteger = 266 ifTrue: [ 
 			^self stackPush: anObject argumentCount. 
 		 ].
 		anInteger = 202 ifTrue: [ 
+			self halt.
 			primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
 			^ self stackPush: primitiveResult
 		].
@@ -114,10 +156,10 @@ DASTInterpreter >> solvePrimitive: anInteger receiver: anObject arguments: anArr
 	].
 	 	
 	"apply primitive to object"
-	primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
-	(self primitiveResultIsError: primitiveResult)
+	primitiveResult := anObject executePrimitiveMethod: aMethod withArguments: anArray asArray.
+	primitiveResult hasFailed 
 		ifTrue: [DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject ].
-	self stackPush: primitiveResult
+	self stackPush: primitiveResult value
 
 ]
 
@@ -202,7 +244,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
 	
 	"Instance variables assignment"
-	(self currentContext receiver class allInstVarNames includes: name)
+	((self evaluator classOf: self currentContext receiver) allInstVarNames includes: name)
 		ifTrue: [ self write: value toInstVarNamed: name. ^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
@@ -214,8 +256,11 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
+	| block blockMirror |
+	block := DASTBlock new initializeWith: aRBBlockNode; outerContext: currentContext.
+	blockMirror := self evaluator objectSpace backend mirrorOnExternalHandle: block.
 	
-	self stackPush: (DASTBlock new initializeWith: aRBBlockNode; outerContext: currentContext)
+	self stackPush: blockMirror
 ]
 
 { #category : #visiting }
@@ -225,6 +270,7 @@ DASTInterpreter >> visitCascadeNode: aRBCascadeNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitGlobalNode: aRBGlobalNode [ 
+
 	self stackPush: (currentContext findVariable: aRBGlobalNode name)
 	
 ]
@@ -247,13 +293,14 @@ DASTInterpreter >> visitLiteralArrayNode: aRBLiteralArrayNode [
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
 
-	self stackPush: aRBLiteralValueNode value
+	self stackPush: (aRBLiteralValueNode value asLiteralInObjectSpace: evaluator objectSpace)
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
 	| arguments receiver method newContext |
 	" Resolve Arguments "
+	self haltIf: [ aRBMessageNode selector = 'ifTrue:ifFalse:'].
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
@@ -263,7 +310,8 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 		DASTContext
 			newWithSender: self currentContext 
 			receiver: receiver 
-			messageNode: aRBMessageNode.
+			messageNode: aRBMessageNode
+			evaluator: evaluator.
 	
 	" Lookup"
 	method := newContext methodOrBlock.
@@ -272,7 +320,8 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
 	(method isPrimitive and: [method isMessageValue not and: [method isOnDo not]] )  
 	ifTrue: [ 
-		[ ^ self solvePrimitive: method primitive receiver: receiver arguments: arguments]
+		[ 
+		^ self solvePrimitive: method receiver: receiver arguments: arguments]
 			on: DASTPrimitiveFailed
 			do: [
 				" Remove pragma node from method body to prevent infinit loop and continue with the excecution of the method body" 
@@ -351,6 +400,9 @@ DASTInterpreter >> visitVariableNode: aRBVariableNode [
 
 { #category : #visiting }
 DASTInterpreter >> write: value toInstVarNamed: name [
-
-	self currentContext receiver instVarNamed: name put: value
+	| receiver index |
+	receiver := self currentContext receiver.
+	index := ((self evaluator classOf: receiver) allInstVarNames indexOf: name).
+	(index = 0) ifTrue: [ InstanceVariableNotFound signalFor: name asString ].
+	receiver instanceVariableAtIndex: index put: value
 ]

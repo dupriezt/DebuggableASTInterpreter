@@ -11,9 +11,9 @@ Class {
 { #category : #accessing }
 DASTContextRootSmalltalk >> findVariable: aByteSymbol [
 
-	^ Smalltalk globals at: aByteSymbol ifAbsent: [ 
-		self error: 'Variable ', aByteSymbol , ' not defined!'
-		 ]
+	^ (self evaluator environment bindingOf: aByteSymbol) 
+		ifNil: [ self error: 'Variable ', aByteSymbol , ' not defined!' ] 
+		ifNotNil: [  :b | b value ]
 ]
 
 { #category : #accessing }
@@ -30,4 +30,9 @@ DASTContextRootSmalltalk >> isRoot [
 DASTContextRootSmalltalk >> isUnwindContext [
 	"is this context for  method that is marked?"
 	^ self shouldNotImplement 
+]
+
+{ #category : #'as yet unclassified' }
+DASTContextRootSmalltalk >> temps: aCollection [ 
+	self shouldBeImplemented.
 ]
