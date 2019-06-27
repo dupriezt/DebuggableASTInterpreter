@@ -4,6 +4,17 @@ Class {
 	#category : #'DebuggableASTInterpreter-Closures'
 }
 
+{ #category : #'gt-inspector-extension' }
+DASTMethod >> gtInspectorIn: composite [
+	<gtInspectorPresentationOrder: 5>
+	^composite text
+		title: 'source';
+		display: [ '(',self methodClass asString , ')>>', 
+						self sourceCode asString
+			];
+		when: [ true ]
+]
+
 { #category : #accessing }
 DASTMethod >> initializeWith: aRBNode [ 
 	self assert: aRBNode isBlock not.
