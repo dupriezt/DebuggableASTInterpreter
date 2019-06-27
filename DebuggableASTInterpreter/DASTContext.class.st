@@ -34,7 +34,7 @@ DASTContext class >> newWithSender: aDASTContext receiver: aReceiver messageNode
 { #category : #instantiation }
 DASTContext class >> newWithSender: aDASTContext receiver: aReceiver messageNode: aRBMessageNode evaluator: aDASTEvaluator [ 
 	| context |
-	context := ((aReceiver isKindOf: DASTBlock) 
+	context := ((aReceiver isEPDASTBlockMirror ) 
 					and: [ " Check if the message is one of the variants of value. This is very ugly and must be changed when implementing environments "
 						self valueToBlockMessages keys includes: aRBMessageNode selector ])
 		ifTrue: [ DASTBlockContext new ]
@@ -156,7 +156,6 @@ DASTContext >> findInstanceVariable: aName [
 
 { #category : #'API-lookup' }
 DASTContext >> findLocalVariable: aName [
-	self haltIf: [ aName = 'n' ].
 	^ variablesDict 
 		associationAt: aName 
 		ifAbsent: [ nil ]
@@ -501,7 +500,6 @@ DASTContext >> setIndexForTempVarNamed: tempVarName [
 DASTContext >> setTemporalVariablesNamed: names values: values [
 	values doWithIndex: 
 		  [ :val :index | 
-				self haltIf: [ (names at: index) = 'n' ].
 				self 
 					at: (names at: index)
 					 put: val ].

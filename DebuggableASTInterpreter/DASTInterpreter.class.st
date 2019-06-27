@@ -258,9 +258,10 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 DASTInterpreter >> visitBlockNode: aRBBlockNode [ 
 	| block blockMirror |
 	block := DASTBlock new initializeWith: aRBBlockNode; outerContext: currentContext.
+	
 	blockMirror := self evaluator objectSpace backend mirrorOnExternalHandle: block.
 	
-	self stackPush: blockMirror
+	self stackPush: blockMirror asDASTBlockMirror
 ]
 
 { #category : #visiting }
@@ -300,7 +301,9 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
 	| arguments receiver method newContext |
 	" Resolve Arguments "
-	self haltIf: [ aRBMessageNode selector = 'ifTrue:ifFalse:'].
+	self haltIf: [ aRBMessageNode selector = 'key'].
+	"self haltIf: [ aRBMessageNode selector = 'ifTrue:ifFalse:'].
+	self haltIf: [ aRBMessageNode selector = 'value']."
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
