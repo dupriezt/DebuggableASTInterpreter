@@ -129,9 +129,13 @@ DASTContext >> executedNodes [
 
 { #category : #'API-lookup' }
 DASTContext >> findClassVariable: aName [
-	^ receiver isClass 
-		ifTrue: [ receiver bindingOf: aName ]
-		ifFalse:[ receiver class bindingOf: aName ]
+	| mClass hlClass |
+	mClass := receiver isClassMirror
+		ifTrue: [ receiver ]
+		ifFalse: [ receiver basicClass ].
+	hlClass := mClass asHighLevelClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary).
+	^ hlClass bindingOf: aName.
+	
 ]
 
 { #category : #query }
@@ -149,9 +153,10 @@ DASTContext >> findContextSuchThat: testBlock [
 
 { #category : #'API-lookup' }
 DASTContext >> findInstanceVariable: aName [
-	self haltIf: [ aName = 'array' ].
+self flag: 'resolve what to do with classes'.
+	self receiver isClassMirror ifTrue: [ ^ nil ].
 	[^ aName -> (self receiver instVarNamed: aName) ]
-		on: InstanceVariableNotFound do: [ ^nil ] 
+		on: InstanceVariableNotFound do: [ ^ nil ] 
 ]
 
 { #category : #'API-lookup' }
@@ -369,6 +374,11 @@ DASTContext >> namedTempAt: anIndex [
 DASTContext >> nextHandlerContext [
 
 	^ self sender findNextHandlerContext
+]
+
+{ #category : #'accessing-environment' }
+DASTContext >> nilObject [
+	^ evaluator objectSpace backend nilObject
 ]
 
 { #category : #accessing }
