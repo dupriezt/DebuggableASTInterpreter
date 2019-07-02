@@ -101,6 +101,7 @@ DASTInterpreter >> initializeWithProgram: aRBNode withTemps: aCollection [
 	self flag: 'update next call'.
 	" Set the first method (noMethod) context evaluation. The receiver is nil "
 	currentContext := DASTMethodContext new
+		receiver: self evaluator objectSpace backend nilObject;
 		parent: rootContext;
 		methodOrBlock: (DASTMethod new initializeWith: nodes last methodNode);
 		nodes: nodes;
@@ -259,9 +260,9 @@ DASTInterpreter >> visitBlockNode: aRBBlockNode [
 	| block blockMirror |
 	block := DASTBlock new initializeWith: aRBBlockNode; outerContext: currentContext.
 	
-	blockMirror := self evaluator objectSpace backend mirrorOnExternalHandle: block.
+	blockMirror := (self evaluator objectSpace backend mirrorOnExternalHandle: block) asDASTBlockMirror.
 	
-	self stackPush: blockMirror asDASTBlockMirror
+	self stackPush: blockMirror 
 ]
 
 { #category : #visiting }
