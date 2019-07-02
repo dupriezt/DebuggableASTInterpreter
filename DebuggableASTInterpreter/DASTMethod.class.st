@@ -39,8 +39,7 @@ DASTMethod >> isMessageValue [
 
 { #category : #accessing }
 DASTMethod >> isNamedPrimitive [
-	^ self primitive isString
-	
+	^ self primitive = 117
 ]
 
 { #category : #accessing }

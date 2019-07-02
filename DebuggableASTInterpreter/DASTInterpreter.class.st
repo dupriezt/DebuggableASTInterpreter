@@ -158,10 +158,8 @@ DASTInterpreter >> solvePrimitive: aMethod receiver: anObject arguments: anArray
 	 	
 	"apply primitive to object"
 	primitiveResult := anObject executePrimitiveMethod: aMethod withArguments: anArray asArray.
-	primitiveResult hasFailed 
-		ifTrue: [DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject ].
-	self stackPush: primitiveResult value
-
+	^ primitiveResult
+	
 ]
 
 { #category : #stack }
@@ -302,7 +300,7 @@ DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [
 DASTInterpreter >> visitMessageNode: aRBMessageNode [ 
 	| arguments receiver method newContext |
 	" Resolve Arguments "
-	self haltIf: [ aRBMessageNode selector = 'key'].
+
 	"self haltIf: [ aRBMessageNode selector = 'ifTrue:ifFalse:'].
 	self haltIf: [ aRBMessageNode selector = 'value']."
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
@@ -319,17 +317,19 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	
 	" Lookup"
 	method := newContext methodOrBlock.
-	
 	" Apply - invoke method "
 	(aRBMessageNode isCascaded and: [aRBMessageNode parent messages last ~= aRBMessageNode]) ifTrue: [ self stackPush: receiver ]. 
 	(method isPrimitive and: [method isMessageValue not and: [method isOnDo not]] )  
-	ifTrue: [ 
-		[ 
-		^ self solvePrimitive: method receiver: receiver arguments: arguments]
-			on: DASTPrimitiveFailed
-			do: [
-				" Remove pragma node from method body to prevent infinit loop and continue with the excecution of the method body" 
-				newContext := newContext removePrimitiveFromMethod;yourself ]
+	ifTrue: [ | result |
+		result := self solvePrimitive: method receiver: receiver arguments: arguments.
+		result hasFailed 
+			ifFalse: [ ^ self stackPush: result value ]
+			ifTrue: [ 
+			" Remove pragma node from method body to prevent infinit loop 
+			  and continue with the excecution of the method body" 
+			  Transcript show: method primitive asString, ' ', receiver asSmallInteger asString, Character cr.
+			  newContext := newContext removePrimitiveFromMethod;yourself
+			]
 		].
 	" Set new context "
 	currentContext := newContext.

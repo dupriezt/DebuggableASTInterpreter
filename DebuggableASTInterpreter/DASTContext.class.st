@@ -429,6 +429,7 @@ DASTContext >> receiver: anObject [
 { #category : #modifying }
 DASTContext >> removePrimitiveFromMethod [
 	
+	closure := closure veryDeepCopy.
 	closure nodeAST removePragma: (closure nodeAST pragmas select: [ :p | p isPrimitive ]) first
 ]
 
