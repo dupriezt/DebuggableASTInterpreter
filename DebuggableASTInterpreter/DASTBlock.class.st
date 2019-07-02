@@ -134,7 +134,7 @@ DASTBlock >> sourceCodeInMethod [
 ]
 
 { #category : #accessing }
-DASTBlock >> value: anArg [
+DASTBlock >> value1: anArg [
 	| block |
 	block := Smalltalk compiler
 		source: self sourceCode;
