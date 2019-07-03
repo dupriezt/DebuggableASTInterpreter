@@ -133,7 +133,7 @@ DASTContext >> findClassVariable: aName [
 	mClass := receiver isClassMirror
 		ifTrue: [ receiver ]
 		ifFalse: [ receiver basicClass ].
-	hlClass := mClass asHighLevelClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary).
+	hlClass := mClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary).
 	^ hlClass bindingOf: aName.
 	
 ]
