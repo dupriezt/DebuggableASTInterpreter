@@ -238,19 +238,7 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	name := aRBAssignmentNode variable name.
 	value := self stackTop.
 	
-	"Temporary variables assignment"
-	(self currentContext lookupContextDefiningLocalVariable: name)
-		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
-	
-	"Instance variables assignment"
-	((self evaluator classOf: self currentContext receiver) allInstVarNames includes: name)
-		ifTrue: [ self write: value toInstVarNamed: name. ^ self].
-
-	"ToDo: fix this step since it's updating the class in the system and not in the environment"
-	(self currentContext receiver class classPool includesKey: name)
-		ifTrue: [ self currentContext receiver class classPool at: name put: value . ^ self].
-		
-	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'
+	self currentContext assignVariable: name value: value
 ]
 
 { #category : #visiting }

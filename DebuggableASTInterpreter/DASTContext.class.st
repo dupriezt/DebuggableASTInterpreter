@@ -52,6 +52,29 @@ DASTContext class >> valueToBlockMessages [
 		ifNil: [ valueToBlockMessages := (BlockClosure methodDict select: [ :e | (201 to: 206) includes: e primitive ]) collect: [ :e | e selector ] ]
 ]
 
+{ #category : #'API-lookup' }
+DASTContext >> assignVariable: name value: value [
+	| mClass hlClass receiverClass |
+	"Temporary variables assignment"
+	(self lookupContextDefiningLocalVariable: name)
+		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
+	
+	receiverClass := receiver basicClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary).
+	"Instance variables assignment"
+	self halt.
+	(receiverClass allInstVarNames includes: name)
+		ifTrue: [ self write: value toInstVarNamed: name. ^ self].
+
+	"ToDo: fix this step since it's updating the class in the system and not in the environment"
+	(self currentContext receiver class classPool includesKey: name)
+		ifTrue: [ self currentContext receiver class classPool at: name put: value . ^ self].
+		
+	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'.
+	
+	^ hlClass bindingOf: name.
+	
+]
+
 { #category : #'API-store' }
 DASTContext >> at: aByteSymbol put: anObject [
 	self setIndexForTempVarNamed: aByteSymbol.
