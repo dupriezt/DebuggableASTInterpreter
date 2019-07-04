@@ -31,6 +31,6 @@ That is not yet synchronized with the master branch.
 ```Smalltalk
 Metacello new
     baseline: 'DebuggableASTInterpreter';
-    repository: 'github://carolahp/DebuggableASTInterpreter:ExceptionsDev';
+    repository: 'github://carolahp/DebuggableASTInterpreter';
     load: #Overlay.
 ```
