@@ -54,16 +54,20 @@ DASTContext class >> valueToBlockMessages [
 
 { #category : #'API-lookup' }
 DASTContext >> assignVariable: name value: value [
-	| mClass hlClass receiverClass |
+	| rgClass hlClass |
 	"Temporary variables assignment"
 	(self lookupContextDefiningLocalVariable: name)
 		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
 	
-	receiverClass := receiver basicClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary).
+	"receiverClass := receiver basicClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary)."
 	"Instance variables assignment"
-	self halt.
-	(receiverClass allInstVarNames includes: name)
-		ifTrue: [ self write: value toInstVarNamed: name. ^ self].
+	
+	rgClass := receiver basicClass asRGClass.
+	(rgClass allInstVarNames includes: name)
+		ifTrue: [ |ivIndex| 
+			ivIndex := rgClass instVarIndexFor: name ifAbsent: [ self halt ].
+			receiver instanceVariableAtIndex: ivIndex put: value. 
+			^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
 	(self currentContext receiver class classPool includesKey: name)
@@ -176,10 +180,17 @@ DASTContext >> findContextSuchThat: testBlock [
 
 { #category : #'API-lookup' }
 DASTContext >> findInstanceVariable: aName [
-self flag: 'resolve what to do with classes'.
-	self receiver isClassMirror ifTrue: [ ^ nil ].
+	| rgClass |
+	self haltIf: [aName = 'array'].
+	rgClass := receiver basicClass asRGClass.
+	(rgClass allInstVarNames includes: aName)
+		ifTrue: [ |ivIndex| 
+			ivIndex := rgClass instVarIndexFor: aName ifAbsent: [ self halt ].
+			^ receiver instanceVariableAtIndex: ivIndex ].
+	^ nil
+"	self receiver isClassMirror ifTrue: [ ^ nil ].
 	[^ aName -> (self receiver instVarNamed: aName) ]
-		on: InstanceVariableNotFound do: [ ^ nil ] 
+		on: InstanceVariableNotFound do: [ ^ nil ] "
 ]
 
 { #category : #'API-lookup' }
@@ -240,7 +251,7 @@ DASTContext >> findNextUnwindContextUpTo: aContext [
 DASTContext >> findVariable: aByteSymbol [
 	|association|
 	"Return the value of a variable. If this context redefines a variable defined by its parent context, this method will return the variable value for this context"
-	
+	self haltIf: [ aByteSymbol = 'array' ].
 	"class variables"
 	association := self findClassVariable: aByteSymbol.
 	association ifNotNil: [ ^ association value ].

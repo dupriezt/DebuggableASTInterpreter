@@ -130,7 +130,7 @@ DASTInterpreter >> programCounter [
 
 { #category : #visiting }
 DASTInterpreter >> readInstanceVariableNamed: name [
-	^ (self currentContext findInstanceVariable: name) value
+	^ (self currentContext findInstanceVariable: name) 
 ]
 
 { #category : #accessing }
@@ -237,7 +237,6 @@ DASTInterpreter >> visitAssignmentNode: aRBAssignmentNode [
 	| name value |
 	name := aRBAssignmentNode variable name.
 	value := self stackTop.
-	
 	self currentContext assignVariable: name value: value
 ]
 
@@ -289,8 +288,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	| arguments receiver method newContext |
 	" Resolve Arguments "
 
-	"self haltIf: [ aRBMessageNode selector = 'ifTrue:ifFalse:'].
-	self haltIf: [ aRBMessageNode selector = 'value']."
+	"self haltIf: [ aRBMessageNode selector = 'basicNew']."
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
@@ -387,6 +385,8 @@ DASTInterpreter >> visitVariableNode: aRBVariableNode [
 
 	aRBVariableNode isDefinition
 		ifTrue: [ currentContext at: aRBVariableNode name put: nil ].
+		
+		self haltIf: [ aRBVariableNode name = 'array' ].
 	self stackPush: (currentContext findVariable: aRBVariableNode name)
 ]
 
