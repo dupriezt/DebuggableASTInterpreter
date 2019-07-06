@@ -70,8 +70,12 @@ DASTContext >> assignVariable: name value: value [
 			^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
-	(self receiver basicClass classPool includesKey: name)
-		ifTrue: [ self currentContext receiver class classPool at: name put: value . ^ self].
+	(rgClass classVarNames contains: [:c | c = name])
+		ifTrue: [ 
+			| cvIndex |
+			cvIndex := rgClass classVarNames indexOf: name.
+			self flag:'hardcoded instance variable index '.
+			(self receiver basicClass classPool instanceVariableAtIndex: 2) at: cvIndex put: value . ^ self].
 		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'.
 	
@@ -181,12 +185,11 @@ DASTContext >> findContextSuchThat: testBlock [
 { #category : #'API-lookup' }
 DASTContext >> findInstanceVariable: aName [
 	| rgClass |
-	self haltIf: [aName = 'array'].
-	rgClass := receiver basicClass asRGClass.
+	rgClass := self receiver basicClass asRGClass.
 	(rgClass allInstVarNames includes: aName)
 		ifTrue: [ |ivIndex| 
 			ivIndex := rgClass instVarIndexFor: aName ifAbsent: [ self halt ].
-			^ receiver instanceVariableAtIndex: ivIndex ].
+			^ self receiver instanceVariableAtIndex: ivIndex ].
 	^ nil
 "	self receiver isClassMirror ifTrue: [ ^ nil ].
 	[^ aName -> (self receiver instVarNamed: aName) ]
