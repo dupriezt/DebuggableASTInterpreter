@@ -70,7 +70,7 @@ DASTContext >> assignVariable: name value: value [
 			^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
-	(self currentContext receiver class classPool includesKey: name)
+	(self receiver basicClass classPool includesKey: name)
 		ifTrue: [ self currentContext receiver class classPool at: name put: value . ^ self].
 		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'.
@@ -157,9 +157,9 @@ DASTContext >> executedNodes [
 { #category : #'API-lookup' }
 DASTContext >> findClassVariable: aName [
 	| mClass hlClass |
-	mClass := receiver isClassMirror
-		ifTrue: [ receiver ]
-		ifFalse: [ receiver basicClass ].
+	mClass := self receiver isClassMirror
+		ifTrue: [ self receiver ]
+		ifFalse: [ self receiver basicClass ].
 	hlClass := mClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary).
 	^ hlClass bindingOf: aName.
 	
