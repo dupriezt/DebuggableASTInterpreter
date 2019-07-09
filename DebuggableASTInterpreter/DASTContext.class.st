@@ -62,20 +62,19 @@ DASTContext >> assignVariable: name value: value [
 	"receiverClass := receiver basicClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary)."
 	"Instance variables assignment"
 	
-	rgClass := receiver basicClass asRGClass.
+	rgClass := self receiver  basicClass asRGClass.
 	(rgClass allInstVarNames includes: name)
 		ifTrue: [ |ivIndex| 
 			ivIndex := rgClass instVarIndexFor: name ifAbsent: [ self halt ].
-			receiver instanceVariableAtIndex: ivIndex put: value. 
+			self receiver instanceVariableAtIndex: ivIndex put: value. 
 			^ self].
 
 	"ToDo: fix this step since it's updating the class in the system and not in the environment"
 	(rgClass classVarNames contains: [:c | c = name])
 		ifTrue: [ 
-			| cvIndex |
-			cvIndex := rgClass classVarNames indexOf: name.
-			self flag:'hardcoded instance variable index '.
-			(self receiver basicClass classPool instanceVariableAtIndex: 2) at: cvIndex put: value . ^ self].
+			| rDictionary |
+			rDictionary := EPRemoteDictionary on: self receiver basicClass classPool. 
+			rDictionary at: name put: value . ^ self].
 		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'.
 	
@@ -164,7 +163,7 @@ DASTContext >> findClassVariable: aName [
 	mClass := self receiver isClassMirror
 		ifTrue: [ self receiver ]
 		ifFalse: [ self receiver basicClass ].
-	hlClass := mClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary).
+	hlClass := mClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator environment bootstrapEnvironment "evaluator objectSpace backend systemDictionary").
 	^ hlClass bindingOf: aName.
 	
 ]
