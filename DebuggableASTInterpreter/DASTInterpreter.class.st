@@ -145,7 +145,8 @@ DASTInterpreter >> solvePrimitive: aMethod receiver: anObject arguments: anArray
 	
 	"primitives applied to blocks:"
 	(anObject isKindOf: DASTClosure) ifTrue: [ 
-		anInteger = 266 ifTrue: [ 
+		anInteger = 266 ifTrue: [
+			self halt. 
 			^self stackPush: anObject argumentCount. 
 		 ].
 		anInteger = 202 ifTrue: [ 
@@ -153,7 +154,8 @@ DASTInterpreter >> solvePrimitive: aMethod receiver: anObject arguments: anArray
 			primitiveResult := anObject tryPrimitive: anInteger withArgs: anArray asArray.
 			^ self stackPush: primitiveResult
 		].
-		DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject 
+		self halt.
+		"DASTPrimitiveFailed signalWithPrimitive: anInteger receiver: anObject "
 	].
 	 	
 	"apply primitive to object"
@@ -288,7 +290,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	| arguments receiver method newContext |
 	" Resolve Arguments "
 
-	"self haltIf: [ aRBMessageNode selector = 'basicNew']."
+	self haltIf: [ aRBMessageNode selector = 'bePointers'].
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
@@ -313,8 +315,10 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 			ifTrue: [ 
 			" Remove pragma node from method body to prevent infinit loop 
 			  and continue with the excecution of the method body" 
-			  Transcript show: method primitive asString, ' ', receiver asSmallInteger asString, Character cr.
-			  newContext := newContext removePrimitiveFromMethod;yourself
+			  Transcript show: method primitive asString, ' ', receiver basicClass className asString, (arguments at: 1) asString, Character cr.
+			  newContext := newContext removePrimitiveFromMethod;yourself.
+			  Transcript show: ' continuar ', Character cr.
+			
 			]
 		].
 	" Set new context "

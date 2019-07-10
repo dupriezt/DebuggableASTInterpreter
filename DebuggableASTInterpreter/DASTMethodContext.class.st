@@ -64,6 +64,15 @@ DASTMethodContext >> printOn: aStream [
 					(self variablesDict values at: 1) selector printOn: aStream ]
 ]
 
+{ #category : #modifying }
+DASTMethodContext >> removePrimitiveFromMethod [
+	"|nodeWithoutPrimitive|
+	nodeWithoutPrimitive := closure nodeAST veryDeepCopy.
+	closure nodeAST: nodeWithoutPrimitive.
+	closure nodeAST removePragma: (closure nodeAST pragmas select: [ :p | p isPrimitive ]) first"
+	self methodOrBlock evaluatePrimitive: false
+]
+
 { #category : #accessing }
 DASTMethodContext >> temps: aCollection [ 
 	aCollection do: [ :assoc | self at: assoc key put: assoc value ]

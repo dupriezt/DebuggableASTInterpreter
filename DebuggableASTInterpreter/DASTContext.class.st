@@ -54,7 +54,7 @@ DASTContext class >> valueToBlockMessages [
 
 { #category : #'API-lookup' }
 DASTContext >> assignVariable: name value: value [
-	| rgClass hlClass |
+	| rgClass |
 	"Temporary variables assignment"
 	(self lookupContextDefiningLocalVariable: name)
 		ifNotNil: [ :definingContext | definingContext at: name put: value. ^ self ].
@@ -78,7 +78,7 @@ DASTContext >> assignVariable: name value: value [
 		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'.
 	
-	^ hlClass bindingOf: name.
+	
 	
 ]
 
@@ -460,13 +460,6 @@ DASTContext >> receiver [
 { #category : #accessing }
 DASTContext >> receiver: anObject [
 	receiver := anObject
-]
-
-{ #category : #modifying }
-DASTContext >> removePrimitiveFromMethod [
-	
-	closure := closure veryDeepCopy.
-	closure nodeAST removePragma: (closure nodeAST pragmas select: [ :p | p isPrimitive ]) first
 ]
 
 { #category : #'private-exceptions' }

@@ -1,8 +1,21 @@
 Class {
 	#name : #DASTMethod,
 	#superclass : #DASTClosure,
+	#instVars : [
+		'evaluatePrimitive'
+	],
 	#category : #'DebuggableASTInterpreter-Closures'
 }
+
+{ #category : #accessing }
+DASTMethod >> evaluatePrimitive [
+	^ evaluatePrimitive ifNil: [ evaluatePrimitive := true ]
+]
+
+{ #category : #accessing }
+DASTMethod >> evaluatePrimitive: aBoolean [
+	^ evaluatePrimitive := false
+]
 
 { #category : #'gt-inspector-extension' }
 DASTMethod >> gtInspectorIn: composite [
@@ -49,7 +62,7 @@ DASTMethod >> isOnDo [
 
 { #category : #accessing }
 DASTMethod >> isPrimitive [ 
-	^ nodeAST isPrimitive
+	^ nodeAST isPrimitive and: [ self evaluatePrimitive ]
 ]
 
 { #category : #accessing }
