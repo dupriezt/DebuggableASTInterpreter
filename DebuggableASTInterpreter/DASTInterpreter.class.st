@@ -73,9 +73,10 @@ DASTInterpreter >> evaluator [
 { #category : #'gt-extension' }
 DASTInterpreter >> gtInspectorContextsIn: composite [
 	<gtInspectorPresentationOrder: 0>
+	
 	^composite fastList
 		title: 'Evaluation Stack';
-		display: [ {self currentContext} asOrderedCollection addAll: self currentContext senders ]
+		display: [ {self currentContext} asOrderedCollection , self currentContext senders ]
 ]
 
 { #category : #evaluation }
@@ -300,7 +301,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	| arguments receiver method newContext |
 	" Resolve Arguments "
 
-	self haltIf: [ aRBMessageNode selector = 'value'].
+	
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
