@@ -44,7 +44,6 @@ DASTBlock >> ensure: aBlock [
 { #category : #'gt-extension' }
 DASTBlock >> gtInspectorIn: composite [
 	<gtInspectorPresentationOrder: 5>
-	
 
 	^composite text
 		title: 'Source Code';

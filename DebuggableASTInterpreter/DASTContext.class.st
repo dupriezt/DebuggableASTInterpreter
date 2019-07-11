@@ -10,6 +10,7 @@ Class {
 		'receiver',
 		'nodes',
 		'executedNodes',
+		'currentNode',
 		'stack',
 		'parent',
 		'closure',
@@ -62,7 +63,7 @@ DASTContext >> assignVariable: name value: value [
 	"receiverClass := receiver basicClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator objectSpace backend systemDictionary)."
 	"Instance variables assignment"
 	
-	rgClass := self receiver  basicClass asRGClass.
+	rgClass := self receiver basicClass asRGClass.
 	(rgClass allInstVarNames includes: name)
 		ifTrue: [ |ivIndex| 
 			ivIndex := rgClass instVarIndexFor: name ifAbsent: [ self halt ].
@@ -98,6 +99,16 @@ DASTContext >> canExecute [
 { #category : #'closure support' }
 DASTContext >> contextTag [
 	^ self
+]
+
+{ #category : #accessing }
+DASTContext >> currentNode [
+	^ currentNode
+]
+
+{ #category : #accessing }
+DASTContext >> currentNode: anObject [
+	currentNode := anObject
 ]
 
 { #category : #'accessing - private' }
@@ -184,7 +195,10 @@ DASTContext >> findContextSuchThat: testBlock [
 { #category : #'API-lookup' }
 DASTContext >> findInstanceVariable: aName [
 	| rgClass |
+	self flag: 'incomplete return value'.
+	
 	rgClass := self receiver basicClass asRGClass.
+	rgClass ifNil: [ ^ nil ].
 	(rgClass allInstVarNames includes: aName)
 		ifTrue: [ |ivIndex| 
 			ivIndex := rgClass instVarIndexFor: aName ifAbsent: [ self halt ].
@@ -281,12 +295,21 @@ DASTContext >> getClassForLookup [
 
 { #category : #'gt-extension' }
 DASTContext >> gtInspectorSendersIn: composite [
-	<gtInspectorPresentationOrder: 0>
+	<gtInspectorPresentationOrder: 30>
 	^composite tree
 		rootsExpanded;
 		title: 'Senders';
 		display: [ {self} ];
 		children: [ :each | each senders ]
+]
+
+{ #category : #'gt-extension' }
+DASTContext >> gtInspectorSourceIn: composite [
+	<gtInspectorPresentationOrder: 0> 
+	
+	(self method gtInspectorIn: composite highlightInterval: (Interval from: self currentNode debugHighlightStart to: self currentNode debugHighlightStop))
+		doItReceiver: [ self receiver ];
+		doItContext: [ self ]
 ]
 
 { #category : #accessing }

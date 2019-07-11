@@ -28,6 +28,18 @@ DASTMethod >> gtInspectorIn: composite [
 		when: [ true ]
 ]
 
+{ #category : #'gt-inspector-extension' }
+DASTMethod >> gtInspectorIn: composite highlightInterval: anInterval [
+	^composite text
+		title: 'Source with Interval';
+		display: [ '(',self methodClass asString , ')>>', 
+						self sourceCode asString
+			];
+		initialize: [ :presentation | 
+			presentation selectionInterval: (anInterval collect: [:each | each + ( '(',self methodClass asString , ')>>') size])];
+		when: [ true ]
+]
+
 { #category : #accessing }
 DASTMethod >> initializeWith: aRBNode [ 
 	self assert: aRBNode isBlock not.

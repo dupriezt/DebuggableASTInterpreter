@@ -16,6 +16,12 @@ DASTContextRootSmalltalk >> findVariable: aByteSymbol [
 		ifNotNil: [  :b | b value ]
 ]
 
+{ #category : #'as yet unclassified' }
+DASTContextRootSmalltalk >> gtInspectorSourceIn: composite [
+	<gtInspectorPresentationOrder: 30> 
+	'asd'
+]
+
 { #category : #accessing }
 DASTContextRootSmalltalk >> isBlockContext [
 	^false

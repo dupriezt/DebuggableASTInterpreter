@@ -70,6 +70,14 @@ DASTInterpreter >> evaluator [
 	^ evaluator
 ]
 
+{ #category : #'gt-extension' }
+DASTInterpreter >> gtInspectorContextsIn: composite [
+	<gtInspectorPresentationOrder: 0>
+	^composite fastList
+		title: 'Evaluation Stack';
+		display: [ {self currentContext} asOrderedCollection addAll: self currentContext senders ]
+]
+
 { #category : #evaluation }
 DASTInterpreter >> increasePC [
 	programCounter := self programCounter + 1
@@ -196,7 +204,9 @@ DASTInterpreter >> stepInto [
 	| node |
 	currentContext canExecute
 		ifFalse: [ DASTEvaluationTerminated signal ].
-	self visit: (node := currentContext nodes pop).
+	node := currentContext nodes pop.
+	currentContext currentNode: node.
+	self visit: node.
 	self increasePC.
 	currentContext executedNodes push: node.
 	^ self currentContext
@@ -276,7 +286,7 @@ DASTInterpreter >> visitLiteralArrayNode: aRBLiteralArrayNode [
 	| literals size |
 	size := aRBLiteralArrayNode contents size.
 	literals := self stackPop: size.
-	self stackPush: literals
+	self stackPush: (evaluator objectSpace newArrayWithAll: literals)
 ]
 
 { #category : #visiting }
@@ -290,7 +300,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	| arguments receiver method newContext |
 	" Resolve Arguments "
 
-	self haltIf: [ aRBMessageNode selector = 'bePointers'].
+	self haltIf: [ aRBMessageNode selector = 'value'].
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
