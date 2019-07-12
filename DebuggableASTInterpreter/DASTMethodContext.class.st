@@ -25,6 +25,7 @@ DASTMethodContext >> initializeContext [
 	visitor := DASTPostOrderTreeVisitor new.
 	theMethod body acceptVisitor: visitor.
 	nodes := visitor stack.
+	currentNode := nodes top.
 	
 	self 	methodOrBlock: theMethod;
 			nodes: nodes.

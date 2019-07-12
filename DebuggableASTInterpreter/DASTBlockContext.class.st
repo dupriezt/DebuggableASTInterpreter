@@ -26,7 +26,7 @@ DASTBlockContext >> initializeContext [
 	visitor := DASTPostOrderTreeVisitor new.
 	receiver body acceptVisitor: visitor.
 	nodes := visitor stack.
-	
+	currentNode := nodes top.
 	self 	methodOrBlock: receiver;
 			nodes: nodes.
 	

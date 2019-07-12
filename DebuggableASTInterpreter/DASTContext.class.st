@@ -441,10 +441,12 @@ DASTContext >> lookupSelector: aByteString startInClass: aClass [
 		(aClass == UnhandledError) 
 			ifTrue: [ DASTErrorNonInteractive ]
 			ifFalse: [ aClass ].
-	^( lclass lookupSelector: aByteString)
-		ifNil: [ "ToDo: implement does not understand" 
+	
+	^( lclass lookupSelector: aByteString installingMissingClassesWithClassLoader: self evaluator codeProvider classLoader )
+		ifNil: [ 
 					self error: 'The class ',lclass asString,' does not understand the message: ', aByteString asString ].
 	
+
 ]
 
 { #category : #accessing }
