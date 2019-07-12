@@ -180,7 +180,7 @@ DASTContext >> executedNodes [
 DASTContext >> findClassVariable: aName [
 	| mClass hlClass |
 	mClass := self receiver isClassMirror
-		ifTrue: [ self receiver ]
+		ifTrue: [ self receiver asClassMirror ]
 		ifFalse: [ self receiver basicClass ].
 	hlClass := mClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator environment bootstrapEnvironment "evaluator objectSpace backend systemDictionary").
 	^ hlClass bindingOf: aName.
