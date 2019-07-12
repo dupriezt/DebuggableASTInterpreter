@@ -53,6 +53,14 @@ DASTContext class >> valueToBlockMessages [
 		ifNil: [ valueToBlockMessages := (BlockClosure methodDict select: [ :e | (201 to: 206) includes: e primitive ]) collect: [ :e | e selector ] ]
 ]
 
+{ #category : #'accessing - private' }
+DASTContext >> allTempsWithContext [
+	| associations |
+	associations := self variablesDict associations collect: [:each | {self asString . each key . each value}].
+	self sender ifNil: [ ^ associations ].
+	^ associations , self sender allTempsWithContext 
+]
+
 { #category : #'API-lookup' }
 DASTContext >> assignVariable: name value: value [
 	| rgClass |
@@ -310,6 +318,42 @@ DASTContext >> gtInspectorSourceIn: composite [
 	(self method gtInspectorIn: composite highlightInterval: (Interval from: self currentNode debugHighlightStart to: self currentNode debugHighlightStop))
 		doItReceiver: [ self receiver ];
 		doItContext: [ self ]
+]
+
+{ #category : #'gt-extension' }
+DASTContext >> gtInspectorTempVarsIn: composite [
+	<gtInspectorPresentationOrder: 1> 
+	
+	^ (composite fastTable)
+		title: 'TempVariables';
+		display: [ self allTempsWithContext ];
+		"children: [ :each | 
+			(each value isDictionary) 
+				ifTrue: [ each value associations ] 
+				ifFalse: [ (each value isArray and: [ each value allSatisfy: #isDictionary ])
+						ifTrue: [ each value collectWithIndex: [:x :i | i -> x ] ]
+						ifFalse: [ #() ] ] ];"
+		column: 'Origin' 
+			evaluated: [:each | GTObjectPrinter asTruncatedTextFrom: (each at: 1) ];
+		column: 'Key' 
+			evaluated: [:each | GTObjectPrinter asTruncatedTextFrom: (each at: 2) ];
+		column: 'Value' 
+			evaluated: [:each | GTObjectPrinter asTruncatedTextFrom: (each at: 3) ];
+		
+		selectionAct: [ :table |
+			table rawSelection do: [ :assoc | self removeKey: assoc key ].
+			table update ]
+			entitled: 'Remove item(s)';
+		selectionPopulate: #selection 
+			entitled: 'Open key'
+			with: [ :table | (table rawSelection collect: #key) gtInspectorInterestingObject ];
+		beMultiple;
+		send: [ :selection | 
+			selection isNil 
+			ifTrue:[nil]
+			ifFalse:[ (selection size = 1) 
+				ifTrue: [ selection anyOne value ] 
+				ifFalse: [ selection collect: #value ] ]]
 ]
 
 { #category : #accessing }
