@@ -71,7 +71,7 @@ DASTInterpreter >> evaluator [
 { #category : #'gt-extension' }
 DASTInterpreter >> gtInspectorContextsIn: composite [
 	<gtInspectorPresentationOrder: 1>
-	
+	self currentContext ifNil: [ ^ composite ].
 	^composite fastList
 		title: 'Evaluation Stack';
 		display: [ {self currentContext} asOrderedCollection , self currentContext senders ]
@@ -81,7 +81,9 @@ DASTInterpreter >> gtInspectorContextsIn: composite [
 DASTInterpreter >> gtInspectorCurrentContextIn: composite [
 	<gtInspectorPresentationOrder: 0>
 	myComposite := composite.
-	^self currentContext gtInspectorSourceIn: composite
+	^(self currentContext) 
+		ifNil: [ composite ] 
+		ifNotNil: [ :ctx | ctx gtInspectorSourceIn: composite]
 ]
 
 { #category : #evaluation }
