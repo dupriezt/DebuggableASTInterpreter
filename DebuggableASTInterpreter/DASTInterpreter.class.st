@@ -292,13 +292,13 @@ DASTInterpreter >> visitLiteralArrayNode: aRBLiteralArrayNode [
 	| literals size |
 	size := aRBLiteralArrayNode contents size.
 	literals := self stackPop: size.
-	self stackPush: (evaluator objectSpace newArrayWithAll: literals)
+	self stackPush: (self evaluator objectSpace newArrayWithAll: literals)
 ]
 
 { #category : #visiting }
 DASTInterpreter >> visitLiteralNode: aRBLiteralValueNode [ 
 
-	self stackPush: (aRBLiteralValueNode value asLiteralInObjectSpace: evaluator objectSpace)
+	self stackPush: (aRBLiteralValueNode value asLiteralInObjectSpace: self evaluator objectSpace)
 ]
 
 { #category : #visiting }
@@ -306,7 +306,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 	| arguments receiver method newContext |
 	" Resolve Arguments "
 
-	
+	"self haltIf: [ aRBMessageNode selector = #methodDict ]."
 	arguments := (self stackPop: aRBMessageNode numArgs) reverse.	
 	(aRBMessageNode isCascaded and: [aRBMessageNode isFirstCascaded not]) ifTrue: [ self stackPop ].
 	receiver := self stackPop.
@@ -317,7 +317,7 @@ DASTInterpreter >> visitMessageNode: aRBMessageNode [
 			newWithSender: self currentContext 
 			receiver: receiver 
 			messageNode: aRBMessageNode
-			evaluator: evaluator.
+			evaluator: self evaluator.
 	
 	" Lookup"
 	method := newContext methodOrBlock.
@@ -412,9 +412,5 @@ DASTInterpreter >> visitVariableNode: aRBVariableNode [
 
 { #category : #visiting }
 DASTInterpreter >> write: value toInstVarNamed: name [
-	| receiver index |
-	receiver := self currentContext receiver.
-	index := ((self evaluator classOf: receiver) allInstVarNames indexOf: name).
-	(index = 0) ifTrue: [ InstanceVariableNotFound signalFor: name asString ].
-	receiver instanceVariableAtIndex: index put: value
+	self currentContext write: value toInstVarNamed: name
 ]

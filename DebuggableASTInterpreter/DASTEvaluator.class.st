@@ -1,6 +1,9 @@
 Class {
 	#name : #DASTEvaluator,
 	#superclass : #EPASTEvaluator,
+	#instVars : [
+		'interpreter'
+	],
 	#category : #'DebuggableASTInterpreter-Espell'
 }
 
@@ -15,5 +18,16 @@ DASTEvaluator >> initialize [
 
 	super initialize.
 	interpreterClass := DASTInterpreter.
+	
+]
+
+{ #category : #accessing }
+DASTEvaluator >> interpreter [
+	^ interpreter ifNil: [ self newInterpreter ]
+]
+
+{ #category : #accessing }
+DASTEvaluator >> newInterpreter [
+	^ interpreter := super newInterpreter
 	
 ]

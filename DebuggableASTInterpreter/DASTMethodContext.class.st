@@ -67,10 +67,7 @@ DASTMethodContext >> printOn: aStream [
 
 { #category : #modifying }
 DASTMethodContext >> removePrimitiveFromMethod [
-	"|nodeWithoutPrimitive|
-	nodeWithoutPrimitive := closure nodeAST veryDeepCopy.
-	closure nodeAST: nodeWithoutPrimitive.
-	closure nodeAST removePragma: (closure nodeAST pragmas select: [ :p | p isPrimitive ]) first"
+	
 	self methodOrBlock evaluatePrimitive: false
 ]
 

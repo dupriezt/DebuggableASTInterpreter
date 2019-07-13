@@ -179,10 +179,11 @@ DASTContext >> executedNodes [
 { #category : #'API-lookup' }
 DASTContext >> findClassVariable: aName [
 	| mClass hlClass |
+	"self haltIf: [ aName = 'value' ]."
 	mClass := self receiver isClassMirror
 		ifTrue: [ self receiver asClassMirror ]
 		ifFalse: [ self receiver basicClass ].
-	hlClass := mClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: evaluator environment bootstrapEnvironment "evaluator objectSpace backend systemDictionary").
+	hlClass := mClass asRemoteClassOnEnvironment: (EPRemoteEnvironment on: self evaluator environment bootstrapEnvironment "evaluator objectSpace backend systemDictionary").
 	^ hlClass bindingOf: aName.
 	
 ]
@@ -483,7 +484,7 @@ DASTContext >> nextHandlerContext [
 
 { #category : #'accessing-environment' }
 DASTContext >> nilObject [
-	^ evaluator objectSpace backend nilObject
+	^ self evaluator objectSpace backend nilObject
 ]
 
 { #category : #accessing }
@@ -677,4 +678,12 @@ DASTContext >> unwindComplete [
 { #category : #'accessing - private' }
 DASTContext >> variablesDict [
 	^ variablesDict
+]
+
+{ #category : #'API-store' }
+DASTContext >> write: value toInstVarNamed: name [
+	| index |
+	index := ((self evaluator classOf: self receiver) allInstVarNames indexOf: name).
+	(index = 0) ifTrue: [ InstanceVariableNotFound signalFor: name asString ].
+	self receiver instanceVariableAtIndex: index put: value
 ]
