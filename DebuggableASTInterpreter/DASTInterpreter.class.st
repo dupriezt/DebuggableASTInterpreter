@@ -72,11 +72,18 @@ DASTInterpreter >> evaluator [
 
 { #category : #'gt-extension' }
 DASTInterpreter >> gtInspectorContextsIn: composite [
-	<gtInspectorPresentationOrder: 0>
+	<gtInspectorPresentationOrder: 1>
 	
 	^composite fastList
 		title: 'Evaluation Stack';
 		display: [ {self currentContext} asOrderedCollection , self currentContext senders ]
+]
+
+{ #category : #'gt-extension' }
+DASTInterpreter >> gtInspectorCurrentContextIn: composite [
+	<gtInspectorPresentationOrder: 0>
+	
+	^self currentContext gtInspectorSourceIn: composite
 ]
 
 { #category : #evaluation }
@@ -277,8 +284,7 @@ DASTInterpreter >> visitGlobalNode: aRBGlobalNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitInstanceVariableNode: aRBInstanceVariableNode [
-	self
-		stackPush: (self readInstanceVariableNamed: aRBInstanceVariableNode name)
+	self stackPush: (self readInstanceVariableNamed: aRBInstanceVariableNode name)
 ]
 
 { #category : #visiting }
