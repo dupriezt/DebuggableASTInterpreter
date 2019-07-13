@@ -224,6 +224,7 @@ DASTInterpreter >> stepOver [
 	initialContext := currentContext.
 	self stepInto.
 	[ currentContext ~= initialContext
+		and: currentContext senders size > initialContext senders size 
 		"and: [ currentContext ~= initialContext sender ]" ]
 		whileTrue: [ self stepInto ].
 	^ self currentContext
