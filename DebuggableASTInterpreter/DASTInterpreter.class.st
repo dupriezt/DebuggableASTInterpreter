@@ -246,11 +246,11 @@ DASTInterpreter >> visitArgumentNode: aRBArgumentNode [
 
 { #category : #visiting }
 DASTInterpreter >> visitArrayNode: aRBArrayNode [ 
-	| literals size |
-	
+	| literals size arrayMirror |
 	size := aRBArrayNode statements size.
 	literals := self stackPop: size.
-	self stackPush: literals reverse
+	arrayMirror := self evaluator objectSpace newArrayWithAll: literals reverse.
+	self stackPush: arrayMirror
 ]
 
 { #category : #visiting }
