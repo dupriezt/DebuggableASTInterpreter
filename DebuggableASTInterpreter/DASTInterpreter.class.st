@@ -46,7 +46,7 @@ DASTInterpreter >> evaluate [
 		node := currentContext nodes top.
 		self stepInto.
 		"self stepOver."
-		myComposite ifNotNil: [myComposite update].
+		"myComposite ifNotNil: [myComposite update]."
 		 ].
 	^ self stackTop
 ]
