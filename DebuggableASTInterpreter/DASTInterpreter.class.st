@@ -6,11 +6,10 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'currentContext',
-		'exception',
 		'programCounter',
-		'anEvaluator',
 		'evaluator',
-		'astCache'
+		'astCache',
+		'myComposite'
 	],
 	#category : #'DebuggableASTInterpreter-Core'
 }
@@ -43,12 +42,11 @@ DASTInterpreter >> decreasePC [
 { #category : #evaluation }
 DASTInterpreter >> evaluate [
 	|node|
-	
 	[ currentContext canExecute ] whileTrue: [  
-		"node:=currentContext nodes pop. 
-		self visit: node ."
 		node := currentContext nodes top.
 		self stepInto.
+		"self stepOver."
+		myComposite ifNotNil: [myComposite update].
 		 ].
 	^ self stackTop
 ]
@@ -82,7 +80,7 @@ DASTInterpreter >> gtInspectorContextsIn: composite [
 { #category : #'gt-extension' }
 DASTInterpreter >> gtInspectorCurrentContextIn: composite [
 	<gtInspectorPresentationOrder: 0>
-	
+	myComposite := composite.
 	^self currentContext gtInspectorSourceIn: composite
 ]
 
