@@ -78,12 +78,15 @@ DASTContext >> assignVariable: name value: value [
 			self receiver instanceVariableAtIndex: ivIndex put: value. 
 			^ self].
 
-	"ToDo: fix this step since it's updating the class in the system and not in the environment"
 	(rgClass classVarNames contains: [:c | c = name])
 		ifTrue: [ 
 			| rDictionary |
 			rDictionary := EPRemoteDictionary on: self receiver basicClass classPool. 
 			rDictionary at: name put: value . ^ self].
+	
+	" Global variables "
+	(self rootContext findVariable: name)
+		ifNotNil: [ self rootContext assignVariable: name value: value. ^ self ].
 		
 	Error signal: 'Assignment operation failed for variable "' , name , '" with value "', value asString, '"'.
 	
@@ -276,17 +279,18 @@ DASTContext >> findNextUnwindContextUpTo: aContext [
 DASTContext >> findVariable: aByteSymbol [
 	|association|
 	"Return the value of a variable. If this context redefines a variable defined by its parent context, this method will return the variable value for this context"
-	self haltIf: [ aByteSymbol = 'array' ].
-	"class variables"
-	association := self findClassVariable: aByteSymbol.
+	"self haltIf: [ aByteSymbol = 'array' ]."
+	
+	"local variables"
+	association := self findLocalVariable: aByteSymbol.
 	association ifNotNil: [ ^ association value ].
 	
 	"instance variables"
 	association := self findInstanceVariable: aByteSymbol.
 	association ifNotNil: [ ^ association value ].
 	
-	"local variables"
-	association := self findLocalVariable: aByteSymbol.
+	"class variables"
+	association := self findClassVariable: aByteSymbol.
 	association ifNotNil: [ ^ association value ].
 	
 	^ parent 
@@ -569,6 +573,12 @@ DASTContext >> returnContext [
 	^self isBlockContext 
 		ifTrue: [ ^ parent returnContext ]
 		ifFalse: [ ^ sender  ]
+]
+
+{ #category : #accessing }
+DASTContext >> rootContext [
+	self sender ifNil: [ ^ self ].
+	^ self sender rootContext
 ]
 
 { #category : #accessing }
