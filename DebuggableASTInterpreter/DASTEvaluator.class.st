@@ -14,6 +14,12 @@ DASTEvaluator >> evaluateAST: ast [
 ]
 
 { #category : #interpreting }
+DASTEvaluator >> evaluateCode: someCode withTemps: aCollectionOfTemps [
+	self flag: 'move the parser to a method that compiles it'.
+	^self evaluateAST: (RBParser parseExpression: someCode) withTemps: aCollectionOfTemps 
+]
+
+{ #category : #interpreting }
 DASTEvaluator >> initialize [
 
 	super initialize.
