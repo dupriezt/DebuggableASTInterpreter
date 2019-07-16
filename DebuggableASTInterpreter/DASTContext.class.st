@@ -196,16 +196,16 @@ DASTContext >> findVariable: aByteSymbol [
 	|association|
 	"Return the value of a variable. If this context redefines a variable defined by its parent context, this method will return the variable value for this context"
 	
-	"class variables"
-	association := self findClassVariable: aByteSymbol.
+	"local variables"
+	association := self findLocalVariable: aByteSymbol.
 	association ifNotNil: [ ^ association value ].
 	
 	"instance variables"
 	association := self findInstanceVariable: aByteSymbol.
 	association ifNotNil: [ ^ association value ].
 	
-	"local variables"
-	association := self findLocalVariable: aByteSymbol.
+	"class variables"
+	association := self findClassVariable: aByteSymbol.
 	association ifNotNil: [ ^ association value ].
 	
 	^ parent 
