@@ -522,6 +522,14 @@ DASTInterpreterTests >> testLocalVarScopeWhenAsignedInOuterContextOfBlockAndUpda
 ]
 
 { #category : #'tests-variables-local' }
+DASTInterpreterTests >> testLocalVarScopeWhenDefinedInBlockSenderAndNotInBlockHome [
+
+	self should: [self evaluateProgram:  '(1 to: 3) collect: [ :i | index ]'] 
+		  raise: Exception
+	
+]
+
+{ #category : #'tests-variables-local' }
 DASTInterpreterTests >> testLocalVarScopeWhenModifiedFromBlock [
 
 	self assert: (self evaluateProgram:  '|x| [ x:=1 ] value  . ^ x ') 
