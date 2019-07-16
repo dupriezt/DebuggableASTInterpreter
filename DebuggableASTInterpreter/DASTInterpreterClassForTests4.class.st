@@ -13,3 +13,8 @@ DASTInterpreterClassForTests4 >> m1 [
 DASTInterpreterClassForTests4 >> m2 [
 	^42
 ]
+
+{ #category : #'as yet unclassified' }
+DASTInterpreterClassForTests4 >> m3 [
+	[^super m3] value
+]

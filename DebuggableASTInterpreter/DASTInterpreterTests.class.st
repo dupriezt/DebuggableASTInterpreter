@@ -316,6 +316,19 @@ DASTInterpreterTests >> testInitialProgramCounter [
 ]
 
 { #category : #'tests-variables-instance' }
+DASTInterpreterTests >> testInitializeWithInstanceVariables [
+	
+	self assert: (self evaluateProgram: '| obj | 
+													obj := DASTInterpreterClassForTests6 new initializeIV1: 1 IV2: 2 . 
+													obj iv1' ) 
+		  equals: 1.
+	self assert: (self evaluateProgram: '| obj | 
+													obj := DASTInterpreterClassForTests6 new initializeIV1: 1 IV2: 2 . 
+													obj iv2' ) 
+		  equals: 2
+]
+
+{ #category : #'tests-variables-instance' }
 DASTInterpreterTests >> testInstanceVarIsCapturedInBlockCreation [
 
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests3 new evaluateBlock' ) 
@@ -723,6 +736,15 @@ DASTInterpreterTests >> testSetAndGetClassVariableFromMethodInInstanceSide [
 ]
 
 { #category : #'tests-super' }
+DASTInterpreterTests >> testSuperInsideBlock [
+
+	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests4 new m3' ) 
+		  equals: 4
+		
+
+]
+
+{ #category : #'tests-super' }
 DASTInterpreterTests >> testSuperTheReceiverRemains [
 
 	self assert: (self evaluateProgram: 'DASTInterpreterClassForTests5 new m1' ) 
@@ -738,6 +760,16 @@ DASTInterpreterTests >> testSuperTheReceiverRemains1 [
 		  equals: 42
 		
 
+]
+
+{ #category : #'tests-blocks' }
+DASTInterpreterTests >> testToDo [
+
+	self assert: (self evaluateProgram: '|x| 
+													x := 0.
+													1 to: 10 do: [:each | x := x + each].
+													x' ) 
+		  equals: 55
 ]
 
 { #category : #'tests-transcript' }
@@ -785,6 +817,31 @@ DASTInterpreterTests >> testVarsLocalScopeLookupIsDoneInExceutionTime [
 	
 	self assert: (self evaluateProgram:  '|block t| t := 42 . block := [ t ] .	t := 69 . ^ DASTInterpreterClassForTests new evaluateBlock: block') 
 		  equals: 69
+		
+]
+
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testVarsLocalVariableModifiedInsideWhileTrue [
+	
+	self assert: (self evaluateProgram:  '| nextValue |
+	nextValue := 1.
+	[ nextValue <= 10 ]
+		whileTrue: [ nextValue := nextValue + 1 ].
+	nextValue') 
+		  equals: 11
+		
+]
+
+{ #category : #'tests-variables-local' }
+DASTInterpreterTests >> testVarsLocalVariableModifiedInsideWhileTrueAndValueBlock [
+	
+	self assert: (self evaluateProgram:  '| nextValue block |
+	nextValue := 1.
+	block := [ :x | x ].
+	[ nextValue <= 10 ]
+		whileTrue: [ block value: nextValue . nextValue := nextValue + 1 ].
+	nextValue') 
+		  equals: 11
 		
 ]
 
