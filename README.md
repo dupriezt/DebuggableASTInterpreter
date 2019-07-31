@@ -34,3 +34,26 @@ Metacello new
     repository: 'github://carolahp/DebuggableASTInterpreter';
     load: #Overlay.
 ```
+
+# Example
+In a playground, instanciate an interpreter and initialize it with the program you want it to interpret (here: `Point x: 1 y: 2`)
+```Smalltalk
+interpreter := DASTInterpreter new.
+interpreter initializeWithProgram: (RBParser parseExpression: 'Point x: 1 y: 2').
+```
+You can see the stack of AST nodes the current context still has to interpret by inspecting: `interpreter currentContext nodes`.
+Result:
+**K**
+You can see the value stack of the current context (where the interpreter pushes the values of the AST nodes it interprets) by inspecting: `interpreter currentContext stack`. It is empty at the moment because nothing has been evaluated yet.
+
+Evaluate `interpreter stepInto` 3 times to evaluate the receiver and arguments of the #x:y: message being interpreted.
+New node stack:
+**K**
+New value stack:
+**K**
+
+Finally, the message send itself is ready to be interpreted. If you evaluate `interpreter stepOver`, the interpreter will pop the receiver and arguments from the value stack, evaluate the message send completely, and push its value on the value stack.
+New node stack:
+**K**
+New value stack:
+**K**
