@@ -43,9 +43,9 @@ interpreter initializeWithProgram: (RBParser parseExpression: 'Point x: 1 y: 2')
 ```
 
 
-You can see the stack of AST nodes the current context still has to interpret by inspecting: `interpreter currentContext nodes`.  
+You can see the stack of AST nodes the current context still has to interpret by inspecting: `interpreter currentContext nodes`. The nodes will be interpreted from last to first.
 Node stack:  
-**K**  
+![Node stack](./Pictures/DASTExample1.png)
 
 
 You can see the value stack of the current context (where the interpreter pushes the values of the AST nodes it interprets) by inspecting: `interpreter currentContext stack`. It is empty at the moment because nothing has been evaluated yet.
