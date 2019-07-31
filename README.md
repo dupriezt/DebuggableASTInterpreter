@@ -44,7 +44,7 @@ interpreter initializeWithProgram: (RBParser parseExpression: 'Point x: 1 y: 2')
 
 
 You can see the stack of AST nodes the current context still has to interpret by inspecting: `interpreter currentContext nodes`. The nodes will be interpreted from last to first.
-Node stack:  
+*Node stack:*  
 ![Node stack](./Pictures/DASTExample1.png)
 
 
@@ -52,14 +52,16 @@ You can see the value stack of the current context (where the interpreter pushes
 
 
 Evaluate `interpreter stepInto` 3 times to evaluate the receiver and arguments of the #x:y: message being interpreted.  
-New node stack:  
-**K**  
-New value stack:  
-**K**  
+*New node stack:*  
+![Node stack](./Pictures/DASTExample2.png)  
+*New value stack:*  
+![Value stack](./Pictures/DASTExample3.png)  
 
 
 Finally, the message send itself is ready to be interpreted. If you evaluate `interpreter stepOver`, the interpreter will pop the receiver and arguments from the value stack, evaluate the message send completely, and push its value on the value stack.  
-New node stack:  
-**K**  
-New value stack:  
-**K**  
+*New node stack:*  
+![Node stack](./Pictures/DASTExample4.png)  
+*New value stack:*  
+![Value stack](./Pictures/DASTExample5.png)  
+
+As you can see, the value of the message send is the point it created: `(1@2)`
